@@ -12,6 +12,7 @@ before_install:
   - source .travis/setenv_lua.sh
 
 install:
+  - luarocks install classic
   - luarocks install luacov
   - luarocks install luaunit
   - luarocks install luafilesystem
