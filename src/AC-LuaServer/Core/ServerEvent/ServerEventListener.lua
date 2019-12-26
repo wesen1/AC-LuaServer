@@ -84,6 +84,8 @@ function ServerEventListener:initializeServerEventCallbacks()
 
   for eventName, callbackConfig in pairs(self.serverEventListeners) do
 
+    print(eventName, callbackConfig)
+
     local callbackFunction = { object = self }
 
     local priority
