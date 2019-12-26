@@ -27,6 +27,9 @@ package.path = package.path .. ";../?.lua"
 --
 local runner = TestRunner()
 
+local coverageAnalysisConfigFile = _G.arg[1]
+_G.arg[1] = nil
+
 runner:addTestDirectory("AC-LuaServer")
-      :enableCoverageAnalysis()
+      :enableCoverageAnalysis(coverageAnalysisConfigFile)
       :run()

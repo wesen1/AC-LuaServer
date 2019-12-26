@@ -32,10 +32,20 @@ end
 ---
 -- Enables code coverage analysis.
 --
+-- @tparam string _configFileName The name of the luacov config file to use
+--
 -- @treturn TestRunner The TestRunner instance to allow chaining other method calls
 --
-function TestRunner:enableCoverageAnalysis()
-  require("luacov")
+function TestRunner:enableCoverageAnalysis(_configFileName)
+
+  local configFileName
+  if (type(_configFileName) == "string") then
+    configFileName = _configFileName
+  else
+    configFileName = ".luacov"
+  end
+
+  require("luacov.runner")(configFileName)
   return self
 end
 
