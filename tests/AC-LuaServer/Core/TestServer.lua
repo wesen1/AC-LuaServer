@@ -32,22 +32,46 @@ TestServer.dependencyPaths = {
   { id = "LuaServerApi", path = "AC-LuaServer.Core.LuaServerApi", ["type"] = "table" },
   { id = "EventCallback", path = "AC-LuaServer.Core.Event.EventCallback" },
   { id = "PlayerList", path = "AC-LuaServer.Core.PlayerList.PlayerList" },
+  { id = "GameHandler", path = "AC-LuaServer.Core.GameHandler.GameHandler" },
+  { id = "MapRotation", path = "AC-LuaServer.Core.MapRotation.MapRotation" },
+  { id = "VoteListener", path = "AC-LuaServer.Core.VoteListener.VoteListener" },
   { id = "ServerEventManager", path = "AC-LuaServer.Core.ServerEvent.ServerEventManager" }
 }
 
 ---
 -- The ExtensionManager mock that will be injected into the test Server instance
 --
--- @tparam table extensionManagerMock
+-- @tfield table extensionManagerMock
 --
 TestServer.extensionManagerMock = nil
 
 ---
+-- The GameHandler mock that will be injected into the test Server instance
+--
+-- @tfield table gameHandlerMock
+--
+TestServer.gameHandlerMock = nil
+
+---
+-- The MapRotation mock that will be injected into the test Server instance
+--
+-- @tfield table mapRotationMock
+--
+TestServer.mapRotationMock = nil
+
+---
 -- The PlayerList mock that will be injected into the test Server instance
 --
--- @tparam table playerListMock
+-- @tfield table playerListMock
 --
 TestServer.playerListMock = nil
+
+---
+-- The VoteListener mock that will be injected into the test Server instance
+--
+-- @tfield table voteListenerMock
+--
+TestServer.voteListenerMock = nil
 
 
 ---
@@ -60,8 +84,17 @@ function TestServer:setUp()
   self.extensionManagerMock = self.mach.mock_object(
     self.originalDependencies["AC-LuaServer.Core.Extension.ExtensionManager"], "ExtensionManagerMock"
   )
+  self.gameHandlerMock = self.mach.mock_object(
+    self.originalDependencies["AC-LuaServer.Core.GameHandler.GameHandler"], "GameHandlerMock"
+  )
+  self.mapRotationMock = self.mach.mock_object(
+    self.originalDependencies["AC-LuaServer.Core.MapRotation.MapRotation"], "MapRotationMock"
+  )
   self.playerListMock = self.mach.mock_object(
     self.originalDependencies["AC-LuaServer.Core.PlayerList.PlayerList"], "PlayerListMock"
+  )
+  self.voteListenerMock = self.mach.mock_object(
+    self.originalDependencies["AC-LuaServer.Core.VoteListener.VoteListener"], "VoteListenerMock"
   )
 end
 
@@ -73,7 +106,10 @@ function TestServer:tearDown()
   TestCase.tearDown(self)
 
   self.extensionManagerMock = nil
+  self.gameHandlerMock = nil
+  self.mapRotationMock = nil
   self.playerListMock = nil
+  self.voteListenerMock = nil
 end
 
 
@@ -180,6 +216,21 @@ function TestServer:createTestServerInstance()
                                               :should_be_called()
                                               :and_will_return(serverEventManagerMock)
                       )
+                      :and_also(
+                        self.dependencyMocks.GameHandler.__call
+                                                        :should_be_called()
+                                                        :and_will_return(self.gameHandlerMock)
+                      )
+                      :and_also(
+                        self.dependencyMocks.MapRotation.__call
+                                                        :should_be_called()
+                                                        :and_will_return(self.mapRotationMock)
+                      )
+                      :and_also(
+                        self.dependencyMocks.VoteListener.__call
+                                                         :should_be_called()
+                                                         :and_will_return(self.voteListenerMock)
+                      )
                       :and_then(
                         EventCallbackMock.__call
                                          :should_be_called_with(
@@ -198,6 +249,14 @@ function TestServer:createTestServerInstance()
                       :and_also(
                         self.playerListMock.initialize
                                            :should_be_called()
+                      )
+                      :and_also(
+                        self.gameHandlerMock.initialize
+                                            :should_be_called()
+                      )
+                      :and_also(
+                        self.voteListenerMock.initialize
+                                             :should_be_called()
                       )
                       :when(
                         function()
