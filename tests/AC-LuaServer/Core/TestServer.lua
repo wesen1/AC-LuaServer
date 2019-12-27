@@ -187,6 +187,8 @@ end
 ---
 -- Creates and returns a Server test instance.
 --
+-- @treturn Server The test Server instance
+--
 function TestServer:createTestServerInstance()
 
   local Server = self.testClass

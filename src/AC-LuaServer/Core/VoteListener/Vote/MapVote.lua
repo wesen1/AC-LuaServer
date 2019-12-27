@@ -38,7 +38,7 @@ function MapVote:new(...)
 
   self.super.new(self, ...)
 
-  if (self:getNumberA() > LuaServerApi.GM_NUM) then
+  if (self:getNumberA() >= LuaServerApi.GM_NUM) then
     self.isSetNext = true
     self.gameModeId = self:getNumberA() - LuaServerApi.GM_NUM
   else

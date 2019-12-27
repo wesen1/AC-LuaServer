@@ -68,7 +68,7 @@ function VoteListener:onPlayerCallVote(_cn, _type, _text, _numberA, _numberB, _v
     self:emit("onPlayerCalledVote", vote)
   else
     vote:setStatus(Vote.STATUS_FAILED)
-    self:emit("onPlayerFailedToCallVote", vote)
+    self:emit("onPlayerFailedToCallVote", vote, _voteError)
   end
 
 end
