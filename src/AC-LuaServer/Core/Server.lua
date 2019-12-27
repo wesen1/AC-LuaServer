@@ -9,6 +9,7 @@ local Object = require "classic"
 local ExtensionManager = require "AC-LuaServer.Core.Extension.ExtensionManager"
 local ExtensionTarget = require "AC-LuaServer.Core.Extension.ExtensionTarget"
 local LuaServerApi = require "AC-LuaServer.Core.LuaServerApi"
+local MapRotation = require "AC-LuaServer.Core.MapRotation.MapRotation"
 local PlayerList = require "AC-LuaServer.Core.PlayerList.PlayerList"
 local ServerEventListener = require "AC-LuaServer.Core.ServerEvent.ServerEventListener"
 local ServerEventManager = require "AC-LuaServer.Core.ServerEvent.ServerEventManager"
@@ -49,6 +50,13 @@ Server.eventManager = nil
 Server.extensionManager = nil
 
 ---
+-- The map rotation
+--
+-- @tfield MapRotation mapRotation
+--
+Server.mapRotation = nil
+
+---
 -- The list of connected players
 --
 -- @tfield PlayerList playerList
@@ -82,6 +90,7 @@ function Server:new()
 
   self.eventManager = ServerEventManager()
   self.extensionManager = ExtensionManager(self)
+  self.mapRotation = MapRotation()
   self.playerList = PlayerList()
   self.voteListener = VoteListener()
 
@@ -97,6 +106,15 @@ end
 --
 function Server:getEventManager()
   return self.eventManager
+end
+
+---
+-- Returns the map rotation.
+--
+-- @treturn MapRotation The map rotation
+--
+function Server:getMapRotation()
+  return self.mapRotation
 end
 
 ---
