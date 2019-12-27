@@ -8,6 +8,7 @@
 local Object = require "classic"
 local ExtensionManager = require "AC-LuaServer.Core.Extension.ExtensionManager"
 local ExtensionTarget = require "AC-LuaServer.Core.Extension.ExtensionTarget"
+local GameHandler = require "AC-LuaServer.Core.GameHandler.GameHandler"
 local LuaServerApi = require "AC-LuaServer.Core.LuaServerApi"
 local MapRotation = require "AC-LuaServer.Core.MapRotation.MapRotation"
 local PlayerList = require "AC-LuaServer.Core.PlayerList.PlayerList"
@@ -50,6 +51,13 @@ Server.eventManager = nil
 Server.extensionManager = nil
 
 ---
+-- The game handler
+--
+-- @tfield GameHandler gameHandler
+--
+Server.gameHandler = nil
+
+---
 -- The map rotation
 --
 -- @tfield MapRotation mapRotation
@@ -90,6 +98,7 @@ function Server:new()
 
   self.eventManager = ServerEventManager()
   self.extensionManager = ExtensionManager(self)
+  self.gameHandler = GameHandler()
   self.mapRotation = MapRotation()
   self.playerList = PlayerList()
   self.voteListener = VoteListener()
@@ -106,6 +115,15 @@ end
 --
 function Server:getEventManager()
   return self.eventManager
+end
+
+---
+-- Returns the game handler.
+--
+-- @treturn GameHandler The game handler
+--
+function Server:getGameHandler()
+  return self.gameHandler
 end
 
 ---
@@ -161,6 +179,7 @@ end
 --
 function Server:initialize()
   -- Cannot register the server event listeners in the constructor because that causes a dependency loop
+  self.gameHandler:initialize()
   self.playerList:initialize()
   self.voteListener:initialize()
   self:registerAllServerEventListeners()
