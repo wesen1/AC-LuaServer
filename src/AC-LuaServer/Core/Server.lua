@@ -12,6 +12,7 @@ local LuaServerApi = require "AC-LuaServer.Core.LuaServerApi"
 local PlayerList = require "AC-LuaServer.Core.PlayerList.PlayerList"
 local ServerEventListener = require "AC-LuaServer.Core.ServerEvent.ServerEventListener"
 local ServerEventManager = require "AC-LuaServer.Core.ServerEvent.ServerEventManager"
+local VoteListener = require "AC-LuaServer.Core.VoteListener.VoteListener"
 
 ---
 -- The lua server.
@@ -55,6 +56,13 @@ Server.extensionManager = nil
 Server.playerList = nil
 
 ---
+-- The vote listener
+--
+-- @tfield VoteListener voteListener
+--
+Server.voteListener = nil
+
+---
 -- The global Server instance that will be returned by Server.getInstance()
 --
 -- @tfield Server globalInstance
@@ -75,6 +83,7 @@ function Server:new()
   self.eventManager = ServerEventManager()
   self.extensionManager = ExtensionManager(self)
   self.playerList = PlayerList()
+  self.voteListener = VoteListener()
 
 end
 
@@ -97,6 +106,15 @@ end
 --
 function Server:getPlayerList()
   return self.playerList
+end
+
+---
+-- Returns the vote listener.
+--
+-- @treturn VoteListener The vote listener
+--
+function Server:getVoteListener()
+  return self.voteListener
 end
 
 
@@ -126,6 +144,7 @@ end
 function Server:initialize()
   -- Cannot register the server event listeners in the constructor because that causes a dependency loop
   self.playerList:initialize()
+  self.voteListener:initialize()
   self:registerAllServerEventListeners()
 end
 
