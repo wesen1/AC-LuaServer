@@ -28,7 +28,7 @@ TestServerEventManager.testClassPath = "AC-LuaServer.Core.ServerEvent.ServerEven
 -- @tfield table[] dependencyPaths
 --
 TestServerEventManager.dependencyPaths = {
-  ["LuaServerApi"] = { path = "AC-LuaServer.Core.LuaServerApi", ["type"] = "table" }
+  { id = "LuaServerApi", path = "AC-LuaServer.Core.LuaServerApi", ["type"] = "table" }
 }
 
 

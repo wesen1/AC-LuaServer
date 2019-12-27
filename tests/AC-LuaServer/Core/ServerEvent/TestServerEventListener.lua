@@ -28,8 +28,8 @@ TestServerEventListener.testClassPath = "tests.AC-LuaServer.Core.ServerEvent.Exa
 -- @tfield table[] dependencyPaths
 --
 TestServerEventListener.dependencyPaths = {
-  ["EventCallback"] = { path = "AC-LuaServer.Core.Event.EventCallback" },
-  ["Server"] = { path = "AC-LuaServer.Core.Server" }
+  { id = "EventCallback", path = "AC-LuaServer.Core.Event.EventCallback" },
+  { id = "Server", path = "AC-LuaServer.Core.Server" }
 }
 
 

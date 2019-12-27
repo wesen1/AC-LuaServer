@@ -68,6 +68,7 @@ TestCase.originalLoadedPackages = nil
 -- The list is in the format { "dependencyPath" = originalDependency }
 --
 -- @tfield table[] originalDependencies
+--
 TestCase.originalDependencies = nil
 
 ---
@@ -222,8 +223,9 @@ function TestCase:initializeMocks()
   -- Create mocks and load them into the package.loaded variable
   self.dependencyMocks = {}
   self.originalDependencies = {}
-  for dependencyId, dependencyInfo in pairs(self.dependencyPaths) do
+  for _, dependencyInfo in pairs(self.dependencyPaths) do
 
+    local dependencyId = dependencyInfo["id"]
     local dependencyPath = dependencyInfo["path"]
 
     -- Load the dependency

@@ -28,9 +28,9 @@ TestPlayerList.testClassPath = "AC-LuaServer.Core.PlayerList.PlayerList"
 -- @tfield table[] dependencyPaths
 --
 TestPlayerList.dependencyPaths = {
-  ["EventCallback"] = { path = "AC-LuaServer.Core.Event.EventCallback" },
-  ["Player"] = { path = "AC-LuaServer.Core.PlayerList.Player", ["type"] = "table" },
-  ["Server"] = { path = "AC-LuaServer.Core.Server" }
+  { id = "EventCallback", path = "AC-LuaServer.Core.Event.EventCallback" },
+  { id = "Player", path = "AC-LuaServer.Core.PlayerList.Player", ["type"] = "table" },
+  { id = "Server", path = "AC-LuaServer.Core.Server" }
 }
 
 ---

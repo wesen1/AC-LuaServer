@@ -28,20 +28,11 @@ TestServer.testClassPath = "AC-LuaServer.Core.Server"
 -- @tfield table[] dependencyPaths
 --
 TestServer.dependencyPaths = {
-  ["ExtensionManager"] = { path = "AC-LuaServer.Core.Extension.ExtensionManager" },
-  ["LuaServerApi"] = { path = "AC-LuaServer.Core.LuaServerApi", ["type"] = "table" },
-  ["EventCallback"] = { path = "AC-LuaServer.Core.Event.EventCallback" },
-  ["PlayerList"] = { path = "AC-LuaServer.Core.PlayerList.PlayerList" },
-  ["ServerEventManager"] = { path = "AC-LuaServer.Core.ServerEvent.ServerEventManager" }
-}
-
----
--- The paths of the classes that need to be reloaded after the mocks for the test class dependencies were applied.
---
--- @tfield string[] reloadDependencies
---
-TestServer.reloadDependencies = {
-  "AC-LuaServer.Core.ServerEvent.ServerEventListener"
+  { id = "ExtensionManager", path = "AC-LuaServer.Core.Extension.ExtensionManager" },
+  { id = "LuaServerApi", path = "AC-LuaServer.Core.LuaServerApi", ["type"] = "table" },
+  { id = "EventCallback", path = "AC-LuaServer.Core.Event.EventCallback" },
+  { id = "PlayerList", path = "AC-LuaServer.Core.PlayerList.PlayerList" },
+  { id = "ServerEventManager", path = "AC-LuaServer.Core.ServerEvent.ServerEventManager" }
 }
 
 ---

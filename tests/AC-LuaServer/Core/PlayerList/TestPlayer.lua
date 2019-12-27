@@ -28,7 +28,7 @@ TestPlayer.testClassPath = "AC-LuaServer.Core.PlayerList.Player"
 -- @tfield table[] dependencyPaths
 --
 TestPlayer.dependencyPaths = {
-  ["LuaServerApi"] = { path = "AC-LuaServer.Core.LuaServerApi", ["type"] = "table" }
+  { id = "LuaServerApi", path = "AC-LuaServer.Core.LuaServerApi", ["type"] = "table" }
 }
 
 ---
