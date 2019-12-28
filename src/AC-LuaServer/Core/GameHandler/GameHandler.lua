@@ -48,13 +48,6 @@ GameHandler.currentGame = nil
 --
 GameHandler.votedNextGame = nil
 
----
--- Stores whether the Server is currently in the intermission state between two games
---
--- @tfield bool isInIntermissionBetweenGames
---
-GameHandler.isInIntermissionBetweenGames = nil
-
 
 ---
 -- GameHandler constructor.
@@ -82,6 +75,7 @@ end
 -- Initializes this GameHandler.
 --
 function GameHandler:initialize()
+  self:registerAllServerEventListeners()
   self:initializeEventListeners()
 end
 
@@ -106,12 +100,13 @@ function GameHandler:onVotePassed(_vote)
 
   if (_vote:is(MapVote)) then
 
-    self.votedNextGame = VotedGame(_vote)
-    self:emit("onGameChangeVotePassed", self.votedNextGame)
+    local votedNextGame = VotedGame(_vote)
+    self:emit("onGameChangeVotePassed", votedNextGame)
 
-    if (not _vote:getIsSetNext() and self.isInIntermissionBetweenGames) then
-      -- TODO: Check if this is needed only in intermission or not at all or even outside intermission
-      self:emit("onGameWillChange", self.votedNextGame)
+    if (_vote:getIsSetNext()) then
+      self.votedNextGame = votedNextGame
+    else
+      self:emit("onGameWillChange", votedNextGame)
     end
 
   end
@@ -124,7 +119,9 @@ end
 -- @tparam Vote _vote The vote that failed
 --
 function GameHandler:onVoteFailed(_vote)
-  self:emit("onGameChangeVoteFailed", VotedGame(_vote))
+  if (_vote:is(MapVote)) then
+    self:emit("onGameChangeVoteFailed", VotedGame(_vote))
+  end
 end
 
 ---
@@ -137,12 +134,10 @@ function GameHandler:onMapEnd()
     nextGame = self.votedNextGame
 
   else
+    local Server = require "AC-LuaServer.Core.Server"
     local mapRotation = Server.getInstance():getMapRotation()
     nextGame = MapRotationGame(mapRotation:getNextEntry())
   end
-
-  self.votedNextGame = nil
-  self.isInIntermissionBetweenGames = true
 
   self:emit("onGameWillChange", nextGame)
 
@@ -155,7 +150,7 @@ end
 -- @tparam int _gameModeId The game mode if of the game
 --
 function GameHandler:onMapChange(_mapName, _gameModeId)
-  self.isInIntermissionBetweenGames = false
+  self.votedNextGame = nil
   self.currentGame = ActiveGame(_mapName, _gameModeId)
   self:emit("onGameChanged", self.currentGame)
 end
@@ -171,9 +166,9 @@ function GameHandler:initializeEventListeners()
   local Server = require "AC-LuaServer.Core.Server"
 
   local voteListener = Server.getInstance():getVoteListener()
-  voteListener:on("onPlayerCalledVote", EventCallback({object = self, method = "onPlayerCalledVote"}))
-  voteListener:on("onVotePassed", EventCallback({object = self, method = "onVotePassed"}))
-  voteListener:on("onVoteFailed", EventCallback({object = self, method = "onVoteFailed"}))
+  voteListener:on("onPlayerCalledVote", EventCallback({object = self, methodName = "onPlayerCalledVote"}))
+  voteListener:on("onVotePassed", EventCallback({object = self, methodName = "onVotePassed"}))
+  voteListener:on("onVoteFailed", EventCallback({object = self, methodName = "onVoteFailed"}))
 
 end
 

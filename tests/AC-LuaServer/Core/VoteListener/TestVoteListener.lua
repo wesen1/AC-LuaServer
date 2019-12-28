@@ -335,7 +335,7 @@ function TestVoteListener:createTestVoteListenerInstance()
                    )
 
 
-  -- Attach the event listeners to the PlayerList instance
+  -- Attach the event listeners to the VoteListener instance
   local EventCallback = self.originalDependencies["AC-LuaServer.Core.Event.EventCallback"]
   voteListener:on("onPlayerCalledVote", EventCallback(function(...) self.onPlayerCalledVoteListener(...) end))
   voteListener:on("onPlayerFailedToCallVote", EventCallback(function(...) self.onPlayerFailedToCallVoteListener(...) end))
