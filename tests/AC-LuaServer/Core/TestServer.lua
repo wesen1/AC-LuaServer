@@ -266,7 +266,11 @@ function TestServer:createTestServerInstance()
                         end
                       )
 
+  self:assertEquals(serverEventManagerMock, server:getEventManager())
+  self:assertEquals(self.gameHandlerMock, server:getGameHandler())
+  self:assertEquals(self.mapRotationMock, server:getMapRotation())
   self:assertEquals(self.playerListMock, server:getPlayerList())
+  self:assertEquals(self.voteListenerMock, server:getVoteListener())
 
   return server
 
