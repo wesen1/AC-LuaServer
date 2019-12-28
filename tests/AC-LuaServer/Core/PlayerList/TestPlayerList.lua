@@ -194,11 +194,12 @@ end
 ---
 -- Creates and returns a PlayerList instance to which the event listeners are attached.
 --
+-- @treturn PlayerList The test PlayerList instance
+--
 function TestPlayerList:createPlayerListInstance()
 
   local PlayerList = self.testClass
   local list = PlayerList()
-
 
   local EventCallbackMock = self.dependencyMocks.EventCallback
 

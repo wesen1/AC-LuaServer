@@ -8,10 +8,13 @@
 local Object = require "classic"
 local ExtensionManager = require "AC-LuaServer.Core.Extension.ExtensionManager"
 local ExtensionTarget = require "AC-LuaServer.Core.Extension.ExtensionTarget"
+local GameHandler = require "AC-LuaServer.Core.GameHandler.GameHandler"
 local LuaServerApi = require "AC-LuaServer.Core.LuaServerApi"
+local MapRotation = require "AC-LuaServer.Core.MapRotation.MapRotation"
 local PlayerList = require "AC-LuaServer.Core.PlayerList.PlayerList"
 local ServerEventListener = require "AC-LuaServer.Core.ServerEvent.ServerEventListener"
 local ServerEventManager = require "AC-LuaServer.Core.ServerEvent.ServerEventManager"
+local VoteListener = require "AC-LuaServer.Core.VoteListener.VoteListener"
 
 ---
 -- The lua server.
@@ -48,11 +51,32 @@ Server.eventManager = nil
 Server.extensionManager = nil
 
 ---
+-- The game handler
+--
+-- @tfield GameHandler gameHandler
+--
+Server.gameHandler = nil
+
+---
+-- The map rotation
+--
+-- @tfield MapRotation mapRotation
+--
+Server.mapRotation = nil
+
+---
 -- The list of connected players
 --
 -- @tfield PlayerList playerList
 --
 Server.playerList = nil
+
+---
+-- The vote listener
+--
+-- @tfield VoteListener voteListener
+--
+Server.voteListener = nil
 
 ---
 -- The global Server instance that will be returned by Server.getInstance()
@@ -74,7 +98,10 @@ function Server:new()
 
   self.eventManager = ServerEventManager()
   self.extensionManager = ExtensionManager(self)
+  self.gameHandler = GameHandler()
+  self.mapRotation = MapRotation()
   self.playerList = PlayerList()
+  self.voteListener = VoteListener()
 
 end
 
@@ -91,12 +118,39 @@ function Server:getEventManager()
 end
 
 ---
+-- Returns the game handler.
+--
+-- @treturn GameHandler The game handler
+--
+function Server:getGameHandler()
+  return self.gameHandler
+end
+
+---
+-- Returns the map rotation.
+--
+-- @treturn MapRotation The map rotation
+--
+function Server:getMapRotation()
+  return self.mapRotation
+end
+
+---
 -- Returns the list of Player's.
 --
 -- @treturn PlayerList The list of Player's
 --
 function Server:getPlayerList()
   return self.playerList
+end
+
+---
+-- Returns the vote listener.
+--
+-- @treturn VoteListener The vote listener
+--
+function Server:getVoteListener()
+  return self.voteListener
 end
 
 
@@ -125,7 +179,9 @@ end
 --
 function Server:initialize()
   -- Cannot register the server event listeners in the constructor because that causes a dependency loop
+  self.gameHandler:initialize()
   self.playerList:initialize()
+  self.voteListener:initialize()
   self:registerAllServerEventListeners()
 end
 

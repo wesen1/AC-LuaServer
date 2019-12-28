@@ -33,19 +33,12 @@ TestCase.testClass = nil
 
 ---
 -- The paths of the classes that the test class depends on
--- The list must be in the format { [dependencyId] = { path = <string>, [type = "object"|"table"] }, ... }
+-- The list must be in the format { { id = <string>, path = <string>, [type = "object"|"table"] }, ... }
 -- Every dependency will be mocked during each test's setup
 --
 -- @tfield table[] dependencyPaths
 --
 TestCase.dependencyPaths = {}
-
----
--- The paths of the classes that need to be reloaded after the mocks for the test class dependencies were applied.
---
--- @tfield string[] reloadDependencies
---
-TestCase.reloadDependencies = {}
 
 ---
 -- The list of mocked dependencies
@@ -62,6 +55,14 @@ TestCase.dependencyMocks = nil
 -- @tfield table originalLoadedPackages
 --
 TestCase.originalLoadedPackages = nil
+
+---
+-- The backup of the original global variables
+-- The list is in the format { "variableName" = originalDependency }
+--
+-- @tfield table[] originalGlobalVariables
+--
+TestCase.originalGlobalVariables = nil
 
 ---
 -- The backup of the original dependencies that are replaced by mocks as configured in dependencyPaths
@@ -117,13 +118,8 @@ end
 --
 function TestCase:setUp()
 
-  -- Initialize the mocks
-  self:initializeMocks()
-
-  -- Unset the reload dependencies so that they are reloaded on the next require call
-  for _, reloadDependencyPath in ipairs(self.reloadDependencies) do
-    package.loaded[reloadDependencyPath] = nil
-  end
+  self:backupOriginalDependencies()
+  self:initializeDependencyMocks()
 
   -- Unload the test class for the case that it was loaded while requiring one of its dependencies
   package.loaded[self.testClassPath] = nil
@@ -139,14 +135,10 @@ end
 --
 function TestCase:tearDown()
 
-  -- Remove all packages that were not loaded before the test started
-  for packagePath, _ in pairs(package.loaded) do
-    if (not self.originalLoadedPackages[packagePath]) then
-      package.loaded[packagePath] = nil
-    end
-  end
+  self:restoreOriginalDependencies()
 
   self.originalLoadedPackages = nil
+  self.originalGlobalVariables = nil
   self.dependencyMocks = nil
   self.testClass = nil
 
@@ -197,7 +189,6 @@ function TestCase:getMock(_mockTarget, _mockName, _mockType)
     mockTarget = _mockTarget
   end
 
-
   if (_mockType == nil or _mockType == "object") then
     return mach.mock_object(mockTarget, _mockName)
   elseif (_mockType == "table") then
@@ -210,54 +201,114 @@ end
 -- Private Methods
 
 ---
--- Initializes the mocks for the test class dependencies.
+-- Backs up the original dependencies to be able to restore them after a test was executed.
 --
-function TestCase:initializeMocks()
+function TestCase:backupOriginalDependencies()
 
-  -- Backup the original loaded packages contents
+  -- Backup the original loaded packages
   self.originalLoadedPackages = {}
   for packagePath, loadedPackage in pairs(package.loaded) do
     self.originalLoadedPackages[packagePath] = loadedPackage
   end
 
-  -- Create mocks and load them into the package.loaded variable
+  -- Backup the original fields of the global table
+  self.originalGlobalVariables = {}
+  for key, value in pairs(_G) do
+    self.originalGlobalVariables[key] = value
+  end
+
+end
+
+---
+-- Restores the original dependencies and global variables.
+--
+function TestCase:restoreOriginalDependencies()
+
+  -- Restore  all packages that were loaded before the test started
+  for packagePath, _ in pairs(package.loaded) do
+    package.loaded[packagePath] = self.originalLoadedPackages[packagePath]
+  end
+
+  -- Overwrite all global variables with the ones that were set before the test started
+  for key, _ in pairs(_G) do
+    _G[key] = self.originalGlobalVariables[key]
+  end
+
+end
+
+---
+-- Initializes the mocks for the test class dependencies.
+--
+function TestCase:initializeDependencyMocks()
+
+  -- Create mocks and load them into the package.loaded or the _G variable
   self.dependencyMocks = {}
   self.originalDependencies = {}
   for _, dependencyInfo in pairs(self.dependencyPaths) do
 
     local dependencyId = dependencyInfo["id"]
     local dependencyPath = dependencyInfo["path"]
+    local dependencyType = dependencyInfo["type"] or "object"
 
     -- Load the dependency
-    local dependency = require(dependencyPath)
+    local dependency
+    if (dependencyType == "globalVariable") then
+      dependency = _G[dependencyPath]
+    else
+      dependency = require(dependencyPath)
+    end
 
-    -- Create a mock for the dependency
-    local dependencyMock = self:getMock(dependency, dependencyId .. "Mock", dependencyInfo["type"])
-
-    -- Backup the original dependency to be able to manually create more mocks from the dependency
-    self.originalDependencies[dependencyPath] = dependency
+    local dependencyMock, injectValue = self:getDependencyMock(dependency, dependencyId, dependencyType)
 
     -- Replace the dependency by the mock
-    if (dependencyInfo["type"] == nil or dependencyInfo["type"] == "object") then
-      package.loaded[dependencyPath] = setmetatable({}, {
-          __call = function(...)
-
-            local mockedInstance = dependencyMock.__call(...)
-            if (mockedInstance) then
-              return mockedInstance
-            else
-              return dependencyMock
-            end
-          end,
-          __index = dependencyMock
-      })
+    if (dependencyType == "globalVariable") then
+      _G[dependencyPath] = injectValue
     else
-      package.loaded[dependencyPath] = dependencyMock
+      package.loaded[dependencyPath] = injectValue
     end
 
     -- Save the mock to be able to use it in the tests
     self.dependencyMocks[dependencyId] = dependencyMock
+
+    -- Backup the original dependency to be able to manually create more mocks from the dependency
+    self.originalDependencies[dependencyPath] = dependency
   end
+
+end
+
+---
+-- Generates and returns a mock for a dependency.
+--
+-- @tparam mixed _dependency The dependency to mock
+-- @tparam string _dependencyId The id of the dependency (Will be used to generate the mock name)
+-- @tparam string _dependencyType The dependency type
+--
+-- @treturn table The mock for the depedency
+-- @treturn table The mock to insert into the loaded packages list or the global table
+--
+function TestCase:getDependencyMock(_dependency, _dependencyId, _dependencyType)
+
+  local dependencyType = _dependencyType
+  if (dependencyType == "globalVariable") then
+    dependencyType = "table"
+  end
+
+  local dependencyMock = self:getMock(_dependency, _dependencyId .. "Mock", dependencyType)
+
+  local injectValue
+  if (dependencyType == "object") then
+    injectValue = setmetatable({}, {
+        __call = function(...)
+          return dependencyMock.__call(...)
+        end,
+        __index = dependencyMock
+    })
+  else
+    injectValue = dependencyMock
+  end
+
+
+  return dependencyMock, injectValue
 
 end
 
