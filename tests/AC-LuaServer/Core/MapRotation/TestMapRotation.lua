@@ -208,7 +208,7 @@ function TestMapRotation:testCanChangeMapRotationFile()
   MapRotationFileMock.__call
                      :should_be_called_with("config/tosok_maprot.cfg")
                      :and_will_return(mapRotationFileMock)
-                     :and_then(
+                     :and_also(
                        self.activeMapRotationMock.loadFromFile
                                                  :should_be_called_with("config/tosok_maprot.cfg")
                      )

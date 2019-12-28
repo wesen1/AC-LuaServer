@@ -23,14 +23,24 @@ local MaximumRemainingTimeExceededException = Exception:extend()
 --
 MaximumRemainingTimeExceededException.exceedanceInMilliseconds = nil
 
+---
+-- Stores whether the extra minute that may be unavailable because of the integer overflow
+-- in the intermission check is currently available
+--
+-- @tfield bool isExtraMinuteAvailable
+--
+MaximumRemainingTimeExceededException.isExtraMinuteAvailable = nil
+
 
 ---
 -- MaximumRemainingTimeExceededException constructor.
 --
 -- @tparam int _exceedanceInMilliseconds The exceedance of the maximum remaining time in milliseconds
+-- @tparam bool _isExtraMinuteAvailable True if the extra minute is currently available, false otherwise
 --
-function MaximumRemainingTimeExceededException:new(_exceedanceInMilliseconds)
+function MaximumRemainingTimeExceededException:new(_exceedanceInMilliseconds, _isExtraMinuteAvailable)
   self.exceedanceInMilliseconds = _exceedanceInMilliseconds
+  self.isExtraMinuteAvailable = _isExtraMinuteAvailable
 end
 
 
@@ -43,6 +53,15 @@ end
 --
 function MaximumRemainingTimeExceededException:getExceedanceInMilliseconds()
   return self.exceedanceInMilliseconds
+end
+
+---
+-- Returns whether the extra minute is currently available.
+--
+-- @treturn bool True if the extra minute is currently available, false otherwise
+--
+function MaximumRemainingTimeExceededException:getIsExtraMinuteAvailable()
+  return self.isExtraMinuteAvailable
 end
 
 

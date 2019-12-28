@@ -98,9 +98,7 @@ function ActiveGame:setRemainingTimeInMilliseconds(_newRemainingTimeInMillisecon
   -- right).
   --
   local gamemillis = LuaServerApi.getgamemillis()
-  local timeleftmillis = LuaServerApi.gettimeleftmillis()
-
-  local newGameLimit = gamemillis + (_newRemainingTimeInMilliseconds - timeleftmillis)
+  local newGameLimit = gamemillis + _newRemainingTimeInMilliseconds
 
   --
   -- The maximum integer value for signed integers is (2 ^ 31 - 1).
@@ -108,13 +106,11 @@ function ActiveGame:setRemainingTimeInMilliseconds(_newRemainingTimeInMillisecon
   --
   local maximumGameLimit = 2147483647
   if (gamemillis < 60000) then
-    maximumGameLimit = maximumGameLimit - gamemillis
-  else
     maximumGameLimit = maximumGameLimit - 60000
   end
 
   if (newGameLimit > maximumGameLimit) then
-    error(MaximumRemainingTimeExceededException(newGameLimit - maximumGameLimit))
+    error(MaximumRemainingTimeExceededException(newGameLimit - maximumGameLimit, (gamemillis >= 60000)))
   else
     LuaServerApi.settimeleft(_newRemainingTimeInMilliseconds)
   end
