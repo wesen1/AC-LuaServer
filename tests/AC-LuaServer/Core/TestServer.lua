@@ -81,20 +81,20 @@ TestServer.voteListenerMock = nil
 function TestServer:setUp()
   TestCase.setUp(self)
 
-  self.extensionManagerMock = self.mach.mock_object(
-    self.originalDependencies["AC-LuaServer.Core.Extension.ExtensionManager"], "ExtensionManagerMock"
+  self.extensionManagerMock = self:getMock(
+    "AC-LuaServer.Core.Extension.ExtensionManager", "ExtensionManagerMock"
   )
-  self.gameHandlerMock = self.mach.mock_object(
-    self.originalDependencies["AC-LuaServer.Core.GameHandler.GameHandler"], "GameHandlerMock"
+  self.gameHandlerMock = self:getMock(
+    "AC-LuaServer.Core.GameHandler.GameHandler", "GameHandlerMock"
   )
-  self.mapRotationMock = self.mach.mock_object(
-    self.originalDependencies["AC-LuaServer.Core.MapRotation.MapRotation"], "MapRotationMock"
+  self.mapRotationMock = self:getMock(
+    "AC-LuaServer.Core.MapRotation.MapRotation", "MapRotationMock"
   )
-  self.playerListMock = self.mach.mock_object(
-    self.originalDependencies["AC-LuaServer.Core.PlayerList.PlayerList"], "PlayerListMock"
+  self.playerListMock = self:getMock(
+    "AC-LuaServer.Core.PlayerList.PlayerList", "PlayerListMock"
   )
-  self.voteListenerMock = self.mach.mock_object(
-    self.originalDependencies["AC-LuaServer.Core.VoteListener.VoteListener"], "VoteListenerMock"
+  self.voteListenerMock = self:getMock(
+    "AC-LuaServer.Core.VoteListener.VoteListener", "VoteListenerMock"
   )
 end
 

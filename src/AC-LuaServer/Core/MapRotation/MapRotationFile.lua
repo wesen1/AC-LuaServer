@@ -87,7 +87,12 @@ function MapRotationFile:removeEntriesForMap(_mapName)
 
   -- Add all map rotation entries to the file that are not for the search map name
   for line in io.lines(self.filePath) do
-    if (not line:match("^" .. _mapName .. ":")) then
+
+    --
+    -- Escaping all non alphanumeric characters with a leading "%" to prevent characters in map names
+    -- from breaking the pattern (e.g. "-")
+    --
+    if (not line:match("^" .. _mapName:gsub("([^%w])", "%%%1") .. ":")) then
       tmpFile:write(line .. "\n")
     end
   end

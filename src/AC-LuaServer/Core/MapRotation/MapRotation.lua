@@ -62,7 +62,7 @@ end
 --
 function MapRotation:changeMapRotationConfigFile(_mapRotationConfigFilePath)
   self.mapRotationFile = MapRotationFile(_mapRotationConfigFilePath)
-  self.activeMapRotation:loadFromFile(self.mapRotationFile)
+  self.activeMapRotation:loadFromFile(_mapRotationConfigFilePath)
 end
 
 ---
@@ -103,4 +103,4 @@ function MapRotation:clear()
 end
 
 
-return MapRotationFile
+return MapRotation

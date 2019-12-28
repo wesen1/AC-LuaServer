@@ -22,10 +22,10 @@ local ActiveMapRotation = Object:extend()
 ---
 -- Loads the map rotation from a config file.
 --
--- @tparam MapRotationFile _mapRotationFile The map rotation config file to load
+-- @tparam string _mapRotationConfigFilePath The map rotation config file to load
 --
-function ActiveMapRotation:loadFromFile(_mapRotationFile)
-  LuaServerApi.setmaprot(_mapRotationFile:getFilePath())
+function ActiveMapRotation:loadFromFile(_mapRotationConfigFilePath)
+  LuaServerApi.setmaprot(_mapRotationConfigFilePath)
 end
 
 ---
@@ -43,7 +43,7 @@ function ActiveMapRotation:getNextEntry()
            :setAreGameChangeVotesAllowed((rawNextEntry["allowVote"] == 1))
            :setMinimumNumberOfPlayers(rawNextEntry["minplayer"])
            :setMaximumNumberOfPlayers(rawNextEntry["maxplayer"])
-           :setNumberOfSkiplines(rawNextEntry["skiplines"])
+           :setNumberOfSkipLines(rawNextEntry["skiplines"])
 
   return nextEntry
 
@@ -77,10 +77,8 @@ end
 --
 function ActiveMapRotation:removeEntriesForMap(_mapName)
 
-  local mapRotation = LuaServerApi.getwholemaprot()
   local updatedMapRotation = {}
-
-  for _, rawMapRotationEntry in ipairs(mapRotation) do
+  for _, rawMapRotationEntry in ipairs(LuaServerApi.getwholemaprot()) do
     if (rawMapRotationEntry["map"] ~= _mapName) then
       table.insert(updatedMapRotation, rawMapRotationEntry)
     end
