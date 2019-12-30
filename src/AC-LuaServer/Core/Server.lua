@@ -92,7 +92,7 @@ Server.globalInstance = nil
 function Server:new()
 
   -- ExtensionTarget
-  self.name = "server"
+  self.name = "Server"
   self.extensions = {}
   self.isEnabled = true
 

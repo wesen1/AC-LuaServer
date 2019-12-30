@@ -25,7 +25,7 @@ BaseExtension:implement(ExtensionTarget)
 --
 -- @tfield string targetName
 --
-BaseExtension.targetName = "server"
+BaseExtension.targetName = nil
 
 ---
 -- The target that is extended by this Extension
@@ -39,7 +39,7 @@ BaseExtension.target = nil
 -- BaseExtension constructor.
 --
 -- @tparam string _name The name of this Extension
--- @tparam string _targetName The name of the target that is extended by this Extension
+-- @tparam string _targetName The name of the target that is extended by this Extension (Defaults to "Server")
 --
 function BaseExtension:new(_name, _targetName)
 
@@ -51,7 +51,11 @@ function BaseExtension:new(_name, _targetName)
   self.extensions = {}
   self.isEnabled = false
 
-  self.targetName = _targetName
+  if (type(_targetName) == "string") then
+    self.targetName = _targetName
+  else
+    self.targetName = "Server"
+  end
 
 end
 
