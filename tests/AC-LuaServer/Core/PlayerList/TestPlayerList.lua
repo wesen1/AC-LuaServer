@@ -212,6 +212,7 @@ function TestPlayerList:createPlayerListInstance()
   local eventCallbackMockA = self:getMock(eventCallbackPath, "EventCallbackMock")
   local eventCallbackMockB = self:getMock(eventCallbackPath, "EventCallbackMock")
   local eventCallbackMockC = self:getMock(eventCallbackPath, "EventCallbackMock")
+  local eventCallbackMockD = self:getMock(eventCallbackPath, "EventCallbackMock")
 
   -- Initialize event callbacks and register the event handlers
   EventCallbackMock.__call
@@ -245,6 +246,17 @@ function TestPlayerList:createPlayerListInstance()
                                       )
                                       :and_will_return(eventCallbackMockC)
                    )
+                   :and_also(
+                     EventCallbackMock.__call
+                                      :should_be_called_with(
+                                        self.mach.match(
+                                          { object = PlayerList, methodName = "onPlayerRoleChange" },
+                                          TestPlayerList.matchEventCallback
+                                        ),
+                                        nil
+                                      )
+                                      :and_will_return(eventCallbackMockD)
+                   )
                    :and_then(
                      self.dependencyMocks.Server.getInstance
                                                 :should_be_called()
@@ -266,6 +278,10 @@ function TestPlayerList:createPlayerListInstance()
                    :and_also(
                      serverEventManagerMock.on
                                            :should_be_called_with("onPlayerNameChange", eventCallbackMockC)
+                   )
+                   :and_also(
+                     serverEventManagerMock.on
+                                           :should_be_called_with("onPlayerRoleChange", eventCallbackMockD)
                    )
                    :when(
                      function()
