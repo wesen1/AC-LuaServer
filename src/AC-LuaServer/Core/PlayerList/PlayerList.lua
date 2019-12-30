@@ -137,8 +137,8 @@ function PlayerList:onPlayerRoleChange(_cn, _newRole)
     -- There can only be one active player with the admin role at a time
     -- If there is already a player with the admin role he will lose the role when another player
     -- claims admin
-    for _, player in pairs(self.players) do
-      if (player:getHasAdminRole()) then
+    for cn, player in pairs(self.players) do
+      if (cn ~= _cn and player:getHasAdminRole()) then
         player:setHasAdminRole(false)
         break
       end
