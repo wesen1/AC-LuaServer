@@ -6,6 +6,7 @@
 --
 
 local EventEmitter = require "AC-LuaServer.Core.Event.EventEmitter"
+local LuaServerApi = require "AC-LuaServer.Core.LuaServerApi"
 local Object = require "classic"
 local Player = require "AC-LuaServer.Core.PlayerList.Player"
 local ServerEventListener = require "AC-LuaServer.Core.ServerEvent.ServerEventListener"
@@ -28,7 +29,8 @@ PlayerList:implement(ServerEventListener)
 PlayerList.serverEventListeners = {
   onPlayerConnect = "onPlayerConnect",
   onPlayerDisconnectAfter = "onPlayerDisconnectAfter",
-  onPlayerNameChange = "onPlayerNameChange"
+  onPlayerNameChange = "onPlayerNameChange",
+  onPlayerRoleChange = "onPlayerRoleChange"
 }
 
 
@@ -114,6 +116,36 @@ function PlayerList:onPlayerNameChange(_cn, _newName)
     local previousName = player:getName()
     player:setName(_newName)
     self:emit("onPlayerNameChanged", player, previousName)
+  end
+
+end
+
+---
+-- Event handler that is called when the role of a player changes.
+-- This will be triggered when a player claims or drops admin.
+--
+-- @tparam int _cn The client number of the player whose role changed
+-- @tparam int _newRole The new role of the player
+--
+function PlayerList:onPlayerRoleChange(_cn, _newRole)
+
+  local roleChangePlayer = self.players[_cn]
+
+  if (_newRole == LuaServerApi.CR_ADMIN) then
+    roleChangePlayer:setHasAdminRole(true)
+
+    -- There can only be one active player with the admin role at a time
+    -- If there is already a player with the admin role he will lose the role when another player
+    -- claims admin
+    for _, player in pairs(self.players) do
+      if (player:getHasAdminRole()) then
+        player:setHasAdminRole(false)
+        break
+      end
+    end
+
+  elseif (_newRole == LuaServerApi.CR_DEFAULT) then
+    roleChangePlayer:setHasAdminRole(false)
   end
 
 end
