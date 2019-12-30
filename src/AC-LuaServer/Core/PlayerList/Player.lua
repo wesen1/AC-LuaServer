@@ -38,6 +38,13 @@ Player.name = nil
 --
 Player.ip = nil
 
+---
+-- Stores whether the player currently has the admin role
+--
+-- @tfield bool hasAdminRole
+--
+Player.hasAdminRole = nil
+
 
 ---
 -- Player constructor.
@@ -50,6 +57,7 @@ function Player:new(_cn, _ip, _name)
   self.cn = _cn
   self.ip = _ip
   self.name = _name
+  self.hasAdminRole = false
 end
 
 ---
@@ -113,6 +121,24 @@ end
 --
 function Player:setName(_name)
   self.name = _name
+end
+
+---
+-- Returns whether the player currently has the admin role.
+--
+-- @treturn bool True if the player currently has the admin role, false otherwise
+--
+function Player:getHasAdminRole()
+  return self.hasAdminRole
+end
+
+---
+-- Sets whether the player currently has the admin role.
+--
+-- @tparam bool _hasAdminRole True if the player has the admin role, false otherwise
+--
+function Player:setHasAdminRole(_hasAdminRole)
+  self.hasAdminRole = _hasAdminRole
 end
 
 

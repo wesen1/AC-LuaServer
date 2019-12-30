@@ -109,6 +109,7 @@ function TestPlayer:testCanBeCreatedFromConnectedPlayer()
   self:assertEquals(3, player:getCn())
   self:assertEquals("192.168.0.27", player:getIp())
   self:assertEquals("random", player:getName())
+  self:assertFalse(player:getHasAdminRole())
 
 end
 
@@ -152,6 +153,30 @@ function TestPlayer:testCanSetName()
 
   player:setName("SOMETHINGELSE")
   self:assertEquals("SOMETHINGELSE", player:getName())
+
+end
+
+---
+-- Checks that whether the Player currently has the admin role can be set as expected.
+--
+function TestPlayer:testCanSetHasAdminRole()
+
+  local Player = self.testClass
+  local player = Player(15, "10.0.0.2", "un-armed")
+
+  self:assertFalse(player:getHasAdminRole())
+
+  player:setHasAdminRole(false)
+  self:assertFalse(player:getHasAdminRole())
+
+  player:setHasAdminRole(true)
+  self:assertTrue(player:getHasAdminRole())
+
+  player:setHasAdminRole(true)
+  self:assertTrue(player:getHasAdminRole())
+
+  player:setHasAdminRole(false)
+  self:assertFalse(player:getHasAdminRole())
 
 end
 

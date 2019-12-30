@@ -29,6 +29,7 @@ TestPlayerList.testClassPath = "AC-LuaServer.Core.PlayerList.PlayerList"
 --
 TestPlayerList.dependencyPaths = {
   { id = "EventCallback", path = "AC-LuaServer.Core.Event.EventCallback" },
+  { id = "LuaServerApi", path = "AC-LuaServer.Core.LuaServerApi", ["type"] = "table" },
   { id = "Player", path = "AC-LuaServer.Core.PlayerList.Player", ["type"] = "table" },
   { id = "Server", path = "AC-LuaServer.Core.Server" }
 }
@@ -86,13 +87,17 @@ end
 --
 function TestPlayerList:testCanHandleServerEvents()
 
+  local LuaServerApiMock = self.dependencyMocks.LuaServerApi
+  LuaServerApiMock.CR_ADMIN = 1
+  LuaServerApiMock.CR_DEFAULT = 0
+
   local list = self:createPlayerListInstance()
 
   self:assertNil(list:getPlayerByCn(5))
 
   local PlayerMock = self.dependencyMocks.Player
-  local playerMockA = self:getPlayerMock()
-  local playerMockB = self:getPlayerMock()
+  local playerMockA = self:getMock("AC-LuaServer.Core.PlayerList.Player", "PlayerMockA")
+  local playerMockB = self:getMock("AC-LuaServer.Core.PlayerList.Player", "PlayerMockB")
 
   -- Connect a player
   PlayerMock.createFromConnectedPlayer
@@ -164,6 +169,48 @@ function TestPlayerList:testCanHandleServerEvents()
              )
 
 
+  -- Make the first player claim admin
+  playerMockA.setHasAdminRole
+             :should_be_called_with(true)
+             :and_also(
+               playerMockB.getHasAdminRole
+                          :should_be_called()
+                          :and_will_return(false)
+             )
+             :when(
+               function()
+                 list:onPlayerRoleChange(5, 1)
+               end
+             )
+
+  -- Make the second player claim admin
+  playerMockB.setHasAdminRole
+             :should_be_called_with(true)
+             :and_also(
+               playerMockA.getHasAdminRole
+                          :should_be_called()
+                          :and_will_return(true)
+                          :and_then(
+                            playerMockA.setHasAdminRole
+                                       :should_be_called_with(false)
+                          )
+             )
+             :when(
+               function()
+                 list:onPlayerRoleChange(7, 1)
+               end
+             )
+
+  -- Make the second player drop admin
+  playerMockA.setHasAdminRole
+             :should_be_called_with(false)
+             :when(
+               function()
+                 list:onPlayerRoleChange(5, 0)
+               end
+             )
+
+
   -- Disconnect the first player
   self.onPlayerRemovedListener
       :should_be_called_with(playerMockA)
@@ -212,6 +259,7 @@ function TestPlayerList:createPlayerListInstance()
   local eventCallbackMockA = self:getMock(eventCallbackPath, "EventCallbackMock")
   local eventCallbackMockB = self:getMock(eventCallbackPath, "EventCallbackMock")
   local eventCallbackMockC = self:getMock(eventCallbackPath, "EventCallbackMock")
+  local eventCallbackMockD = self:getMock(eventCallbackPath, "EventCallbackMock")
 
   -- Initialize event callbacks and register the event handlers
   EventCallbackMock.__call
@@ -245,6 +293,17 @@ function TestPlayerList:createPlayerListInstance()
                                       )
                                       :and_will_return(eventCallbackMockC)
                    )
+                   :and_also(
+                     EventCallbackMock.__call
+                                      :should_be_called_with(
+                                        self.mach.match(
+                                          { object = PlayerList, methodName = "onPlayerRoleChange" },
+                                          TestPlayerList.matchEventCallback
+                                        ),
+                                        nil
+                                      )
+                                      :and_will_return(eventCallbackMockD)
+                   )
                    :and_then(
                      self.dependencyMocks.Server.getInstance
                                                 :should_be_called()
@@ -266,6 +325,10 @@ function TestPlayerList:createPlayerListInstance()
                    :and_also(
                      serverEventManagerMock.on
                                            :should_be_called_with("onPlayerNameChange", eventCallbackMockC)
+                   )
+                   :and_also(
+                     serverEventManagerMock.on
+                                           :should_be_called_with("onPlayerRoleChange", eventCallbackMockD)
                    )
                    :when(
                      function()
@@ -295,15 +358,6 @@ end
 --
 function TestPlayerList.matchEventCallback(_expected, _actual)
   return (_actual.object:is(_expected.object) and _actual.methodName == _expected.methodName)
-end
-
----
--- Generates and returns a Player mock.
---
--- @treturn table The Player mock
---
-function TestPlayerList:getPlayerMock()
-  return self:getMock("AC-LuaServer.Core.PlayerList.Player", "PlayerMock")
 end
 
 
