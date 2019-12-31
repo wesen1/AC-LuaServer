@@ -48,12 +48,12 @@ function TestTagFinder:testCanFindConfigOpenTags()
     "AC-LuaServer.Core.Output.Template.TemplateNodeTree.TagFinder.TemplateTag", "TemplateTagMockA"
   )
   TemplateTagMock.__call
-                 :should_be_called_with("##+%[ *CONFIG *]#*;", 1, 11)
+                 :should_be_called_with("config", 1, 11)
                  :and_will_return(templateTagMockA)
                  :and_then(
-                   templateTagMockA.getPattern
+                   templateTagMockA.getName
                                    :should_be_called()
-                                   :and_will_return("##+%[ *CONFIG *]#*;")
+                                   :and_will_return("config")
                  )
                  :when(
                    function()
@@ -69,12 +69,12 @@ function TestTagFinder:testCanFindConfigOpenTags()
     "AC-LuaServer.Core.Output.Template.TemplateNodeTree.TagFinder.TemplateTag", "TemplateTagMockB"
   )
   TemplateTagMock.__call
-                 :should_be_called_with("##+%[ *CONFIG *]#*;", 3, 27)
+                 :should_be_called_with("config", 3, 27)
                  :and_will_return(templateTagMockB)
                  :and_then(
-                   templateTagMockB.getPattern
+                   templateTagMockB.getName
                                    :should_be_called()
-                                   :and_will_return("##+%[ *CONFIG *]#*;")
+                                   :and_will_return("config")
                  )
                  :when(
                    function()
@@ -102,12 +102,12 @@ function TestTagFinder:testCanFindConfigCloseTags()
     "AC-LuaServer.Core.Output.Template.TemplateNodeTree.TagFinder.TemplateTag", "TemplateTagMockA"
   )
   TemplateTagMock.__call
-                 :should_be_called_with("##+%[ *ENDCONFIG *]#*;", 2, 15)
+                 :should_be_called_with("end-config", 2, 15)
                  :and_will_return(templateTagMockA)
                  :and_then(
-                   templateTagMockA.getPattern
+                   templateTagMockA.getName
                                    :should_be_called()
-                                   :and_will_return("##+%[ *ENDCONFIG *]#*;")
+                                   :and_will_return("end-config")
                  )
                  :when(
                    function()
@@ -123,12 +123,12 @@ function TestTagFinder:testCanFindConfigCloseTags()
     "AC-LuaServer.Core.Output.Template.TemplateNodeTree.TagFinder.TemplateTag", "TemplateTagMockB"
   )
   TemplateTagMock.__call
-                 :should_be_called_with("##+%[ *ENDCONFIG *]#*;", 5, 32)
+                 :should_be_called_with("end-config", 5, 32)
                  :and_will_return(templateTagMockB)
                  :and_then(
-                   templateTagMockB.getPattern
+                   templateTagMockB.getName
                                    :should_be_called()
-                                   :and_will_return("##+%[ *ENDCONFIG *]#*;")
+                                   :and_will_return("end-config")
                  )
                  :when(
                    function()
@@ -156,12 +156,12 @@ function TestTagFinder:testCanFindCustomFieldOpenTags()
     "AC-LuaServer.Core.Output.Template.TemplateNodeTree.TagFinder.TemplateTag", "TemplateTagMockA"
   )
   TemplateTagMock.__call
-                 :should_be_called_with("%-%-+%[ *FIELD *]%-*;", 5, 14)
+                 :should_be_called_with("custom-field", 5, 14)
                  :and_will_return(templateTagMockA)
                  :and_then(
-                   templateTagMockA.getPattern
+                   templateTagMockA.getName
                                    :should_be_called()
-                                   :and_will_return("%-%-+%[ *FIELD *]%-*;")
+                                   :and_will_return("custom-field")
                  )
                  :when(
                    function()
@@ -177,12 +177,12 @@ function TestTagFinder:testCanFindCustomFieldOpenTags()
     "AC-LuaServer.Core.Output.Template.TemplateNodeTree.TagFinder.TemplateTag", "TemplateTagMockB"
   )
   TemplateTagMock.__call
-                 :should_be_called_with("%-%-+%[ *FIELD *]%-*;", 1, 17)
+                 :should_be_called_with("custom-field", 1, 17)
                  :and_will_return(templateTagMockB)
                  :and_then(
-                   templateTagMockB.getPattern
+                   templateTagMockB.getName
                                    :should_be_called()
-                                   :and_will_return("%-%-+%[ *FIELD *]%-*;")
+                                   :and_will_return("custom-field")
                  )
                  :when(
                    function()
@@ -210,12 +210,12 @@ function TestTagFinder:testCanFindCustomFieldCloseTags()
     "AC-LuaServer.Core.Output.Template.TemplateNodeTree.TagFinder.TemplateTag", "TemplateTagMockA"
   )
   TemplateTagMock.__call
-                 :should_be_called_with("%-%-+%[ *ENDFIELD *]%-*;", 3, 15)
+                 :should_be_called_with("end-custom-field", 3, 15)
                  :and_will_return(templateTagMockA)
                  :and_then(
-                   templateTagMockA.getPattern
+                   templateTagMockA.getName
                                    :should_be_called()
-                                   :and_will_return("%-%-+%[ *ENDFIELD *]%-*;")
+                                   :and_will_return("end-custom-field")
                  )
                  :when(
                    function()
@@ -231,12 +231,12 @@ function TestTagFinder:testCanFindCustomFieldCloseTags()
     "AC-LuaServer.Core.Output.Template.TemplateNodeTree.TagFinder.TemplateTag", "TemplateTagMockB"
   )
   TemplateTagMock.__call
-                 :should_be_called_with("%-%-+%[ *ENDFIELD *]%-*;", 1, 25)
+                 :should_be_called_with("end-custom-field", 1, 25)
                  :and_will_return(templateTagMockB)
                  :and_then(
-                   templateTagMockB.getPattern
+                   templateTagMockB.getName
                                    :should_be_called()
-                                   :and_will_return("%-%-+%[ *ENDFIELD *]%-*;")
+                                   :and_will_return("end-custom-field")
                  )
                  :when(
                    function()
@@ -264,12 +264,12 @@ function TestTagFinder:testCanFindRowTags()
     "AC-LuaServer.Core.Output.Template.TemplateNodeTree.TagFinder.TemplateTag", "TemplateTagMockA"
   )
   TemplateTagMock.__call
-                 :should_be_called_with("__+;", 2, 4)
+                 :should_be_called_with("row", 2, 4)
                  :and_will_return(templateTagMockA)
                  :and_then(
-                   templateTagMockA.getPattern
+                   templateTagMockA.getName
                                    :should_be_called()
-                                   :and_will_return("__+;")
+                                   :and_will_return("row")
                  )
                  :when(
                    function()
@@ -285,12 +285,12 @@ function TestTagFinder:testCanFindRowTags()
     "AC-LuaServer.Core.Output.Template.TemplateNodeTree.TagFinder.TemplateTag", "TemplateTagMockB"
   )
   TemplateTagMock.__call
-                 :should_be_called_with("__+;", 1, 20)
+                 :should_be_called_with("row", 1, 20)
                  :and_will_return(templateTagMockB)
                  :and_then(
-                   templateTagMockB.getPattern
+                   templateTagMockB.getName
                                    :should_be_called()
-                                   :and_will_return("__+;")
+                                   :and_will_return("row")
                  )
                  :when(
                    function()
@@ -318,12 +318,12 @@ function TestTagFinder:testCanFindRowFieldTags()
     "AC-LuaServer.Core.Output.Template.TemplateNodeTree.TagFinder.TemplateTag", "TemplateTagMockA"
   )
   TemplateTagMock.__call
-                 :should_be_called_with("%-%-+;", 6, 8)
+                 :should_be_called_with("row-field", 6, 8)
                  :and_will_return(templateTagMockA)
                  :and_then(
-                   templateTagMockA.getPattern
+                   templateTagMockA.getName
                                    :should_be_called()
-                                   :and_will_return("%-%-+;")
+                                   :and_will_return("row-field")
                  )
                  :when(
                    function()
@@ -339,12 +339,12 @@ function TestTagFinder:testCanFindRowFieldTags()
     "AC-LuaServer.Core.Output.Template.TemplateNodeTree.TagFinder.TemplateTag", "TemplateTagMockB"
   )
   TemplateTagMock.__call
-                 :should_be_called_with("%-%-+;", 10, 20)
+                 :should_be_called_with("row-field", 10, 20)
                  :and_will_return(templateTagMockB)
                  :and_then(
-                   templateTagMockB.getPattern
+                   templateTagMockB.getName
                                    :should_be_called()
-                                   :and_will_return("%-%-+;")
+                                   :and_will_return("row-field")
                  )
                  :when(
                    function()
@@ -417,13 +417,13 @@ function TestTagFinder:testCanUseCachedResults()
 
   -- Should find new row tag
   TemplateTagMock.__call
-                 :should_be_called_with("__+;", 21, 39)
+                 :should_be_called_with("row", 21, 39)
                  :and_will_return(rowTagMockA)
                  :and_then(
 
                    -- Should find new row-field tag
                    TemplateTagMock.__call
-                                  :should_be_called_with("%-%-+;", 61, 79)
+                                  :should_be_called_with("row-field", 61, 79)
                                   :and_will_return(rowFieldTagMockA)
                  )
                  :and_then(
@@ -441,9 +441,9 @@ function TestTagFinder:testCanUseCachedResults()
                  :and_then(
 
                    -- Should clear the cached tag for the closest next tag
-                   rowTagMockA.getPattern
+                   rowTagMockA.getName
                               :should_be_called()
-                              :and_will_return("__+;")
+                              :and_will_return("row")
                  )
                  :when(
                    function()
@@ -456,7 +456,7 @@ function TestTagFinder:testCanUseCachedResults()
 
   -- Should find new row tag
   TemplateTagMock.__call
-                 :should_be_called_with("__+;", 101, 119)
+                 :should_be_called_with("row", 101, 119)
                  :and_will_return(rowTagMockB)
                  :and_then(
 
@@ -480,9 +480,9 @@ function TestTagFinder:testCanUseCachedResults()
                  :and_then(
 
                    -- Should clear the cached tag for the closest next tag
-                   rowFieldTagMockA.getPattern
+                   rowFieldTagMockA.getName
                                    :should_be_called()
-                                   :and_will_return("%-%-+;")
+                                   :and_will_return("row-field")
                  )
                  :when(
                    function()
@@ -501,7 +501,7 @@ function TestTagFinder:testCanUseCachedResults()
 
                -- Should find a new row-field tag
                TemplateTagMock.__call
-                              :should_be_called_with("%-%-+;", 141, 159)
+                              :should_be_called_with("row-field", 141, 159)
                               :and_will_return(rowFieldTagMockB)
              )
              :and_then(
@@ -519,9 +519,9 @@ function TestTagFinder:testCanUseCachedResults()
              :and_then(
 
                -- Should clear the cached tag for the closest next tag
-               rowTagMockB.getPattern
+               rowTagMockB.getName
                           :should_be_called()
-                          :and_will_return("__+;")
+                          :and_will_return("row")
              )
              :when(
                function()
@@ -539,9 +539,9 @@ function TestTagFinder:testCanUseCachedResults()
                   :and_then(
 
                     -- Should clear the cached tag for the closest next tag
-                    rowFieldTagMockB.getPattern
+                    rowFieldTagMockB.getName
                                     :should_be_called()
-                                    :and_will_return("%-%-+;")
+                                    :and_will_return("row-field")
                   )
                   :when(
                     function()
@@ -579,11 +579,11 @@ function TestTagFinder:testDoesNotReturnCachedTagWhenCachedTagStartPositionIsLow
   )
 
   TemplateTagMock.__call
-                 :should_be_called_with("__+;", 6, 8)
+                 :should_be_called_with("row", 6, 8)
                  :and_will_return(rowTagMockA)
                  :and_then(
                    TemplateTagMock.__call
-                                  :should_be_called_with("%-%-+;", 1, 3)
+                                  :should_be_called_with("row-field", 1, 3)
                                   :and_will_return(rowFieldTagMockA)
                  )
                  :and_then(
@@ -597,9 +597,9 @@ function TestTagFinder:testDoesNotReturnCachedTagWhenCachedTagStartPositionIsLow
                               )
                  )
                  :and_then(
-                   rowFieldTagMockA.getPattern
+                   rowFieldTagMockA.getName
                                    :should_be_called()
-                                   :and_will_return("%-%-+;")
+                                   :and_will_return("row-field")
                  )
                  :when(
                    function()
@@ -613,7 +613,7 @@ function TestTagFinder:testDoesNotReturnCachedTagWhenCachedTagStartPositionIsLow
              :should_be_called()
              :and_will_return(6)
              :and_then(
-               rowTagMockA.getPattern
+               rowTagMockA.getName
                           :should_be_called()
                           :and_will_return("__;")
              )
@@ -636,11 +636,11 @@ function TestTagFinder:testDoesNotReturnCachedTagWhenCachedTagStartPositionIsLow
   )
 
   TemplateTagMock.__call
-                 :should_be_called_with("__+;", 6, 8)
+                 :should_be_called_with("row", 6, 8)
                  :and_will_return(rowTagMockB)
                  :and_then(
                    TemplateTagMock.__call
-                                  :should_be_called_with("%-%-+;", 1, 3)
+                                  :should_be_called_with("row-field", 1, 3)
                                   :and_will_return(rowFieldTagMockB)
                  )
                  :and_then(
@@ -654,9 +654,9 @@ function TestTagFinder:testDoesNotReturnCachedTagWhenCachedTagStartPositionIsLow
                               )
                  )
                  :and_then(
-                   rowFieldTagMockB.getPattern
+                   rowFieldTagMockB.getName
                                    :should_be_called()
-                                   :and_will_return("%-%-+;")
+                                   :and_will_return("row-field")
                  )
                  :when(
                    function()
@@ -701,11 +701,11 @@ function TestTagFinder:testDoesNotUseCacheWhenTargetStringChanges()
   )
 
   TemplateTagMock.__call
-                 :should_be_called_with("__+;", 6, 8)
+                 :should_be_called_with("row", 6, 8)
                  :and_will_return(rowTagMockA)
                  :and_then(
                    TemplateTagMock.__call
-                                  :should_be_called_with("%-%-+;", 1, 3)
+                                  :should_be_called_with("row-field", 1, 3)
                                   :and_will_return(rowFieldTagMock)
                  )
                  :and_then(
@@ -719,9 +719,9 @@ function TestTagFinder:testDoesNotUseCacheWhenTargetStringChanges()
                               )
                  )
                  :and_then(
-                   rowFieldTagMock.getPattern
+                   rowFieldTagMock.getName
                                   :should_be_called()
-                                  :and_will_return("%-%-+;")
+                                  :and_will_return("row-field")
                  )
                  :when(
                    function()
@@ -732,12 +732,12 @@ function TestTagFinder:testDoesNotUseCacheWhenTargetStringChanges()
   self:assertEquals(rowFieldTagMock, nextTag)
 
   TemplateTagMock.__call
-                 :should_be_called_with("__+;", 6, 8)
+                 :should_be_called_with("row", 6, 8)
                  :and_will_return(rowTagMockB)
                  :and_then(
-                   rowTagMockB.getPattern
+                   rowTagMockB.getName
                               :should_be_called()
-                              :and_will_return("__+;")
+                              :and_will_return("row")
                  )
                  :when(
                    function()
@@ -770,11 +770,11 @@ function TestTagFinder:testCanHandleCustomFieldTagsWithTrailingDashes()
     "AC-LuaServer.Core.Output.Template.TemplateNodeTree.TagFinder.TemplateTag", "TemplateTagMockB"
   )
   TemplateTagMock.__call
-                 :should_be_called_with("%-%-+%[ *FIELD *]%-*;", 1, 22)
+                 :should_be_called_with("custom-field", 1, 22)
                  :and_will_return(templateTagMockA)
                  :and_also(
                    TemplateTagMock.__call
-                                  :should_be_called_with("%-%-+;", 16, 22)
+                                  :should_be_called_with("row-field", 16, 22)
                                   :and_will_return(templateTagMockB)
                  )
                  :and_then(
@@ -788,9 +788,9 @@ function TestTagFinder:testCanHandleCustomFieldTagsWithTrailingDashes()
                                    )
                  )
                  :and_then(
-                   templateTagMockA.getPattern
+                   templateTagMockA.getName
                                    :should_be_called()
-                                   :and_will_return("%-%-+%[ *FIELD *]%-*;")
+                                   :and_will_return("custom-field")
                  )
                  :when(
                    function()
@@ -820,11 +820,11 @@ function TestTagFinder:testCanHandleCustomFieldTagsWithTrailingDashes()
     "AC-LuaServer.Core.Output.Template.TemplateNodeTree.TagFinder.TemplateTag", "TemplateTagMockD"
   )
   TemplateTagMock.__call
-                 :should_be_called_with("%-%-+%[ *ENDFIELD *]%-*;", 3, 21)
+                 :should_be_called_with("end-custom-field", 3, 21)
                  :and_will_return(templateTagMockC)
                  :and_also(
                    TemplateTagMock.__call
-                                  :should_be_called_with("%-%-+;", 18, 21)
+                                  :should_be_called_with("row-field", 18, 21)
                                   :and_will_return(templateTagMockD)
                  )
                  :and_then(
@@ -838,9 +838,9 @@ function TestTagFinder:testCanHandleCustomFieldTagsWithTrailingDashes()
                                    )
                  )
                  :and_then(
-                   templateTagMockC.getPattern
+                   templateTagMockC.getName
                                    :should_be_called()
-                                   :and_will_return("%-%-+%[ *ENDFIELD *]%-*;")
+                                   :and_will_return("end-custom-field")
                  )
                  :when(
                    function()

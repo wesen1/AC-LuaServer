@@ -17,17 +17,17 @@ local TagFinder = Object:extend()
 
 
 ---
--- The list of available tag patterns
+-- The list of available tag patterns and their corresponding names
 --
 -- @tfield string[] tagPatterns
 --
 TagFinder.tagPatterns = {
-  "##+%[ *CONFIG *]#*;",      -- config
-  "##+%[ *ENDCONFIG *]#*;",   -- end-config
-  "%-%-+%[ *FIELD *]%-*;",    -- custom-field
-  "%-%-+%[ *ENDFIELD *]%-*;", -- end-custom-field
-  "__+;",                     -- row
-  "%-%-+;"                    -- row-field
+  { tagName = "config", pattern = "##+%[ *CONFIG *]#*;" },
+  { tagName = "end-config", pattern = "##+%[ *ENDCONFIG *]#*;" },
+  { tagName = "custom-field", pattern = "%-%-+%[ *FIELD *]%-*;" },
+  { tagName = "end-custom-field", pattern = "%-%-+%[ *ENDFIELD *]%-*;" },
+  { tagName = "row", pattern = "__+;" },
+  { tagName = "row-field", pattern = "%-%-+;" }
 }
 
 
@@ -35,7 +35,7 @@ TagFinder.tagPatterns = {
 
 ---
 -- The cached template tags that were found before they were the closest tag
--- This list is in the format { ["tagPattern"] = TemplateTag, ... }
+-- This list is in the format { ["tagName"] = TemplateTag, ... }
 --
 -- @tfield TemplateTag[] nextTags
 --
@@ -74,7 +74,9 @@ function TagFinder:findNextTag(_text, _textPosition)
   local nextTagPatternTemplateTag
   for _, tagPattern in ipairs(self.tagPatterns) do
 
-    nextTagPatternTemplateTag = self:getNextTagForPattern(_text, _textPosition, tagPattern)
+    nextTagPatternTemplateTag = self:getNextTagForPattern(
+      _text, _textPosition, tagPattern["tagName"], tagPattern["pattern"]
+    )
     if (nextTagPatternTemplateTag ~= false and
          (closestNextTemplateTag == nil or
           nextTagPatternTemplateTag:getStartPosition() < closestNextTemplateTag:getStartPosition())) then
@@ -85,7 +87,7 @@ function TagFinder:findNextTag(_text, _textPosition)
 
   if (closestNextTemplateTag ~= nil) then
     -- Remove the cached next tag position of the current closest tag
-    self.nextTags[closestNextTemplateTag:getPattern()] = nil
+    self.nextTags[closestNextTemplateTag:getName()] = nil
   end
 
   return closestNextTemplateTag
@@ -100,13 +102,14 @@ end
 --
 -- @tparam string _text The text to search for the tag pattern
 -- @tparam int _textPosition The start position inside the text
+-- @tparam string _tagName The tag name
 -- @tparam string _tagPattern The tag pattern
 --
 -- @treturn TemplateTag|bool The next tag or false if there are no more tags of this tag type inside the text
 --
-function TagFinder:getNextTagForPattern(_text, _textPosition, _tagPattern)
+function TagFinder:getNextTagForPattern(_text, _textPosition, _tagName, _tagPattern)
 
-  local nextTemplateTag = self:getCachedTagForPattern(_text, _textPosition, _tagPattern)
+  local nextTemplateTag = self:getCachedTagForPattern(_text, _textPosition, _tagName)
   if (nextTemplateTag == nil) then
 
     -- Search for the start and end position of the next tag with the pattern
@@ -114,11 +117,11 @@ function TagFinder:getNextTagForPattern(_text, _textPosition, _tagPattern)
     if (nextTagStartPosition == nil) then
       nextTemplateTag = false
     else
-      nextTemplateTag = TemplateTag(_tagPattern, nextTagStartPosition, nextTagEndPosition)
+      nextTemplateTag = TemplateTag(_tagName, nextTagStartPosition, nextTagEndPosition)
     end
 
     -- Cache the tag
-    self.nextTags[_tagPattern] = nextTemplateTag
+    self.nextTags[_tagName] = nextTemplateTag
 
   end
 
@@ -132,19 +135,19 @@ end
 --
 -- @tparam string _text The text that is searched for tags
 -- @tparam int _textPosition The start position inside the text
--- @tparam string _tagPattern The tag pattern
+-- @tparam string _tagName The tag name
 --
 -- @treturn TemplateTag|bool|nil The cached tag or nil if there is no cached next tag
 --
-function TagFinder:getCachedTagForPattern(_text, _textPosition, _tagPattern)
+function TagFinder:getCachedTagForPattern(_text, _textPosition, _tagName)
 
   if (_text == self.lastSearchText) then
 
-    local cachedTemplateTag = self.nextTags[_tagPattern]
+    local cachedTemplateTag = self.nextTags[_tagName]
     if (cachedTemplateTag == false or cachedTemplateTag == nil or cachedTemplateTag:getStartPosition() >= _textPosition) then
       return cachedTemplateTag
     else
-      self.nextTags[_tagPattern] = nil
+      self.nextTags[_tagName] = nil
     end
 
   else

@@ -16,11 +16,11 @@ local TemplateTag = Object:extend()
 
 
 ---
--- The pattern of the tag
+-- The name of the tag
 --
--- @tfield string pattern
+-- @tfield string name
 --
-TemplateTag.pattern = nil
+TemplateTag.name = nil
 
 ---
 -- The start position of the tag inside the target string
@@ -40,12 +40,12 @@ TemplateTag.endPosition = nil
 ---
 -- TemplateTag constructor.
 --
--- @tparam string _pattern The tag pattern
+-- @tparam string _name The tag name
 -- @tparam int _startPosition The start position inside the target string
 -- @tparam int _endPosition The end position inside the target string
 --
-function TemplateTag:new(_pattern, _startPosition, _endPosition)
-  self.pattern = _pattern
+function TemplateTag:new(_name, _startPosition, _endPosition)
+  self.name = _name
   self.startPosition = _startPosition
   self.endPosition = _endPosition
 end
@@ -54,12 +54,12 @@ end
 -- Getters and Setters
 
 ---
--- Returns the pattern of this tag.
+-- Returns the name of this tag.
 --
--- @treturn string The pattern
+-- @treturn string The tag name
 --
-function TemplateTag:getPattern()
-  return self.pattern
+function TemplateTag:getName()
+  return self.name
 end
 
 ---
