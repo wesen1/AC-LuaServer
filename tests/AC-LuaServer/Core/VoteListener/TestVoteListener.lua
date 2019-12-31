@@ -69,7 +69,7 @@ TestVoteListener.onVoteFailedListener = nil
 -- Sets up the VoteListener event listeners.
 --
 function TestVoteListener:setUp()
-  TestCase.setUp(self)
+  self.super.setUp(self)
 
   self.onPlayerCalledVoteListener = self.mach.mock_function("onPlayerCalledVote")
   self.onPlayerFailedToCallVoteListener = self.mach.mock_function("onPlayerFailedToCallVote")
@@ -82,7 +82,7 @@ end
 -- Clears the VoteListener event listeners.
 --
 function TestVoteListener:tearDown()
-  TestCase.tearDown(self)
+  self.super.tearDown(self)
 
   self.onPlayerCalledVoteListener = nil
   self.onPlayerFailedToCallVoteListener = nil
