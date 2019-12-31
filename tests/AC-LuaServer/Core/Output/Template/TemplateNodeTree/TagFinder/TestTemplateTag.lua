@@ -30,13 +30,13 @@ function TestTemplateTag:testCanBeCreated()
 
   local TemplateTag = self.testClass
 
-  local tag = TemplateTag("config", 1, 15)
-  self:assertEquals("config", tag:getName())
+  local tag = TemplateTag("##+%[ *CONFIG *]#*;", 1, 15)
+  self:assertEquals("##+%[ *CONFIG *]#*;", tag:getPattern())
   self:assertEquals(1, tag:getStartPosition())
   self:assertEquals(15, tag:getEndPosition())
 
-  local anotherTag = TemplateTag("end-config", 130, 147)
-  self:assertEquals("end-config", anotherTag:getName())
+  local anotherTag = TemplateTag("##+%[ *ENDCONFIG *]#*;", 130, 147)
+  self:assertEquals("##+%[ *ENDCONFIG *]#*;", anotherTag:getPattern())
   self:assertEquals(130, anotherTag:getStartPosition())
   self:assertEquals(147, anotherTag:getEndPosition())
 
