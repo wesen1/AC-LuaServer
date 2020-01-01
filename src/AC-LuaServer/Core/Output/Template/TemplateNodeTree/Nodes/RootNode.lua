@@ -21,7 +21,7 @@ local RootNode = BaseTemplateNode:extend()
 -- RootNode constructor.
 --
 function RootNode:new()
-  self.super.new("root")
+  self.super.new(self, "root")
 end
 
 
@@ -36,7 +36,7 @@ end
 --
 function RootNode:addInnerText(_text)
   local contentNode = ContentNode()
-  self:addInnerNode(contentNode)
+  self.super.addInnerNode(self, contentNode)
 
   return contentNode:addInnerText(_text)
 end
