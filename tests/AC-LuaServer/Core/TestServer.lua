@@ -34,6 +34,7 @@ TestServer.dependencyPaths = {
   { id = "PlayerList", path = "AC-LuaServer.Core.PlayerList.PlayerList" },
   { id = "GameHandler", path = "AC-LuaServer.Core.GameHandler.GameHandler" },
   { id = "MapRotation", path = "AC-LuaServer.Core.MapRotation.MapRotation" },
+  { id = "Output", path = "AC-LuaServer.Core.Output.Output" },
   { id = "VoteListener", path = "AC-LuaServer.Core.VoteListener.VoteListener" },
   { id = "ServerEventManager", path = "AC-LuaServer.Core.ServerEvent.ServerEventManager" }
 }
@@ -58,6 +59,13 @@ TestServer.gameHandlerMock = nil
 -- @tfield table mapRotationMock
 --
 TestServer.mapRotationMock = nil
+
+---
+-- The Output mock that will be injected into the test Server instance
+--
+-- @tfield table outputMock
+--
+TestServer.outputMock = nil
 
 ---
 -- The PlayerList mock that will be injected into the test Server instance
@@ -90,6 +98,9 @@ function TestServer:setUp()
   self.mapRotationMock = self:getMock(
     "AC-LuaServer.Core.MapRotation.MapRotation", "MapRotationMock"
   )
+  self.outputMock = self:getMock(
+    "AC-LuaServer.Core.Output.Output", "OutputMock"
+  )
   self.playerListMock = self:getMock(
     "AC-LuaServer.Core.PlayerList.PlayerList", "PlayerListMock"
   )
@@ -108,6 +119,7 @@ function TestServer:tearDown()
   self.extensionManagerMock = nil
   self.gameHandlerMock = nil
   self.mapRotationMock = nil
+  self.outputMock = nil
   self.playerListMock = nil
   self.voteListenerMock = nil
 end
@@ -229,6 +241,11 @@ function TestServer:createTestServerInstance()
                                                         :and_will_return(self.mapRotationMock)
                       )
                       :and_also(
+                        self.dependencyMocks.Output.__call
+                                                   :should_be_called()
+                                                   :and_will_return(self.outputMock)
+                      )
+                      :and_also(
                         self.dependencyMocks.VoteListener.__call
                                                          :should_be_called()
                                                          :and_will_return(self.voteListenerMock)
@@ -269,6 +286,7 @@ function TestServer:createTestServerInstance()
   self:assertEquals(serverEventManagerMock, server:getEventManager())
   self:assertEquals(self.gameHandlerMock, server:getGameHandler())
   self:assertEquals(self.mapRotationMock, server:getMapRotation())
+  self:assertEquals(self.outputMock, server:getOutput())
   self:assertEquals(self.playerListMock, server:getPlayerList())
   self:assertEquals(self.voteListenerMock, server:getVoteListener())
 
