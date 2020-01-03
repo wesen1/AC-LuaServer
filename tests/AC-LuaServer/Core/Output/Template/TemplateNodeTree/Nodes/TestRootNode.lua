@@ -122,7 +122,7 @@ end
 ---
 -- Checks that a inner "content" node can be added as expected.
 --
-function TestRootNode:testCanAddInnnerContentNode()
+function TestRootNode:testCanAddInnerContentNode()
 
   local RootNode = self.testClass
   local rootNode = RootNode()

@@ -6,7 +6,6 @@
 --
 
 local BaseTemplateNode = require "AC-LuaServer.Core.Output.Template.TemplateNodeTree.Nodes.BaseTemplateNode"
-local StringUtils = require "AC-LuaServer.Core.Util.StringUtils"
 
 ---
 -- Represents the config section of a template.
@@ -52,12 +51,11 @@ end
 --
 function ConfigNode:getTableStringFromInnerTexts()
 
-  -- Convert the configuration string to a lua table
   local configurationValues = table.concat(self.innerTexts)
 
   local configurationTableFields = ""
   local isFirstValue = true
-  for _, configurationValue in ipairs(StringUtils.split(configurationValues, "[^%];\n")) do
+  for configurationValue in configurationValues:gmatch("(.+);") do
 
     if (isFirstValue) then
       isFirstValue = false
