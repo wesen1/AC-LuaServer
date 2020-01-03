@@ -76,7 +76,7 @@ TestGameHandler.onGameChangedListener = nil
 -- Sets up the GameHandler event listeners.
 --
 function TestGameHandler:setUp()
-  TestCase.setUp(self)
+  self.super.setUp(self)
 
   self.onGameChangeVoteCalledListener = self.mach.mock_function("onGameChangeVoteCalled")
   self.onGameChangeVotePassedListener = self.mach.mock_function("onGameChangeVotePassed")
@@ -90,7 +90,7 @@ end
 -- Clears the GameHandler event listeners.
 --
 function TestGameHandler:tearDown()
-  TestCase.tearDown(self)
+  self.super.tearDown(self)
 
   self.onGameChangeVoteCalledListener = nil
   self.onGameChangeVotePassedListener = nil

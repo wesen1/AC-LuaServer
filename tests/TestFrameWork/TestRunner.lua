@@ -71,9 +71,9 @@ function TestRunner:requireTestsRecursive(_testDirectoryPath)
     if (fileName ~= "." and fileName ~= "..") then
 
       local filePath = _testDirectoryPath .. "/" .. fileName
-      local attr = lfs.attributes(filePath)
+      local fileAttributes = lfs.attributes(filePath)
 
-      if (attr.mode == "directory") then
+      if (fileAttributes.mode == "directory") then
         self:requireTestsRecursive(filePath)
       elseif (fileName:match("^Test.+%.lua$")) then
 

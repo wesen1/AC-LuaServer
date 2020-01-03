@@ -35,7 +35,7 @@ TestExtensionManager.serverMock = nil
 -- Sets up the Server mock.
 --
 function TestExtensionManager:setUp()
-  TestCase.setUp(self)
+  self.super.setUp(self)
 
   local Server = require "AC-LuaServer.Core.Server"
   self.serverMock = self.mach.mock_object(Server, "ServerMock")
@@ -46,7 +46,7 @@ end
 -- Clears the Server mock.
 --
 function TestExtensionManager:tearDown()
-  TestCase.tearDown(self)
+  self.super.tearDown(self)
   self.serverMock = nil
 end
 

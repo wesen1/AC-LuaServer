@@ -11,6 +11,7 @@ local ExtensionTarget = require "AC-LuaServer.Core.Extension.ExtensionTarget"
 local GameHandler = require "AC-LuaServer.Core.GameHandler.GameHandler"
 local LuaServerApi = require "AC-LuaServer.Core.LuaServerApi"
 local MapRotation = require "AC-LuaServer.Core.MapRotation.MapRotation"
+local Output = require "AC-LuaServer.Core.Output.Output"
 local PlayerList = require "AC-LuaServer.Core.PlayerList.PlayerList"
 local ServerEventListener = require "AC-LuaServer.Core.ServerEvent.ServerEventListener"
 local ServerEventManager = require "AC-LuaServer.Core.ServerEvent.ServerEventManager"
@@ -65,6 +66,13 @@ Server.gameHandler = nil
 Server.mapRotation = nil
 
 ---
+-- The output
+--
+-- @tfield Output output
+--
+Server.output = nil
+
+---
 -- The list of connected players
 --
 -- @tfield PlayerList playerList
@@ -100,6 +108,7 @@ function Server:new()
   self.extensionManager = ExtensionManager(self)
   self.gameHandler = GameHandler()
   self.mapRotation = MapRotation()
+  self.output = Output()
   self.playerList = PlayerList()
   self.voteListener = VoteListener()
 
@@ -133,6 +142,15 @@ end
 --
 function Server:getMapRotation()
   return self.mapRotation
+end
+
+---
+-- Returns the Output.
+--
+-- @treturn Output The Output
+--
+function Server:getOutput()
+  return self.output
 end
 
 ---
@@ -173,6 +191,21 @@ function Server.getInstance()
 
 end
 
+
+---
+-- Configures this Server.
+--
+-- @tparam table _configuration The configuration to apply
+--
+function Server:configure(_configuration)
+
+  if (type(_configuration) == "table") then
+    if (type(_configuration["Output"] == "table")) then
+      self.output:configure(_configuration["Output"])
+    end
+  end
+
+end
 
 ---
 -- Initializes the Server.

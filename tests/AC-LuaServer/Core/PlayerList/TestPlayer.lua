@@ -58,7 +58,7 @@ TestPlayer.getnameMock = nil
 -- Sets up the LuaServerApi mocks.
 --
 function TestPlayer:setUp()
-  TestCase.setUp(self)
+  self.super.setUp(self)
 
   self.isconnectedMock = self.mach.mock_function("isconnected")
   self.getipMock = self.mach.mock_function("getip")
@@ -74,7 +74,7 @@ end
 -- Clears the LuaServerApi mocks.
 --
 function TestPlayer:tearDown()
-  TestCase.tearDown(self)
+  self.super.tearDown(self)
 
   self.isconnectedMock = nil
   self.getipMock = nil
