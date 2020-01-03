@@ -52,7 +52,7 @@ StringRenderer.suffix = nil
 function StringRenderer:new()
   self.defaultTemplateValues = {}
   self.basePath = "."
-  self.suffix = ""
+  self.suffix = ".template"
 end
 
 
@@ -145,6 +145,9 @@ function StringRenderer:normalizeRenderedTemplate(_renderedTemplateString)
 
   -- Remove leading whitespace from the total string
   renderedTemplateString = renderedTemplateString:gsub("^ +", "")
+
+  -- Remove trailing whitespace from the total string
+  renderedTemplateString = renderedTemplateString:gsub(" +$", "")
 
   -- Find and replace <whitespace> tags
   renderedTemplateString = renderedTemplateString:gsub(
