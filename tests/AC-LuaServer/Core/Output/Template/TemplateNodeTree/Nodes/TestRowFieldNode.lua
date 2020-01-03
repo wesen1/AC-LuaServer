@@ -112,14 +112,31 @@ function TestRowFieldNode:testCanReturnWhetherItIsOpenedByTag()
      :and_will_return("row-field")
      :and_then(
        TableUtilsMock.tableHasValue
-         :should_be_called_with(self.mach.match({}), "row-field")
-         :and_will_return(false)
+         :should_be_called_with(self.mach.match({ "row-field" }), "row-field")
+         :and_will_return(true)
      )
      :when(
        function()
-         self:assertFalse(rowFieldNode:isOpenedByTag(tag))
+         self:assertTrue(rowFieldNode:isOpenedByTag(tag))
        end
      )
+
+  local otherTag = self:getMock(
+    "AC-LuaServer.Core.Output.Template.TemplateNodeTree.TagFinder.TemplateTag", "TemplateTagMockB"
+  )
+  otherTag.getName
+          :should_be_called()
+          :and_will_return("content")
+          :and_then(
+            TableUtilsMock.tableHasValue
+                          :should_be_called_with(self.mach.match({ "row-field" }), "content")
+                          :and_will_return(false)
+          )
+          :when(
+            function()
+              self:assertFalse(rowFieldNode:isOpenedByTag(otherTag))
+            end
+          )
 
 end
 

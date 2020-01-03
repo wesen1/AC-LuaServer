@@ -93,7 +93,7 @@ function TemplateNodeTree:parse(_targetString)
     nextTag = self.tagFinder:findNextTag(_targetString, currentStringPosition)
 
     -- Add the text between the next tag and the current string position to the current node
-    self:addInnerTextToCurrentNode(_targetString, targetStringLength, nextTag, currentStringPosition)
+    self:addInnerTextToCurrentNode(_targetString, currentStringPosition, nextTag)
 
     if (nextTag) then
       self:parseTag(nextTag)
@@ -111,11 +111,10 @@ end
 -- Adds the text between the current string position and the next tag's start position to the current node.
 --
 -- @tparam string _targetString The target string
--- @tparam int _targetStringLength The length of the target string
 -- @tparam int _currentStringPosition The current position inside the target string
 -- @tparam TemplateTag _nextTag The next tag or nil if there is no next tag
 --
-function TemplateNodeTree:addInnerTextToCurrentNode(_targetString, _targetStringLength, _currentStringPosition, _nextTag)
+function TemplateNodeTree:addInnerTextToCurrentNode(_targetString, _currentStringPosition, _nextTag)
 
   local innerTextEndPosition
   if (_nextTag) then
@@ -126,13 +125,6 @@ function TemplateNodeTree:addInnerTextToCurrentNode(_targetString, _targetString
       return
     end
 
-  else
-    -- There is no next tag, check if there is text between the current string position
-    -- and the end of the string
-    innerTextEndPosition = nil
-    if (_currentStringPosition > _targetStringLength) then
-      return
-    end
   end
 
   -- Extract the inner text and check if it contains other symbols than " " and "\t"
