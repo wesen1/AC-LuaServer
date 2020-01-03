@@ -34,18 +34,18 @@ end
 function ConfigNode:toTable()
 
   local configEntries = {}
-  for configEntry in table.concat(self.innerTexts):gmatch("([%a_][%a%d_]*=.+);") do
-    table.insert(configEntries, configEntry)
+
+  local getConfigValueFunction
+  for configName, configValue in table.concat(self.innerTexts):gmatch("([%a_][%a%d_]*) *=([^;]+);") do
+
+    getConfigValueFunction = loadstring("return " .. configValue)
+    if (getConfigValueFunction) then
+      configEntries[configName] = getConfigValueFunction()
+    end
+
   end
 
-  local getConfigurationFunction = loadstring(
-    string.format("return {%s}", table.concat(configEntries))
-  )
-  if (getConfigurationFunction) then
-    return getConfigurationFunction()
-  else
-    return {}
-  end
+  return configEntries
 
 end
 
