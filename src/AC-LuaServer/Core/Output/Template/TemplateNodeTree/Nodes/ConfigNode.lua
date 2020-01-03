@@ -6,6 +6,7 @@
 --
 
 local BaseTemplateNode = require "AC-LuaServer.Core.Output.Template.TemplateNodeTree.Nodes.BaseTemplateNode"
+local loadstring = loadstring or load
 
 ---
 -- Represents the config section of a template.
@@ -32,41 +33,19 @@ end
 --
 function ConfigNode:toTable()
 
-  local getConfigurationFunction = loadstring("return " .. self:getTableStringFromInnerTexts())
+  local configEntries = {}
+  for configEntry in table.concat(self.innerTexts):gmatch("(.+);") do
+    table.insert(configEntries, configEntry)
+  end
+
+  local getConfigurationFunction = loadstring(
+    string.format("return {%s}", table.concat(configEntries))
+  )
   if (getConfigurationFunction) then
     return getConfigurationFunction()
   else
     return {}
   end
-
-end
-
-
--- Private Methods
-
----
--- Returns a string that defines a lua table from the inner texts of this node.
---
--- @treturn string The table string
---
-function ConfigNode:getTableStringFromInnerTexts()
-
-  local configurationValues = table.concat(self.innerTexts)
-
-  local configurationTableFields = ""
-  local isFirstValue = true
-  for configurationValue in configurationValues:gmatch("(.+);") do
-
-    if (isFirstValue) then
-      isFirstValue = false
-    else
-      configurationTableFields = configurationTableFields .. ","
-    end
-
-    configurationTableFields = configurationTableFields .. configurationValue
-  end
-
-  return "{" .. configurationTableFields .. "}"
 
 end
 

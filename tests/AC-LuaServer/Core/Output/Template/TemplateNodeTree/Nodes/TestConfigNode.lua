@@ -180,5 +180,19 @@ function TestConfigNode:testCanBeConvertedToTable()
 
 end
 
+---
+-- Checks that invalid config entries are handled as expected when converting a ConfigNode to a table.
+--
+function TestConfigNode:testCanHandleInvalidConfigEntries()
+
+  local ConfigNode = self.testClass
+  local configNode = ConfigNode()
+
+  -- With inner text that is no valid config entry
+  configNode:addInnerText("value~~\"bad format\";")
+  self:assertEquals({}, configNode:toTable())
+
+end
+
 
 return TestConfigNode
