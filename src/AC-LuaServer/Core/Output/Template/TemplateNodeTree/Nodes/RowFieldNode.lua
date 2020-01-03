@@ -19,7 +19,7 @@ local RowFieldNode = BaseContentNode:extend()
 -- RowFieldNode constructor.
 --
 function RowFieldNode:new()
-  self.super.new(self, "row-field", {}, { "row", "custom-field", "custom-field-end", "row-field"})
+  self.super.new(self, "row-field", nil, { "row", "custom-field", "end-custom-field", "row-field" })
 end
 
 

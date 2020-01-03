@@ -20,7 +20,7 @@ local RowNode = BaseContentNode:extend()
 -- RowNode constructor.
 --
 function RowNode:new()
-  self.super.new(self, "row", {}, { "row", "custom-field-end" })
+  self.super.new(self, "row", { "row" }, { "row", "end-custom-field" })
 end
 
 

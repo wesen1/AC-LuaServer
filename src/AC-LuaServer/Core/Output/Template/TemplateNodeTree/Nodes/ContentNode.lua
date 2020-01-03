@@ -48,10 +48,18 @@ end
 -- @treturn BaseTemplateNode The template node to which the inner node was added
 --
 function ContentNode:addInnerNode(_node)
-  local rowNode = RowNode()
-  self.super.addInnerNode(self, rowNode)
 
-  return rowNode:addInnerNode(_node)
+  if (_node:is(RowNode)) then
+    return self.super.addInnerNode(self, _node)
+  else
+
+    local rowNode = RowNode()
+    self.super.addInnerNode(self, rowNode)
+
+    return rowNode:addInnerNode(_node)
+
+  end
+
 end
 
 
