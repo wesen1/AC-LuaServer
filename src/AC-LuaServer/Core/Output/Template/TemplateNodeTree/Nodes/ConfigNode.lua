@@ -34,7 +34,7 @@ end
 function ConfigNode:toTable()
 
   local configEntries = {}
-  for configEntry in table.concat(self.innerTexts):gmatch("(.+);") do
+  for configEntry in table.concat(self.innerTexts):gmatch("([%a_][%a%d_]*=.+);") do
     table.insert(configEntries, configEntry)
   end
 
