@@ -126,6 +126,33 @@ end
 
 
 ---
+-- Checks that the internally used Output can be configured as expected.
+--
+function TestServer:testCanConfigureOutput()
+
+  local server = self:createTestServerInstance()
+
+  self.outputMock.configure
+                 :should_be_called_with(
+                   self.mach.match(
+                     { TemplateRenderer = { StringRenderer = { suffix = ".luatpl" } } }
+                   )
+                 )
+                 :when(
+                   function()
+                     server:configure({
+                         Output = {
+                           TemplateRenderer = {
+                             StringRenderer = { suffix = ".luatpl" }
+                           }
+                         }
+                     })
+                   end
+                 )
+
+end
+
+---
 -- Checks that extensions can be added to a Server as expected.
 --
 function TestServer:testCanAddExtensions()
