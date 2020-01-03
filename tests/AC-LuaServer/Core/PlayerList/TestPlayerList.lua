@@ -61,7 +61,7 @@ TestPlayerList.onPlayerNameChangedListener = nil
 -- Sets up the PlayerList event listeners.
 --
 function TestPlayerList:setUp()
-  TestCase.setUp(self)
+  self.super.setUp(self)
 
   self.onPlayerAddedListener = self.mach.mock_function("onPlayerAddedListener")
   self.onPlayerRemovedListener = self.mach.mock_function("onPlayerRemovedListener")
@@ -74,7 +74,7 @@ end
 -- Clears the PlayerList event listeners.
 --
 function TestPlayerList:tearDown()
-  TestCase.tearDown(self)
+  self.super.tearDown(self)
 
   self.onPlayerAddedListener = nil
   self.onPlayerRemovedListener = nil

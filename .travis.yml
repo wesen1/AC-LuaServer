@@ -13,6 +13,8 @@ before_install:
 
 install:
   - luarocks install classic
+  - luarocks install ac-clientoutput
+  - luarocks install lua-resty-template
   - luarocks install luacov
   - luarocks install luaunit
   - luarocks install luafilesystem

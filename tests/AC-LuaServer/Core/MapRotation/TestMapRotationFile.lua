@@ -596,11 +596,11 @@ function TestMapRotationFile:generateLineIteratorMock(_lines)
   local numberOfLines = #_lines
 
   return function()
-           lineNumber = lineNumber + 1
-           if (lineNumber <= numberOfLines) then
-             return _lines[lineNumber]
-           end
-         end
+    lineNumber = lineNumber + 1
+    if (lineNumber <= numberOfLines) then
+      return _lines[lineNumber]
+    end
+  end
 
 end
 
