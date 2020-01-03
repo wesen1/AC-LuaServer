@@ -55,8 +55,8 @@ end
 --
 function Output:configure(_configuration)
 
-  if (_configuration["templateRenderer"] ~= nil) then
-    self:configureTemplateRenderer(_configuration["templateRenderer"])
+  if (_configuration["TemplateRenderer"] ~= nil) then
+    self.templateRenderer:configure(_configuration["TemplateRenderer"])
   end
 
 end
@@ -129,16 +129,9 @@ end
 --
 function Output:print(_text, _player)
 
-  local cn
-  if (_player == nil) then
-
-    -- -1 targets all connected players
-    cn = -1
-  else
-    cn = _player:getCn()
-  end
-
-  LuaServerApi.clientprint(cn, _text)
+  -- If the player is set use its cn as target cn, else use -1 which targets all connected players
+  local targetCn = _player and _player:getCn() or -1
+  LuaServerApi.clientprint(targetCn, _text)
 
 end
 
