@@ -6,8 +6,6 @@
 --
 
 local Object = require "classic"
--- TODO: Rename to client output exception or similar
-
 
 ---
 -- Error exception for the error() and pcall() functions.

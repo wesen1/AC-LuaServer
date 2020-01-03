@@ -239,7 +239,6 @@ function Server:onPlayerSayText(_cn, _text)
 
   local player = self.playerList:getPlayerByCn(_cn)
 
-  -- TODO: Must move this to CommandExecutor because it is not needed normally
   LuaServerApi.logline(
     LuaServerApi.ACLOG_INFO,
     string.format(
