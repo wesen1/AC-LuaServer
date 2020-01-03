@@ -694,7 +694,7 @@ end
 
 
 ---
--- Generates and returns a TemplateNodeTree instance into which the RootNode mock
+-- Generates and returns a TemplateNodeTree instance into which the RootNode
 -- and TagFinder mocks were injected.
 --
 -- @treturn TemplateNodeTree The TemplateNodeTree

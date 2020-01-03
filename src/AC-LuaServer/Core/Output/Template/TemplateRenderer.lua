@@ -57,7 +57,7 @@ function TemplateRenderer:configure(_configuration)
       self.stringRenderer:configure(_configuration["StringRenderer"])
     end
 
-    if (type(_configuration["ClientOutputRenderer"] == "table")) then
+    if (type(_configuration["ClientOutputRenderer"]) == "table") then
       self.clientOutputRenderer:configure(_configuration["ClientOutputRenderer"])
     end
 
@@ -86,7 +86,7 @@ end
 -- @treturn string[] The output rows
 --
 function TemplateRenderer:renderAsText(_template)
-  return self.clientOutputRenderer:renderAsClientOutputText(
+  return self.clientOutputRenderer:renderAsClientOutputString(
     self:getParsedTemplate(_template)
   ):getOutputRows()
 end
@@ -101,9 +101,9 @@ end
 --
 function TemplateRenderer:renderAsRawText(_template)
   local parsedTemplate = self:getParsedTemplate(_template)
-  local parsedTemplateContentNode = parsedTemplate:find("content")[1]
+  local contentNode = parsedTemplate:find("content")[1]
 
-  return parsedTemplateContentNode:toString()
+  return contentNode and contentNode:toString() or ""
 end
 
 
