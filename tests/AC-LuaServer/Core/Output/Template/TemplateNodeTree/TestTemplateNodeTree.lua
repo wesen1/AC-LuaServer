@@ -82,10 +82,6 @@ function TestTemplateNodeTree:setUp()
       class = require "AC-LuaServer.Core.Output.Template.TemplateNodeTree.Nodes.ConfigNode"
     },
     {
-      name = "ContentNode",
-      class = require "AC-LuaServer.Core.Output.Template.TemplateNodeTree.Nodes.ContentNode"
-    },
-    {
       name = "CustomFieldNode",
       class = require "AC-LuaServer.Core.Output.Template.TemplateNodeTree.Nodes.CustomFieldNode"
     },

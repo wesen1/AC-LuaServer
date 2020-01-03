@@ -31,7 +31,6 @@ TemplateNodeTree.tagFinder = nil
 --
 TemplateNodeTree.nodeTypes = {
   require "AC-LuaServer.Core.Output.Template.TemplateNodeTree.Nodes.ConfigNode",
-  require "AC-LuaServer.Core.Output.Template.TemplateNodeTree.Nodes.ContentNode",
   require "AC-LuaServer.Core.Output.Template.TemplateNodeTree.Nodes.CustomFieldNode",
   require "AC-LuaServer.Core.Output.Template.TemplateNodeTree.Nodes.RowFieldNode",
   require "AC-LuaServer.Core.Output.Template.TemplateNodeTree.Nodes.RowNode"

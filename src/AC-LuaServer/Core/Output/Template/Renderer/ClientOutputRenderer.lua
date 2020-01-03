@@ -59,9 +59,12 @@ end
 -- @treturn ClientOutputString The ClientOutputString
 --
 function ClientOutputRenderer:renderAsClientOutputString(_parsedTemplate)
+  local configNode = _parsedTemplate:find("config")[1]
+  local contentNode = _parsedTemplate:find("content")[1]
+
   return self.clientOutputFactory:getClientOutputString(
-    _parsedTemplate:find("content")[1]:toString(),
-    self:getClientOutputConfigurationFromParsedTemplate(_parsedTemplate)
+    contentNode and contentNode:toString() or "",
+    configNode and configNode:toTable() or nil
   )
 end
 
@@ -73,29 +76,13 @@ end
 -- @treturn ClientOutputTable The ClientOutputTable
 --
 function ClientOutputRenderer:renderAsClientOutputTable(_parsedTemplate)
+  local configNode = _parsedTemplate:find("config")[1]
+  local contentNode = _parsedTemplate:find("content")[1]
+
   return self.clientOutputFactory:getClientOutputTable(
-    _parsedTemplate:find("content")[1]:toTable(),
-    self:getClientOutputConfigurationFromParsedTemplate(_parsedTemplate)
+    contentNode and contentNode:toTable() or {},
+    configNode and configNode:toTable() or nil
   )
-end
-
-
--- Private Methods
-
----
--- Returns the ClientOutput configuration that is stored in the config section of a parsed template.
---
--- @tparam RootNode _parsedTemplate The parsed template's root node
---
--- @treturn table|nil The ClientOutput configuration that is stored in the parsed template
---
-function ClientOutputRenderer:getClientOutputConfigurationFromParsedTemplate(_parsedTemplate)
-
-  local templateConfigurationNode = _parsedTemplate:find("config")[1]
-  if (templateConfigurationNode) then
-    return templateConfigurationNode:toTable()
-  end
-
 end
 
 
