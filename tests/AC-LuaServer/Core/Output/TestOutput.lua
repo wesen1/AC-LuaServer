@@ -237,7 +237,7 @@ function TestOutput:testCanPrintException()
                :and_then(
                  TemplateMock.__call
                              :should_be_called_with(
-                               "TextTemplate/ServerMessageError",
+                               "Core/Output/ExceptionMessage",
                                self.mach.match(
                                  { errorMessage = "Could not extend time: No extend minutes remaining" }
                                )

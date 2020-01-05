@@ -18,11 +18,11 @@ local RootNode = BaseTemplateNode:extend()
 
 
 ---
--- RootNode constructor.
+-- The name of this node type
 --
-function RootNode:new()
-  self.super.new(self, "root")
-end
+-- @tfield string name
+--
+RootNode.name = "root"
 
 
 -- Public Methods

@@ -5,7 +5,6 @@
 -- @license MIT
 --
 
-local BaseContentNode = require "AC-LuaServer.Core.Output.Template.TemplateNodeTree.Nodes.BaseContentNode"
 local ContentNode = require "AC-LuaServer.Core.Output.Template.TemplateNodeTree.Nodes.ContentNode"
 
 ---
@@ -18,11 +17,25 @@ local CustomFieldNode = ContentNode:extend()
 
 
 ---
--- CustomFieldNode constructor.
+-- The name of this node type
 --
-function CustomFieldNode:new()
-  BaseContentNode.new(self, "custom-field", { "custom-field" }, { "end-custom-field" })
-end
+-- @tfield string name
+--
+CustomFieldNode.name = "custom-field"
+
+---
+-- The list of tag names that open a node of this type when they occur during the tree parsing
+--
+-- @tfield string[] openedByTagNames
+--
+CustomFieldNode.openedByTagNames = { "custom-field" }
+
+---
+-- The list of tag names that close a node of this type when they occur during the tree parsing
+--
+-- @tfield string[] closedByTagNames
+--
+CustomFieldNode.closedByTagNames = { "end-custom-field" }
 
 
 return CustomFieldNode
