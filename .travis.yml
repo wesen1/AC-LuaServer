@@ -15,6 +15,7 @@ install:
   - luarocks install classic
   - luarocks install ac-clientoutput
   - luarocks install lua-resty-template
+  - luarocks install penlight
   - luarocks install luacov
   - luarocks install luaunit
   - luarocks install luafilesystem
