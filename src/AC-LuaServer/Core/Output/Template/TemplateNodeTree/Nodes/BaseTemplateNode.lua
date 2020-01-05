@@ -73,13 +73,9 @@ BaseTemplateNode.closedByTagNames = {}
 -- BaseTemplateNode constructor.
 --
 -- @tparam string _name The name of this node type
--- @tparam string[] _openedByTagNames The list of tag names that open a node of this type
--- @tparam string[] _closedByTagNames The list of tag names that close a node of this type
 --
-function BaseTemplateNode:new(_name, _openedByTagNames, _closedByTagNames)
+function BaseTemplateNode:new(_name)
   self.name = _name
-  self.openedByTagNames = _openedByTagNames
-  self.closedByTagNames = _closedByTagNames
 
   self.innerTexts = {}
   self.innerNodes = {}

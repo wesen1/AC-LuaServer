@@ -17,11 +17,25 @@ local ConfigNode = BaseTemplateNode:extend()
 
 
 ---
--- ConfigNode constructor.
+-- The name of this node type
 --
-function ConfigNode:new()
-  self.super.new(self, "config", { "config" }, { "end-config" })
-end
+-- @tfield string name
+--
+ConfigNode.name = "config"
+
+---
+-- The list of tag names that open a node of this type when they occur during the tree parsing
+--
+-- @tfield string[] openedByTagNames
+--
+ConfigNode.openedByTagNames = { "config" }
+
+---
+-- The list of tag names that close a node of this type when they occur during the tree parsing
+--
+-- @tfield string[] closedByTagNames
+--
+ConfigNode.closedByTagNames = { "end-config" }
 
 
 -- Public Methods
