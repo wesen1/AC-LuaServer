@@ -28,140 +28,10 @@ TestStringRenderer.testClassPath = "AC-LuaServer.Core.Output.Template.Renderer.S
 -- @tfield table[] dependencyPaths
 --
 TestStringRenderer.dependencyPaths = {
-  { id = "LuaRestyTemplateEngine", path = "resty.template", ["type"] = "table" }
+  { id = "LuaRestyTemplateEngine", path = "resty.template", ["type"] = "table" },
+  { id = "Path", path = "AC-LuaServer.Core.Path", ["type"] = "table" }
 }
 
-
----
--- Checks that a custom template path prefix can be configured as expected.
---
-function TestStringRenderer:testCanConfigureCustomTemplatePathPrefix()
-
-  local StringRenderer = self.testClass
-  local renderer = StringRenderer()
-  local renderedString
-
-  -- Default prefix
-  local templateMockA = self:getMock(
-    "AC-LuaServer.Core.Output.Template.Template", "TemplateMockA"
-  )
-  templateMockA.getTemplatePath
-               :should_be_called()
-               :and_will_return("TextTemplates/myexample")
-               :and_also(
-                 templateMockA.getTemplateValues
-                              :should_be_called()
-                              :and_will_return({})
-               )
-               :and_then(
-                 self:expectLuaRestyTemplateEngineRendering(
-                   "./TextTemplates/myexample.template", {}, "astring"
-                 )
-               )
-               :when(
-                 function()
-                   renderedString = renderer:render(templateMockA)
-                 end
-               )
-
-  self:assertEquals("astring", renderedString)
-
-
-  -- Custom prefix
-  renderer:configure({
-      basePath = "/tmp/templates"
-  })
-
-  local templateMockB = self:getMock(
-    "AC-LuaServer.Core.Output.Template.Template", "TemplateMockB"
-  )
-  templateMockB.getTemplatePath
-               :should_be_called()
-               :and_will_return("TableTemplates/otherexample")
-               :and_also(
-                 templateMockB.getTemplateValues
-                              :should_be_called()
-                              :and_will_return({})
-               )
-               :and_then(
-                 self:expectLuaRestyTemplateEngineRendering(
-                   "/tmp/templates/TableTemplates/otherexample.template", {}, "atable"
-                 )
-               )
-               :when(
-                 function()
-                   renderedString = renderer:render(templateMockB)
-                 end
-               )
-
-  self:assertEquals("atable", renderedString)
-
-end
-
----
--- Checks that a custom template path suffix can be configured as expected.
---
-function TestStringRenderer:testCanConfigureCustomTemplatePathSuffix()
-
-  local StringRenderer = self.testClass
-  local renderer = StringRenderer()
-  local renderedString
-
-  -- Default suffix
-  local templateMockA = self:getMock(
-    "AC-LuaServer.Core.Output.Template.Template", "TemplateMock"
-  )
-  templateMockA.getTemplatePath
-               :should_be_called()
-               :and_will_return("TextTemplates/averyshorttext")
-               :and_also(
-                 templateMockA.getTemplateValues
-                              :should_be_called()
-                              :and_will_return({})
-               )
-               :and_then(
-                 self:expectLuaRestyTemplateEngineRendering(
-                   "./TextTemplates/averyshorttext.template", {}, "really?"
-                 )
-               )
-               :when(
-                 function()
-                   renderedString = renderer:render(templateMockA)
-                 end
-               )
-
-  self:assertEquals("really?", renderedString)
-
-  -- Custom prefix
-  renderer:configure({
-      suffix = ".txt"
-  })
-
-  local templateMockB = self:getMock(
-    "AC-LuaServer.Core.Output.Template.Template", "TemplateMockB"
-  )
-  templateMockB.getTemplatePath
-               :should_be_called()
-               :and_will_return("TableTemplates/PlayerScore")
-               :and_also(
-                 templateMockB.getTemplateValues
-                              :should_be_called()
-                              :and_will_return({})
-               )
-               :and_then(
-                 self:expectLuaRestyTemplateEngineRendering(
-                   "./TableTemplates/PlayerScore.txt", {}, "unarmed scored after 0 seconds"
-                 )
-               )
-               :when(
-                 function()
-                   renderedString = renderer:render(templateMockB)
-                 end
-               )
-
-  self:assertEquals("unarmed scored after 0 seconds", renderedString)
-
-end
 
 ---
 -- Checks that a template can be rendered without default and without custom template values.
@@ -172,12 +42,18 @@ function TestStringRenderer:testCanRenderStringWithoutTemplateValues()
   local renderer = StringRenderer()
   local renderedString
 
+  local PathMock = self.dependencyMocks.Path
   local templateMock = self:getMock(
     "AC-LuaServer.Core.Output.Template.Template", "TemplateMock"
   )
   templateMock.getTemplatePath
               :should_be_called()
-              :and_will_return("TextTemplates/TimeExtended")
+              :and_will_return("TimeExtended")
+              :and_then(
+                PathMock.getSourceDirectoryPath
+                        :should_be_called()
+                        :and_will_return("/tmp/src")
+              )
               :and_also(
                 templateMock.getTemplateValues
                             :should_be_called()
@@ -185,7 +61,9 @@ function TestStringRenderer:testCanRenderStringWithoutTemplateValues()
               )
               :and_then(
                 self:expectLuaRestyTemplateEngineRendering(
-                  "./TextTemplates/TimeExtended.template", {}, "Time extended by 10 minutes"
+                  "/tmp/src/AC-LuaServer/Templates/TimeExtended.template",
+                  { getAbsoluteTemplatePath = StringRenderer.getAbsoluteTemplatePath },
+                  "Time extended by 10 minutes"
                 )
               )
               :when(
@@ -211,12 +89,18 @@ function TestStringRenderer:testCanRenderStringWithOnlyDefaultTemplateValues()
       defaultTemplateValues = { serverOwner = "unarmed" }
   })
 
+  local PathMock = self.dependencyMocks.Path
   local templateMock = self:getMock(
     "AC-LuaServer.Core.Output.Template.Template", "TemplateMock"
   )
   templateMock.getTemplatePath
               :should_be_called()
-              :and_will_return("TextTemplates/ServerInfo")
+              :and_will_return("ServerInfo")
+              :and_then(
+                PathMock.getSourceDirectoryPath
+                        :should_be_called()
+                        :and_will_return("/home/wesen/server")
+              )
               :and_also(
                 templateMock.getTemplateValues
                             :should_be_called()
@@ -224,8 +108,11 @@ function TestStringRenderer:testCanRenderStringWithOnlyDefaultTemplateValues()
               )
               :and_then(
                 self:expectLuaRestyTemplateEngineRendering(
-                  "./TextTemplates/ServerInfo.template",
-                  { serverOwner = "unarmed" },
+                  "/home/wesen/server/AC-LuaServer/Templates/ServerInfo.template",
+                  {
+                    serverOwner = "unarmed",
+                    getAbsoluteTemplatePath = StringRenderer.getAbsoluteTemplatePath
+                  },
                   "AC-LuaServer hosted by unarmed"
                 )
               )
@@ -248,12 +135,18 @@ function TestStringRenderer:testCanRenderStringWithOnlyCustomTemplateValues()
   local renderer = StringRenderer()
   local renderedString
 
+  local PathMock = self.dependencyMocks.Path
   local templateMock = self:getMock(
     "AC-LuaServer.Core.Output.Template.Template", "TemplateMock"
   )
   templateMock.getTemplatePath
               :should_be_called()
-              :and_will_return("TextTemplates/PlayerDisconnected")
+              :and_will_return("PlayerDisconnected")
+              :and_then(
+                PathMock.getSourceDirectoryPath
+                        :should_be_called()
+                        :and_will_return("/src")
+              )
               :and_also(
                 templateMock.getTemplateValues
                             :should_be_called()
@@ -261,8 +154,8 @@ function TestStringRenderer:testCanRenderStringWithOnlyCustomTemplateValues()
               )
               :and_then(
                 self:expectLuaRestyTemplateEngineRendering(
-                  "./TextTemplates/PlayerDisconnected.template",
-                  { reason = "banned" },
+                  "/src/AC-LuaServer/Templates/PlayerDisconnected.template",
+                  { reason = "banned", getAbsoluteTemplatePath = StringRenderer.getAbsoluteTemplatePath },
                   "Player could not connect (banned)"
                 )
               )
@@ -289,12 +182,18 @@ function TestStringRenderer:testCanRenderStringWithDefaultAndCustomTemplateValue
       defaultTemplateValues = { serverName = "best-server" }
   })
 
+  local PathMock = self.dependencyMocks.Path
   local templateMock = self:getMock(
     "AC-LuaServer.Core.Output.Template.Template", "TemplateMock"
   )
   templateMock.getTemplatePath
               :should_be_called()
-              :and_will_return("TextTemplates/Greeting")
+              :and_will_return("Greeting")
+              :and_then(
+                PathMock.getSourceDirectoryPath
+                        :should_be_called()
+                        :and_will_return("/etc/lua")
+              )
               :and_also(
                 templateMock.getTemplateValues
                             :should_be_called()
@@ -302,8 +201,12 @@ function TestStringRenderer:testCanRenderStringWithDefaultAndCustomTemplateValue
               )
               :and_then(
                 self:expectLuaRestyTemplateEngineRendering(
-                  "./TextTemplates/Greeting.template",
-                  { serverName = "best-server", playerName = "random" },
+                  "/etc/lua/AC-LuaServer/Templates/Greeting.template",
+                  {
+                    serverName = "best-server",
+                    playerName = "random",
+                    getAbsoluteTemplatePath = StringRenderer.getAbsoluteTemplatePath
+                  },
                   "[best-server] Welcome to our server random!"
                 )
               )
@@ -326,12 +229,18 @@ function TestStringRenderer:testCanRemoveLineEndingsAndBorderingWhitespace()
   local renderer = StringRenderer()
   local renderedString
 
+  local PathMock = self.dependencyMocks.Path
   local templateMock = self:getMock(
     "AC-LuaServer.Core.Output.Template.Template", "TemplateMock"
   )
   templateMock.getTemplatePath
               :should_be_called()
-              :and_will_return("TextTemplates/WithEmptyLines")
+              :and_will_return("WithEmptyLines")
+              :and_then(
+                PathMock.getSourceDirectoryPath
+                        :should_be_called()
+                        :and_will_return("/othertmp/src")
+              )
               :and_also(
                 templateMock.getTemplateValues
                             :should_be_called()
@@ -339,8 +248,8 @@ function TestStringRenderer:testCanRemoveLineEndingsAndBorderingWhitespace()
               )
               :and_then(
                 self:expectLuaRestyTemplateEngineRendering(
-                  "./TextTemplates/WithEmptyLines.template",
-                  {},
+                  "/othertmp/src/AC-LuaServer/Templates/WithEmptyLines.template",
+                  { getAbsoluteTemplatePath = StringRenderer.getAbsoluteTemplatePath },
                   "    Next line is empty   \n\n\n\n   Next line is empty with whitespace\n  \n  \n\nSee?   "
                 )
               )
@@ -364,12 +273,18 @@ function TestStringRenderer:testCanReplaceWhitespaceTags()
   local renderer = StringRenderer()
   local renderedString
 
+  local PathMock = self.dependencyMocks.Path
   local templateMockA = self:getMock(
     "AC-LuaServer.Core.Output.Template.Template", "TemplateMockA"
   )
   templateMockA.getTemplatePath
                :should_be_called()
-               :and_will_return("TextTemplates/WhitespaceUsageA")
+               :and_will_return("WhitespaceUsageA")
+               :and_then(
+                 PathMock.getSourceDirectoryPath
+                         :should_be_called()
+                         :and_will_return("/final")
+               )
                :and_also(
                  templateMockA.getTemplateValues
                               :should_be_called()
@@ -377,8 +292,8 @@ function TestStringRenderer:testCanReplaceWhitespaceTags()
                )
                :and_then(
                  self:expectLuaRestyTemplateEngineRendering(
-                   "./TextTemplates/WhitespaceUsageA.template",
-                   {},
+                   "/final/AC-LuaServer/Templates/WhitespaceUsageA.template",
+                   { getAbsoluteTemplatePath = StringRenderer.getAbsoluteTemplatePath },
                    "Whitespace in separate line upcoming:\n<whitespace>\nDone"
                  )
                )
@@ -397,7 +312,12 @@ function TestStringRenderer:testCanReplaceWhitespaceTags()
   )
   templateMockB.getTemplatePath
                :should_be_called()
-               :and_will_return("TextTemplates/WhitespaceUsageB")
+               :and_will_return("WhitespaceUsageB")
+               :and_then(
+                 PathMock.getSourceDirectoryPath
+                         :should_be_called()
+                         :and_will_return("/lib/luarocks")
+               )
                :and_also(
                  templateMockB.getTemplateValues
                               :should_be_called()
@@ -405,8 +325,8 @@ function TestStringRenderer:testCanReplaceWhitespaceTags()
                )
                :and_then(
                  self:expectLuaRestyTemplateEngineRendering(
-                   "./TextTemplates/WhitespaceUsageB.template",
-                   {},
+                   "/lib/luarocks/AC-LuaServer/Templates/WhitespaceUsageB.template",
+                   { getAbsoluteTemplatePath = StringRenderer.getAbsoluteTemplatePath },
                    "Multiple whitespaces in a row:\n<whitespace:5>\nCool!"
                  )
                )

@@ -7,6 +7,7 @@
 
 local LuaRestyTemplateEngine = require "resty.template"
 local Object = require "classic"
+local Path = require "AC-LuaServer.Core.Path"
 
 ---
 -- Renders template files as strings using the lua resty template engine.
@@ -29,32 +30,26 @@ local StringRenderer = Object:extend()
 --
 StringRenderer.defaultTemplateValues = nil
 
----
--- The base path of the directory in which all templates are stored
--- This will be prepended to every template path
---
--- @tfield string basePath
---
-StringRenderer.basePath = nil
-
----
--- The suffix of template files
--- This will be appended to every template path
---
--- @tfield string suffix
---
-StringRenderer.suffix = nil
-
 
 ---
 -- StringRenderer constructor.
 --
 function StringRenderer:new()
   self.defaultTemplateValues = {}
-  self.basePath = "."
-  self.suffix = ".template"
 end
 
+
+---
+-- Returns the absolute template path to a template file from a path that is relative to the
+-- "src/AC-LuaServer/Templates" directory.
+--
+-- @tparam string _relativeTemplatePath The relative template path
+--
+-- @treturn string The absolute path to the template
+--
+function StringRenderer.getAbsoluteTemplatePath(_relativeTemplatePath)
+  return Path.getSourceDirectoryPath() .. "/AC-LuaServer/Templates/" .. _relativeTemplatePath .. ".template"
+end
 
 -- Public Methods
 
@@ -66,19 +61,9 @@ end
 function StringRenderer:configure(_configuration)
 
   if (type(_configuration) == "table") then
-
     if (type(_configuration["defaultTemplateValues"]) == "table") then
       self.defaultTemplateValues = _configuration["defaultTemplateValues"]
     end
-
-    if (type(_configuration["basePath"]) == "string") then
-      self.basePath = _configuration["basePath"]
-    end
-
-    if (type(_configuration["suffix"]) == "string") then
-      self.suffix = _configuration["suffix"]
-    end
-
   end
 
 end
@@ -108,7 +93,7 @@ end
 function StringRenderer:renderTemplate(_template)
 
   -- Prepare the template values
-  local templateValues = {}
+  local templateValues = { getAbsoluteTemplatePath = self.getAbsoluteTemplatePath }
 
   -- Apply the default values
   for templateValueName, templateValue in pairs(self.defaultTemplateValues) do
@@ -122,8 +107,8 @@ function StringRenderer:renderTemplate(_template)
 
 
   -- Prepare the template
-  local templatePath = self.basePath .. "/" .. _template:getTemplatePath() .. self.suffix
-  local compiledTemplate = LuaRestyTemplateEngine.compile(templatePath)
+  local absoluteTemplatePath = self.getAbsoluteTemplatePath(_template:getTemplatePath())
+  local compiledTemplate = LuaRestyTemplateEngine.compile(absoluteTemplatePath)
 
   -- Render the template
   return compiledTemplate(templateValues)
