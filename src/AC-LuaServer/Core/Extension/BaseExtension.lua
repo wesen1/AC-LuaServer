@@ -21,7 +21,7 @@ BaseExtension:implement(ExtensionTarget)
 
 ---
 -- The name of the target that is extended by this Extension
--- The default target is the Server, but the target can also be another Extension
+-- Available targets are the Server or other Extension's
 --
 -- @tfield string targetName
 --
@@ -51,11 +51,7 @@ function BaseExtension:new(_name, _targetName)
   self.extensions = {}
   self.isEnabled = false
 
-  if (type(_targetName) == "string") then
-    self.targetName = _targetName
-  else
-    self.targetName = "Server"
-  end
+  self.targetName = _targetName
 
 end
 

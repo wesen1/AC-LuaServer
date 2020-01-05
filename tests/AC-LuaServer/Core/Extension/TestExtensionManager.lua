@@ -64,7 +64,7 @@ function TestExtensionManager:testCanAddExtensions()
 
   extensionMockA.getTargetName
                 :should_be_called()
-                :and_will_return("server")
+                :and_will_return("Server")
                 :and_then(
                   self.serverMock.addExtension
                                  :should_be_called_with(extensionMockA)

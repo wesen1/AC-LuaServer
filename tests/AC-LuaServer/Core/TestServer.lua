@@ -153,35 +153,6 @@ function TestServer:testCanConfigureOutput()
 end
 
 ---
--- Checks that extensions can be added to a Server as expected.
---
-function TestServer:testCanAddExtensions()
-
-  local BaseExtension = require "AC-LuaServer.Core.Extension.BaseExtension"
-  local extensionMockA = self.mach.mock_object(BaseExtension, "BaseExtensionMock")
-  local extensionMockB = self.mach.mock_object(BaseExtension, "BaseExtensionMock")
-
-  local server = self:createTestServerInstance()
-
-  self.extensionManagerMock.addExtension
-                           :should_be_called_with(extensionMockA)
-                           :when(
-                             function()
-                               server:addExtension(extensionMockA)
-                             end
-                           )
-
-  self.extensionManagerMock.addExtension
-                           :should_be_called_with(extensionMockB)
-                           :when(
-                             function()
-                               server:addExtension(extensionMockB)
-                             end
-                           )
-
-end
-
----
 -- Checks that "playerSayText" server events are handled as expected.
 --
 function TestServer:testCanHandlePlayerSayTextEvent()

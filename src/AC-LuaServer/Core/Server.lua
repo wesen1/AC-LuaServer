@@ -222,16 +222,7 @@ function Server:initialize()
   self.playerList:initialize()
   self.voteListener:initialize()
   self:registerAllServerEventListeners()
-end
 
-
----
--- Adds an extension to this Server or to one of its extensions.
---
--- @tparam BaseExtension _extension The extension to add
---
-function Server:addExtension(_extension)
-  self.extensionManager:addExtension(_extension)
 end
 
 

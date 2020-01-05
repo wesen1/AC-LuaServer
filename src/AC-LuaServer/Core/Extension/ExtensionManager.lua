@@ -75,7 +75,7 @@ end
 --
 function ExtensionManager:getExtensionTargetByName(_targetName)
 
-  if (_targetName == "server") then
+  if (_targetName == "Server") then
     return self.parentServer
   else
 
