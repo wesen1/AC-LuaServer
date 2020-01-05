@@ -17,11 +17,11 @@ local ContentNode = BaseContentNode:extend()
 
 
 ---
--- ContentNode constructor.
+-- The name of this node type
 --
-function ContentNode:new()
-  self.super.new(self, "content")
-end
+-- @tfield string name
+--
+ContentNode.name = "content"
 
 
 -- Public Methods

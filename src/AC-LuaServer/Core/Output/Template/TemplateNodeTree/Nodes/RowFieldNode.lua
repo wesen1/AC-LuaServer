@@ -16,11 +16,25 @@ local RowFieldNode = BaseContentNode:extend()
 
 
 ---
--- RowFieldNode constructor.
+-- The name of this node type
 --
-function RowFieldNode:new()
-  self.super.new(self, "row-field", { "row-field" }, { "row", "custom-field", "end-custom-field", "row-field" })
-end
+-- @tfield string name
+--
+RowFieldNode.name = "row-field"
+
+---
+-- The list of tag names that open a node of this type when they occur during the tree parsing
+--
+-- @tfield string[] openedByTagNames
+--
+RowFieldNode.openedByTagNames = { "row-field" }
+
+---
+-- The list of tag names that close a node of this type when they occur during the tree parsing
+--
+-- @tfield string[] closedByTagNames
+--
+RowFieldNode.closedByTagNames = { "row", "custom-field", "end-custom-field", "row-field" }
 
 
 return RowFieldNode
