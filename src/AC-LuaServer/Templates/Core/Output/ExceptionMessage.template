@@ -1,0 +1,12 @@
+{#
+ # Exception message that will be printed to players.
+ #
+ # @tparam string[] colors The list of colors
+ # @tparam string exceptionMessage The exception message
+ #}
+
+########################[CONFIG]########################;
+newLineIndent = "          ";
+#######################[ENDCONFIG]######################;
+
+{* colors.error *}[ERROR] {* exceptionMessage *}

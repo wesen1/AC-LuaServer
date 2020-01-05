@@ -100,7 +100,7 @@ end
 --
 function Output:printException(_exception, _player)
   self:printTextTemplate(
-    "TextTemplate/ServerMessageError", { errorMessage = _exception:getMessage() }, _player
+    "Core/Output/ExceptionMessage", { errorMessage = _exception:getMessage() }, _player
   )
 end
 
