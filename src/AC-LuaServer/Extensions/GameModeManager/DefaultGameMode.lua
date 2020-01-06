@@ -5,7 +5,7 @@
 -- @license MIT
 --
 
-local BaseGameMode = require "AC-LuaServer.Core.GameModeManager.BaseGameMode"
+local BaseGameMode = require "AC-LuaServer.Extensions.GameModeManager.BaseGameMode"
 
 ---
 -- The default game mode.

@@ -6,7 +6,7 @@
 --
 
 local BaseExtension = require "AC-LuaServer.Core.Extension.BaseExtension"
-local DefaultGameMode = require "AC-LuaServer.Core.GameModeManager.DefaultGameMode"
+local DefaultGameMode = require "AC-LuaServer.Extensions.GameModeManager.DefaultGameMode"
 local EventCallback = require "AC-LuaServer.Core.Event.EventCallback"
 
 ---
