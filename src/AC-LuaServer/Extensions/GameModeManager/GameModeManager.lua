@@ -180,7 +180,12 @@ function GameModeManager:addGameMode(_gameMode)
     table.insert(self.gameModes, _gameMode)
   else
     -- The game mode is not the default game mode, insert it as the second last item of the game modes list
-    table.insert(self.gameModes, #self.gameModes, _gameMode)
+    local numberOfGameModes = #self.gameModes
+    if (numberOfGameModes == 0) then
+      table.insert(self.gameModes, _gameMode)
+    else
+      table.insert(self.gameModes, numberOfGameModes, _gameMode)
+    end
   end
 
 end
