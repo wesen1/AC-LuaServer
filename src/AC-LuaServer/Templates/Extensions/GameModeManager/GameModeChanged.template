@@ -1,0 +1,20 @@
+{#
+ # Info message for game mode changes.
+ #
+ # @tparam function getAbsoluteTemplatePath The function to fetch absolute template paths
+ # @tparam string[] colors The list of colors
+ # @tparam string newGameModeName The name of the new game mode
+ #}
+
+{# Extends InfoMessage.template #}
+{% layout = getAbsoluteTemplatePath("Core/General/InfoMessage") %}
+
+{-infoMessage-}
+
+  The
+  <whitespace>
+  {* colors.gameModeName *}{* newGameModeName *}{* colors.info *}
+  <whitespace>
+  game mode was automatically activated.
+
+{-infoMessage-}

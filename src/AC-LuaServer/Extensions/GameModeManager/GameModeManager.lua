@@ -57,28 +57,25 @@ function GameModeManager:new()
   self.gameModes = {}
 
   self.onActiveGameModeDisabledEventCallback = EventCallback({ object = self, methodName = "onActiveGameModeDisabled"})
-
-  self:enableGameMode(self.defaultGameMode)
 end
-
-
 
 
 -- Public Methods
 
 ---
--- Initializes the event listeners.
+-- Adds the DefaultGameMode extension to the server and initializes the event listeners.
 --
 function GameModeManager:initialize()
 
   local Server = require "AC-LuaServer.Core.Server"
+  Server.getInstance():getExtensionManager():addExtension(self.defaultGameMode)
 
   local gameHandler = Server.getInstance():getGameHandler()
-  gameHandler:on("onGameChangeVoteCalled", EventCallback({ object = self, method = "onGameChangeVoteCalled" }))
-  gameHandler:on("onGameWillChange", EventCallback({ object = self, method = "onGameWillChange" }))
+  gameHandler:on("onGameChangeVoteCalled", EventCallback({ object = self, methodName = "onGameChangeVoteCalled" }))
+  gameHandler:on("onGameWillChange", EventCallback({ object = self, methodName = "onGameWillOrDidChange" }))
+  gameHandler:on("onGameChanged", EventCallback({ object = self, methodName = "onGameWillOrDidChange" }))
 
 end
-
 
 ---
 -- Adds a game mode.
@@ -101,23 +98,43 @@ function GameModeManager:onGameChangeVoteCalled(_game)
 
   local potentialNextGameMode = self:getGameModeForGame(_game)
   if (potentialNextGameMode ~= self.activeGameMode) then
-    -- TODO: Print message that game mode will change to x when vote passes
+
+    local Server = require "AC-LuaServer.Core.Server"
+    local output = Server.getInstance():getOutput()
+
+    output:printTextTemplate(
+      "Extensions/GameModeManager/GameModeWillChangeIfVotePasses", {
+        nextGameModeName = potentialNextGameMode:getDisplayName()
+    })
+
+    self:emit("onGameModeMightChange", self.activeGameMode, potentialNextGameMode)
   end
 
 end
 
 ---
 -- Event handler that is called when the current Game ended and the next Game is about to be started.
+-- It will also be called when the Game changed to handle the Game's that are started when a Player
+-- connects.
 --
--- @tparam Game _game The next game
+-- @tparam Game _game The next game or the new current game
 --
-function GameModeManager:onGameWillChange(_game)
+function GameModeManager:onGameWillOrDidChange(_game)
 
   local nextGameMode = self:getGameModeForGame(_game)
   if (nextGameMode ~= self.activeGameMode) then
-    self:enableGameMode(nextGameMode)
-    -- TODO: Print game mode changed
 
+    self:enableGameMode(nextGameMode)
+
+    local Server = require "AC-LuaServer.Core.Server"
+    local output = Server.getInstance():getOutput()
+
+    output:printTextTemplate(
+      "Extensions/GameModeManager/GameModeChanged", {
+        newGameModeName = self.activeGameMode:getDisplayName()
+    })
+
+    self:emit("onGameModeChanged", self.activeGameMode, nextGameMode)
   end
 
 end
@@ -128,11 +145,13 @@ end
 function GameModeManager:onActiveGameModeDisabled()
 
   local Server = require "AC-LuaServer.Core.Server"
-
   local gameHandler = Server.getInstance():getGameHandler()
-  local gameMode = self:getGameModeForGame(gameHandler:getCurrentGame())
 
+  local previousGameMode = self.activeGameMode
+  local gameMode = self:getGameModeForGame(gameHandler:getCurrentGame())
   self:enableGameMode(gameMode)
+
+  self:emit("onGameModeChanged", previousGameMode, self.activeGameMode)
 
 end
 
@@ -146,12 +165,14 @@ end
 --
 function GameModeManager:enableGameMode(_gameMode)
 
-  self.activeGameMode:off("disabled", self.onActiveGameModeDisabledEventCallback)
-  self.activeGameMode:disable()
+  if (self.activeGameMode) then
+    self.activeGameMode:off("disabled", self.onActiveGameModeDisabledEventCallback)
+    self.activeGameMode:disable()
+  end
 
   self.activeGameMode = _gameMode
   self.activeGameMode:on("disabled", self.onActiveGameModeDisabledEventCallback)
-  self.activeGameMode:enable()
+  self.activeGameMode:enable(self)
 
 end
 

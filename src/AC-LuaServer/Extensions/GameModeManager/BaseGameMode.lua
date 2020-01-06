@@ -30,7 +30,7 @@ BaseGameMode.displayName = nil
 -- @tparam string _displayName The name of this GameMode that will be displayed to players
 --
 function BaseGameMode:new(_name, _displayName)
-  self.super.new(self, _name, "GameModeManager")
+  BaseExtension.new(self, _name, "GameModeManager")
   self.displayName = _displayName
 end
 

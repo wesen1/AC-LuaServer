@@ -133,6 +133,15 @@ function Server:getEventManager()
 end
 
 ---
+-- Returns the extension manager.
+--
+-- @treturn ExtensionManager The extension manager
+--
+function Server:getExtensionManager()
+  return self.extensionManager
+end
+
+---
 -- Returns the game handler.
 --
 -- @treturn GameHandler The game handler

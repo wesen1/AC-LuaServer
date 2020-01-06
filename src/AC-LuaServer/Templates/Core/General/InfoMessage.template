@@ -1,0 +1,8 @@
+{#
+ # Base template for info messages.
+ #
+ # @tparam string[] colors The list of colors
+ #}
+
+{* colors.info *}[INFO]<whitespace>
+{* blocks.infoMessage *}
