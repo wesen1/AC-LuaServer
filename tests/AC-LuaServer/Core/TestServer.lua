@@ -282,6 +282,7 @@ function TestServer:createTestServerInstance()
                       )
 
   self:assertEquals(serverEventManagerMock, server:getEventManager())
+  self:assertEquals(self.extensionManagerMock, server:getExtensionManager())
   self:assertEquals(self.gameHandlerMock, server:getGameHandler())
   self:assertEquals(self.mapRotationMock, server:getMapRotation())
   self:assertEquals(self.outputMock, server:getOutput())

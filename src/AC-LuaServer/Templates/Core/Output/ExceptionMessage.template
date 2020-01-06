@@ -6,6 +6,7 @@
  #}
 
 ########################[CONFIG]########################;
+{# With the default font config "[ERROR] " is 312 pixels wide and 10x " " is 310 pixels wide #}
 newLineIndent = "          ";
 #######################[ENDCONFIG]######################;
 

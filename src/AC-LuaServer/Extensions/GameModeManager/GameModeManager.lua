@@ -6,6 +6,7 @@
 --
 
 local BaseExtension = require "AC-LuaServer.Core.Extension.BaseExtension"
+local BaseGameMode = require "AC-LuaServer.Extensions.GameModeManager.BaseGameMode"
 local DefaultGameMode = require "AC-LuaServer.Extensions.GameModeManager.DefaultGameMode"
 local EventCallback = require "AC-LuaServer.Core.Event.EventCallback"
 
@@ -19,18 +20,19 @@ local GameModeManager = BaseExtension:extend()
 
 
 ---
+-- Stores whether this ExtensionTarget automatically enables child extensions when this ExtensionTarget
+-- is enabled
+--
+-- @tfield bool autoEnableChildExtensions
+--
+GameModeManager.autoEnableChildExtensions = false
+
+---
 -- The list of game modes that are provided by the server
 --
 -- @tfield BaseGameMode[] modes
 --
 GameModeManager.gameModes = nil
-
----
--- The default game mode that will be enabled when no other game mode can be enabled for a Game
---
--- @tfield BaseGameMode defaultGameMode
---
-GameModeManager.defaultGameMode = nil
 
 ---
 -- The currently active game mode
@@ -53,9 +55,7 @@ GameModeManager.onActiveGameModeDisabledEventCallback = nil
 function GameModeManager:new()
   self.super.new(self, "GameModeManager", "Server")
 
-  self.defaultGameMode = DefaultGameMode()
   self.gameModes = {}
-
   self.onActiveGameModeDisabledEventCallback = EventCallback({ object = self, methodName = "onActiveGameModeDisabled"})
 end
 
@@ -67,23 +67,39 @@ end
 --
 function GameModeManager:initialize()
 
-  local Server = require "AC-LuaServer.Core.Server"
-  Server.getInstance():getExtensionManager():addExtension(self.defaultGameMode)
+  self.target:getExtensionManager():addExtension(DefaultGameMode())
 
-  local gameHandler = Server.getInstance():getGameHandler()
+  local gameHandler = self.target:getGameHandler()
   gameHandler:on("onGameChangeVoteCalled", EventCallback({ object = self, methodName = "onGameChangeVoteCalled" }))
   gameHandler:on("onGameWillChange", EventCallback({ object = self, methodName = "onGameWillOrDidChange" }))
-  gameHandler:on("onGameChanged", EventCallback({ object = self, methodName = "onGameWillOrDidChange" }))
+  gameHandler:on("onGameChangedPlayerConnected", EventCallback({ object = self, methodName = "onGameWillOrDidChange" }))
+
+
+  -- Enable non GameMode extensions
+  for _, extension in ipairs(self.extensions) do
+    if (not extension:is(BaseGameMode)) then
+      extension:enable(self)
+    end
+  end
 
 end
 
 ---
--- Adds a game mode.
+-- Adds a extension to this GameModeManager.
 --
--- @tparam BaseGameMode _gameMode The game mode to add
+-- @tparam BaseExtension _extension The extension to add
 --
-function GameModeManager:addGameMode(_gameMode)
-  table.insert(self.gameModes, _gameMode)
+function GameModeManager:addExtension(_extension)
+  self.super.addExtension(self, _extension)
+
+  if (_extension:is(BaseGameMode)) then
+    self:addGameMode(_extension)
+  else
+    if (self.isEnabled) then
+      _extension:enable(self)
+    end
+  end
+
 end
 
 
@@ -99,10 +115,7 @@ function GameModeManager:onGameChangeVoteCalled(_game)
   local potentialNextGameMode = self:getGameModeForGame(_game)
   if (potentialNextGameMode ~= self.activeGameMode) then
 
-    local Server = require "AC-LuaServer.Core.Server"
-    local output = Server.getInstance():getOutput()
-
-    output:printTextTemplate(
+    self.target:getOutput():printTextTemplate(
       "Extensions/GameModeManager/GameModeWillChangeIfVotePasses", {
         nextGameModeName = potentialNextGameMode:getDisplayName()
     })
@@ -124,17 +137,15 @@ function GameModeManager:onGameWillOrDidChange(_game)
   local nextGameMode = self:getGameModeForGame(_game)
   if (nextGameMode ~= self.activeGameMode) then
 
+    local previousGameMode = self.activeGameMode
     self:enableGameMode(nextGameMode)
 
-    local Server = require "AC-LuaServer.Core.Server"
-    local output = Server.getInstance():getOutput()
-
-    output:printTextTemplate(
+    self.target:getOutput():printTextTemplate(
       "Extensions/GameModeManager/GameModeChanged", {
         newGameModeName = self.activeGameMode:getDisplayName()
     })
 
-    self:emit("onGameModeChanged", self.activeGameMode, nextGameMode)
+    self:emit("onGameModeChanged", previousGameMode, self.activeGameMode)
   end
 
 end
@@ -144,8 +155,7 @@ end
 --
 function GameModeManager:onActiveGameModeDisabled()
 
-  local Server = require "AC-LuaServer.Core.Server"
-  local gameHandler = Server.getInstance():getGameHandler()
+  local gameHandler = self.target:getGameHandler()
 
   local previousGameMode = self.activeGameMode
   local gameMode = self:getGameModeForGame(gameHandler:getCurrentGame())
@@ -157,6 +167,23 @@ end
 
 
 -- Private Methods
+
+---
+-- Adds a game mode.
+--
+-- @tparam BaseGameMode _gameMode The game mode to add
+--
+function GameModeManager:addGameMode(_gameMode)
+
+  if (_gameMode:is(DefaultGameMode)) then
+    -- The game mode is the default game mode, append it to the end of the game modes list
+    table.insert(self.gameModes, _gameMode)
+  else
+    -- The game mode is not the default game mode, insert it as the second last item of the game modes list
+    table.insert(self.gameModes, #self.gameModes, _gameMode)
+  end
+
+end
 
 ---
 -- Enables a specified game mode.
@@ -180,6 +207,8 @@ end
 -- Returns the first game mode that can be enabled for a specified game.
 -- If none of the game modes can be enabled the default game mode will be returned.
 --
+-- @treturn GameMode The game mode that can be enabled for the specified game
+--
 function GameModeManager:getGameModeForGame(_game)
 
   for _, gameMode in ipairs(self.gameModes) do
@@ -187,8 +216,6 @@ function GameModeManager:getGameModeForGame(_game)
       return gameMode
     end
   end
-
-  return self.defaultGameMode
 
 end
 

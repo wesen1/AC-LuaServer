@@ -153,7 +153,7 @@ end
 function GameHandler:onMapChange(_mapName, _gameModeId)
   self.votedNextGame = nil
   self.currentGame = ActiveGame(_mapName, _gameModeId)
-  self:emit("onGameChanged", self.currentGame)
+  self:emit("onGameChangedMapChange", self.currentGame)
 end
 
 ---
@@ -170,7 +170,7 @@ function GameHandler:onPlayerConnected(_player, _numberOfPlayers)
       LuaServerApi.getgamemode()
     )
 
-    self:emit("onGameChanged", self.currentGame)
+    self:emit("onGameChangedPlayerConnected", self.currentGame)
   end
 
 end

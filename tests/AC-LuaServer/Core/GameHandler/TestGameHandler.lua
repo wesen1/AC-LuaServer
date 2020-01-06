@@ -65,11 +65,18 @@ TestGameHandler.onGameChangeVoteFailedListener = nil
 TestGameHandler.onGameWillChangeListener = nil
 
 ---
--- The event listener for the "onGameChanged" event of the GameHandler test instance
+-- The event listener for the "onGameChangedMapChange" event of the GameHandler test instance
 --
--- @tfield table onGameChangedListener
+-- @tfield table onGameChangedMapChangeListener
 --
-TestGameHandler.onGameChangedListener = nil
+TestGameHandler.onGameChangedMapChangeListener = nil
+
+---
+-- The event listener for the "onGameChangedPlayerConnected" event of the GameHandler test instance
+--
+-- @tfield table onGameChangedPlayerConnectedListener
+--
+TestGameHandler.onGameChangedPlayerConnectedListener = nil
 
 
 ---
@@ -83,7 +90,8 @@ function TestGameHandler:setUp()
   self.onGameChangeVotePassedListener = self.mach.mock_function("onGameChangeVotePassed")
   self.onGameChangeVoteFailedListener = self.mach.mock_function("onGameChangeVoteFailed")
   self.onGameWillChangeListener = self.mach.mock_function("onGameWillChange")
-  self.onGameChangedListener = self.mach.mock_function("onGameChanged")
+  self.onGameChangedMapChangeListener = self.mach.mock_function("onGameChangedMapChange")
+  self.onGameChangedPlayerConnectedListener = self.mach.mock_function("onGameChangedPlayerConnected")
 end
 
 ---
@@ -97,7 +105,8 @@ function TestGameHandler:tearDown()
   self.onGameChangeVotePassedListener = nil
   self.onGameChangeVoteFailedListener = nil
   self.onGameWillChangeListener = nil
-  self.onGameChangedListener = nil
+  self.onGameChangedMapChangeListener = nil
+  self.onGameChangedPlayerConnectedListener = nil
 end
 
 
@@ -209,7 +218,7 @@ function TestGameHandler:testCanHandleMapChange()
                                  :should_be_called_with("ac_casa", 5)
                                  :and_will_return(activeGameMock)
                                  :and_then(
-                                   self.onGameChangedListener
+                                   self.onGameChangedMapChangeListener
                                        :should_be_called_with(activeGameMock)
                                  )
                                  :when(
@@ -364,7 +373,7 @@ function TestGameHandler:testSetNextVotedGameIsResetOnMapChange()
                                  :should_be_called_with("ac_douze", 10)
                                  :and_will_return(activeGameMock)
                                  :and_then(
-                                   self.onGameChangedListener
+                                   self.onGameChangedMapChangeListener
                                        :should_be_called_with(activeGameMock)
                                  )
                                  :when(
@@ -498,7 +507,7 @@ function TestGameHandler:testCanHandlePlayerConnection()
                                                    :and_will_return(activeGameMock)
                   )
                   :and_then(
-                    self.onGameChangedListener
+                    self.onGameChangedPlayerConnectedListener
                         :should_be_called_with(activeGameMock)
                   )
                   :when(
@@ -679,7 +688,11 @@ function TestGameHandler:createTestGameHandlerInstance()
   gameHandler:on("onGameChangeVotePassed", EventCallback(function(...) self.onGameChangeVotePassedListener(...) end))
   gameHandler:on("onGameChangeVoteFailed", EventCallback(function(...) self.onGameChangeVoteFailedListener(...) end))
   gameHandler:on("onGameWillChange", EventCallback(function(...) self.onGameWillChangeListener(...) end))
-  gameHandler:on("onGameChanged", EventCallback(function(...) self.onGameChangedListener(...) end))
+  gameHandler:on("onGameChangedMapChange", EventCallback(function(...) self.onGameChangedMapChangeListener(...) end))
+  gameHandler:on(
+    "onGameChangedPlayerConnected",
+    EventCallback(function(...) self.onGameChangedPlayerConnectedListener(...) end)
+  )
 
   return gameHandler
 

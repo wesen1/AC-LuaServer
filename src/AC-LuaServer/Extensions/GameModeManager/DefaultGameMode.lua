@@ -25,4 +25,16 @@ function DefaultGameMode:new()
 end
 
 
+---
+-- Returns whether this GameMode can be enabled for a specified Game.
+--
+-- @tparam Game _game The game to check
+--
+-- @treturn bool True if this GameMode can be enabled for the specified Game, false otherwise
+--
+function DefaultGameMode:canBeEnabledForGame(_game)
+  return true
+end
+
+
 return DefaultGameMode

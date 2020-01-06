@@ -39,7 +39,7 @@ BaseExtension.target = nil
 -- BaseExtension constructor.
 --
 -- @tparam string _name The name of this Extension
--- @tparam string _targetName The name of the target that is extended by this Extension (Defaults to "Server")
+-- @tparam string _targetName The name of the target that is extended by this Extension
 --
 function BaseExtension:new(_name, _targetName)
 

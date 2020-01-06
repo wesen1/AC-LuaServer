@@ -61,12 +61,4 @@ function BaseGameMode:canBeEnabledForGame(_game)
 end
 
 
----
--- Adds this GameMode to the GameModeManager's list of game modes.
---
-function BaseGameMode:initialize()
-  self.target:addGameMode(self)
-end
-
-
 return BaseGameMode
