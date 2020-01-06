@@ -30,6 +30,7 @@ TestGameHandler.testClassPath = "AC-LuaServer.Core.GameHandler.GameHandler"
 TestGameHandler.dependencyPaths = {
   { id = "ActiveGame", path = "AC-LuaServer.Core.GameHandler.Game.ActiveGame" },
   { id = "EventCallback", path = "AC-LuaServer.Core.Event.EventCallback" },
+  { id = "LuaServerApi", path = "AC-LuaServer.Core.LuaServerApi", ["type"] = "table" },
   { id = "MapRotationGame", path = "AC-LuaServer.Core.GameHandler.Game.MapRotationGame" },
   { id = "Server", path = "AC-LuaServer.Core.Server" },
   { id = "VotedGame", path = "AC-LuaServer.Core.GameHandler.Game.VotedGame" }
@@ -469,6 +470,52 @@ function TestGameHandler:testCanHandlePassedVote()
 
 end
 
+---
+-- Checks that player connects are handled as expected.
+--
+function TestGameHandler:testCanHandlePlayerConnection()
+
+  local LuaServerApiMock = self.dependencyMocks.LuaServerApi
+  LuaServerApiMock.getmapname = self.mach.mock_function("getmapname")
+  LuaServerApiMock.getgamemode = self.mach.mock_function("getgamemode")
+
+  local gameHandler = self:createTestGameHandlerInstance()
+  local playerMockA = self:getMock("AC-LuaServer.Core.PlayerList.Player", "PlayerMockA")
+  local activeGameMock = self:getMock("AC-LuaServer.Core.GameHandler.Game.ActiveGame", "ActiveGameMock")
+
+  -- Server had 0 connected players before this player connected, so this connection triggers a Game start
+  LuaServerApiMock.getmapname
+                  :should_be_called()
+                  :and_will_return("ac_desert3")
+                  :and_also(
+                    LuaServerApiMock.getgamemode
+                                    :should_be_called()
+                                    :and_will_return(4)
+                  )
+                  :and_then(
+                    self.dependencyMocks.ActiveGame.__call
+                                                   :should_be_called_with("ac_desert3", 4)
+                                                   :and_will_return(activeGameMock)
+                  )
+                  :and_then(
+                    self.onGameChangedListener
+                        :should_be_called_with(activeGameMock)
+                  )
+                  :when(
+                    function()
+                      gameHandler:onPlayerConnected(playerMockA, 1)
+                    end
+                  )
+
+  -- Should do nothing when the number of connected players is not 1
+  local playerMockB = self:getMock("AC-LuaServer.Core.PlayerList.Player", "PlayerMockB")
+  gameHandler:onPlayerConnected(playerMockB, 2)
+
+  local playerMockC = self:getMock("AC-LuaServer.Core.PlayerList.Player", "PlayerMockC")
+  gameHandler:onPlayerConnected(playerMockC, 10)
+
+end
+
 
 ---
 -- Creates and returns a GameHandler instance to which the event listeners are attached.
@@ -483,6 +530,7 @@ function TestGameHandler:createTestGameHandlerInstance()
   local EventCallbackMock = self.dependencyMocks.EventCallback
   local ServerMock = self.dependencyMocks.Server
 
+  local playerListMock = self:getMock("AC-LuaServer.Core.PlayerList.PlayerList", "PlayerListMock")
   local serverMock = self:getMock("AC-LuaServer.Core.Server", "ServerMock")
   local serverEventManagerMock = self:getMock(
     "AC-LuaServer.Core.ServerEvent.ServerEventManager", "ServerEventManagerMock"
@@ -491,11 +539,12 @@ function TestGameHandler:createTestGameHandlerInstance()
   local voteListenerMock = self:getMock("AC-LuaServer.Core.VoteListener.VoteListener", "VoteListenerMock")
 
   local eventCallbackPath = "AC-LuaServer.Core.Event.EventCallback"
-  local eventCallbackMockA = self:getMock(eventCallbackPath, "EventCallbackMock")
-  local eventCallbackMockB = self:getMock(eventCallbackPath, "EventCallbackMock")
-  local eventCallbackMockC = self:getMock(eventCallbackPath, "EventCallbackMock")
-  local eventCallbackMockD = self:getMock(eventCallbackPath, "EventCallbackMock")
-  local eventCallbackMockE = self:getMock(eventCallbackPath, "EventCallbackMock")
+  local eventCallbackMockA = self:getMock(eventCallbackPath, "EventCallbackMockA")
+  local eventCallbackMockB = self:getMock(eventCallbackPath, "EventCallbackMockB")
+  local eventCallbackMockC = self:getMock(eventCallbackPath, "EventCallbackMockC")
+  local eventCallbackMockD = self:getMock(eventCallbackPath, "EventCallbackMockD")
+  local eventCallbackMockE = self:getMock(eventCallbackPath, "EventCallbackMockE")
+  local eventCallbackMockF = self:getMock(eventCallbackPath, "EventCallbackMockF")
 
   -- Initialize event callbacks and register the event handlers
   EventCallbackMock.__call
@@ -540,65 +589,82 @@ function TestGameHandler:createTestGameHandlerInstance()
                      ServerMock.getInstance
                                :should_be_called()
                                :and_will_return(serverMock)
-                               :and_then(
-                                 serverMock.getVoteListener
-                                           :should_be_called()
-                                           :and_will_return(voteListenerMock)
-                               )
-                               :and_then(
-                                 EventCallbackMock.__call
-                                                  :should_be_called_with(
-                                                    self.mach.match(
-                                                      { object = GameHandler, methodName = "onPlayerCalledVote" },
-                                                      TestGameHandler.matchEventCallback
-                                                    ),
-                                                    nil
-                                                  )
-                                                  :and_will_return(eventCallbackMockC)
-                                                  :and_then(
-                                                    voteListenerMock.on
-                                                                    :should_be_called_with(
-                                                                      "onPlayerCalledVote",
-                                                                      eventCallbackMockC
-                                                                    )
-                                                  )
-                               )
-                               :and_also(
-                                 EventCallbackMock.__call
-                                                  :should_be_called_with(
-                                                    self.mach.match(
-                                                      { object = GameHandler, methodName = "onVotePassed" },
-                                                      TestGameHandler.matchEventCallback
-                                                    ),
-                                                    nil
-                                                  )
-                                                  :and_will_return(eventCallbackMockD)
-                                                  :and_then(
-                                                    voteListenerMock.on
-                                                                    :should_be_called_with(
-                                                                      "onVotePassed",
-                                                                      eventCallbackMockD
-                                                                    )
-                                                  )
-                               )
-                               :and_also(
-                                 EventCallbackMock.__call
-                                                  :should_be_called_with(
-                                                    self.mach.match(
-                                                      { object = GameHandler, methodName = "onVoteFailed" },
-                                                      TestGameHandler.matchEventCallback
-                                                    ),
-                                                    nil
-                                                  )
-                                                  :and_will_return(eventCallbackMockE)
-                                                  :and_then(
-                                                    voteListenerMock.on
-                                                                    :should_be_called_with(
-                                                                      "onVoteFailed",
-                                                                      eventCallbackMockE
-                                                                    )
-                                                  )
-                               )
+                   )
+
+                   -- Should fetch the vote listener and player list
+                   :and_then(
+                     serverMock.getVoteListener
+                               :should_be_called()
+                               :and_will_return(voteListenerMock)
+                   )
+                   :and_also(
+                     serverMock.getPlayerList
+                               :should_be_called()
+                               :and_will_return(playerListMock)
+                   )
+
+                   -- Should set up the event callbacks
+                   :and_also(
+                     EventCallbackMock.__call
+                                      :should_be_called_with(
+                                        self.mach.match(
+                                          { object = GameHandler, methodName = "onPlayerCalledVote" },
+                                          TestGameHandler.matchEventCallback
+                                        ),
+                                        nil
+                                      )
+                                      :and_will_return(eventCallbackMockC)
+                   )
+                   :and_also(
+                     EventCallbackMock.__call
+                                      :should_be_called_with(
+                                        self.mach.match(
+                                          { object = GameHandler, methodName = "onVotePassed" },
+                                          TestGameHandler.matchEventCallback
+                                        ),
+                                        nil
+                                      )
+                                      :and_will_return(eventCallbackMockD)
+                   )
+                   :and_also(
+                     EventCallbackMock.__call
+                                      :should_be_called_with(
+                                        self.mach.match(
+                                          { object = GameHandler, methodName = "onVoteFailed" },
+                                          TestGameHandler.matchEventCallback
+                                        ),
+                                        nil
+                                      )
+                                      :and_will_return(eventCallbackMockE)
+                   )
+                   :and_also(
+                     EventCallbackMock.__call
+                                      :should_be_called_with(
+                                        self.mach.match(
+                                          { object = GameHandler, methodName = "onPlayerConnected" },
+                                          TestGameHandler.matchEventCallback
+                                        ),
+                                        nil
+                                      )
+                                      :and_will_return(eventCallbackMockF)
+                   )
+
+                   -- Should set up the event listeners for the vote listener and the player list
+                   :and_also(
+                     voteListenerMock.on
+                                     :should_be_called_with("onPlayerCalledVote", eventCallbackMockC)
+                   )
+                   :and_also(
+                     voteListenerMock.on
+                                     :should_be_called_with("onVotePassed", eventCallbackMockD)
+                   )
+                   :and_also(
+                     voteListenerMock.on
+                                     :should_be_called_with("onVoteFailed",eventCallbackMockE)
+                   )
+                   :and_also(
+                     playerListMock.on
+                                   :should_be_called_with("onPlayerAdded", eventCallbackMockF)
                    )
                    :when(
                      function()

@@ -206,7 +206,7 @@ end
 function Server:configure(_configuration)
 
   if (type(_configuration) == "table") then
-    if (type(_configuration["Output"] == "table")) then
+    if (type(_configuration["Output"]) == "table") then
       self.output:configure(_configuration["Output"])
     end
   end

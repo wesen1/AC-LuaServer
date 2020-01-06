@@ -76,7 +76,8 @@ end
 function PlayerList:onPlayerConnect(_cn)
   local connectedPlayer = Player.createFromConnectedPlayer(_cn)
   self.players[_cn] = connectedPlayer
-  self:emit("onPlayerAdded", connectedPlayer)
+
+  self:emit("onPlayerAdded", connectedPlayer, self:calculateNumberOfPlayers())
 end
 
 ---
@@ -94,7 +95,8 @@ function PlayerList:onPlayerDisconnectAfter(_cn)
   -- after the "onPlayerDisconnect" event (such as a flag action when he held the flag before
   -- disconnecting)
   self.players[_cn] = nil
-  self:emit("onPlayerRemoved", disconnectedPlayer)
+
+  self:emit("onPlayerRemoved", disconnectedPlayer, self:calculateNumberOfPlayers())
 
 end
 
@@ -147,6 +149,25 @@ function PlayerList:onPlayerRoleChange(_cn, _newRole)
   elseif (_newRole == LuaServerApi.CR_DEFAULT) then
     roleChangePlayer:setHasAdminRole(false)
   end
+
+end
+
+
+-- Private functions
+
+---
+-- Calculates and returns the number of players in this PlayerList.
+--
+-- @treturn int The number of players
+--
+function PlayerList:calculateNumberOfPlayers()
+
+  local numberOfPlayers = 0
+  for _, _ in pairs(self.players) do
+    numberOfPlayers = numberOfPlayers + 1
+  end
+
+  return numberOfPlayers
 
 end
 
