@@ -20,7 +20,6 @@ local DefaultGameMode = BaseGameMode:extend()
 -- DefaultGameMode constructor.
 --
 function DefaultGameMode:new()
-  -- TODO: Add display name to strings table
   self.super.new(self, "DefaultGameMode", "Default")
 end
 

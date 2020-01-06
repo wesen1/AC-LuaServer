@@ -10,7 +10,7 @@ local TestCase = require "TestFrameWork.TestCase"
 ---
 -- Checks that the Path works as expected.
 --
--- @type TestServer
+-- @type TestPath
 --
 local TestPath = TestCase:extend()
 

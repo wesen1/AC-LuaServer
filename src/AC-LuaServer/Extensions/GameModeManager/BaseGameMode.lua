@@ -57,7 +57,6 @@ end
 -- @treturn bool True if this GameMode can be enabled for the specified Game, false otherwise
 --
 function BaseGameMode:canBeEnabledForGame(_game)
-  return false
 end
 
 
