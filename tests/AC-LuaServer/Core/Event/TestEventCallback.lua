@@ -83,6 +83,26 @@ function TestEventCallback:testCanBeCreatedFromObjectMethod()
 end
 
 ---
+-- Checks that a EventCallback can be created from a object's method that has no parameters.
+--
+function TestEventCallback:testCanBeCreatedFromObjectMethodWithNoParameters()
+
+  local EventCallback = self.testClass
+
+  local objectMock = {
+    ["myProperty"] = "perfect",
+    ["methodA"] = function(_self)
+      return _self.myProperty
+    end
+  }
+
+  local callback = EventCallback({["object"] = objectMock, ["methodName"] = "methodA"})
+
+  self:assertEquals("perfect", callback:call())
+
+end
+
+---
 -- Checks that a invalid callback function config is handled as expected.
 --
 function TestEventCallback:testCanHandleInvalidCallbackFunctionConfig()
