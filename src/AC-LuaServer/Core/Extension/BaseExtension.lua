@@ -21,11 +21,11 @@ BaseExtension:implement(ExtensionTarget)
 
 ---
 -- The name of the target that is extended by this Extension
--- The default target is the Server, but the target can also be another Extension
+-- Available targets are the Server or other Extension's
 --
 -- @tfield string targetName
 --
-BaseExtension.targetName = "server"
+BaseExtension.targetName = nil
 
 ---
 -- The target that is extended by this Extension

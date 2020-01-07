@@ -8,6 +8,7 @@
 local ActiveGame = require "AC-LuaServer.Core.GameHandler.Game.ActiveGame"
 local EventEmitter = require "AC-LuaServer.Core.Event.EventEmitter"
 local EventCallback = require "AC-LuaServer.Core.Event.EventCallback"
+local LuaServerApi = require "AC-LuaServer.Core.LuaServerApi"
 local MapRotationGame = require "AC-LuaServer.Core.GameHandler.Game.MapRotationGame"
 local MapVote = require "AC-LuaServer.Core.VoteListener.Vote.MapVote"
 local VotedGame = require "AC-LuaServer.Core.GameHandler.Game.VotedGame"
@@ -152,7 +153,24 @@ end
 function GameHandler:onMapChange(_mapName, _gameModeId)
   self.votedNextGame = nil
   self.currentGame = ActiveGame(_mapName, _gameModeId)
-  self:emit("onGameChanged", self.currentGame)
+  self:emit("onGameChangedMapChange", self.currentGame)
+end
+
+---
+-- Event handler that is called after a Player was added to the player list.
+--
+function GameHandler:onPlayerConnected()
+
+  if (LuaServerApi.getgamemillis() == 0) then
+
+    self.currentGame = ActiveGame(
+      LuaServerApi.getmapname(),
+      LuaServerApi.getgamemode()
+    )
+
+    self:emit("onGameChangedPlayerConnected", self.currentGame)
+  end
+
 end
 
 
@@ -164,8 +182,12 @@ end
 function GameHandler:initializeEventListeners()
 
   local Server = require "AC-LuaServer.Core.Server"
+  local server = Server.getInstance()
 
-  local voteListener = Server.getInstance():getVoteListener()
+  local playerList = server:getPlayerList()
+  playerList:on("onPlayerAdded", EventCallback({ object = self, methodName = "onPlayerConnected"}))
+
+  local voteListener = server:getVoteListener()
   voteListener:on("onPlayerCalledVote", EventCallback({object = self, methodName = "onPlayerCalledVote"}))
   voteListener:on("onVotePassed", EventCallback({object = self, methodName = "onVotePassed"}))
   voteListener:on("onVoteFailed", EventCallback({object = self, methodName = "onVoteFailed"}))

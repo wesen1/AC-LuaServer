@@ -91,6 +91,22 @@ function EventCallback:call(...)
       table.insert(callbackFunctionParameters, parameter)
     end
 
+    -- Add the additional parameters to the function parameters that were not checked yet
+    local highestAdditionalParameterNumber = 0
+    for i, _ in pairs(self.additionalCallbackFunctionParameters) do
+      if (i > highestAdditionalParameterNumber) then
+        highestAdditionalParameterNumber = i
+      end
+    end
+
+    for i = highestAdditionalParameterNumber - #parameters, highestAdditionalParameterNumber, 1 do
+      if (self.additionalCallbackFunctionParameters[i] ~= nil) then
+        table.insert(callbackFunctionParameters, self.additionalCallbackFunctionParameters[i])
+      else
+        table.insert(callbackFunctionParameters, nil)
+      end
+    end
+
     return self.callbackFunction(table.unpack(callbackFunctionParameters))
   end
 

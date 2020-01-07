@@ -37,6 +37,14 @@ ExtensionTarget.extensions = nil
 --
 ExtensionTarget.isEnabled = false
 
+---
+-- Stores whether this ExtensionTarget automatically enables child extensions when this ExtensionTarget
+-- is enabled
+--
+-- @tfield bool autoEnableChildExtensions
+--
+ExtensionTarget.autoEnableChildExtensions = true
+
 
 -- Getters and Setters
 
@@ -60,7 +68,7 @@ end
 function ExtensionTarget:addExtension(_extension)
   table.insert(self.extensions, _extension)
 
-  if (self.isEnabled) then
+  if (self.autoEnableChildExtensions ~= false and self.isEnabled) then
     _extension:enable(self)
   end
 end
@@ -71,8 +79,11 @@ end
 function ExtensionTarget:enable()
 
   if (not self.isEnabled) then
-    for _, extension in ipairs(self.extensions) do
-      extension:enable(self)
+
+    if (self.autoEnableChildExtensions ~= false) then
+      for _, extension in ipairs(self.extensions) do
+        extension:enable(self)
+      end
     end
 
     self.isEnabled = true

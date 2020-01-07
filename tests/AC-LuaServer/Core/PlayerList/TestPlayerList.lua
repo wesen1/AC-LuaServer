@@ -105,7 +105,7 @@ function TestPlayerList:testCanHandleServerEvents()
             :and_will_return(playerMockA)
             :and_then(
               self.onPlayerAddedListener
-                  :should_be_called_with(playerMockA)
+                  :should_be_called_with(playerMockA, 1)
             )
             :when(
               function()
@@ -119,7 +119,7 @@ function TestPlayerList:testCanHandleServerEvents()
             :and_will_return(playerMockB)
             :and_then(
               self.onPlayerAddedListener
-                  :should_be_called_with(playerMockB)
+                  :should_be_called_with(playerMockB, 2)
             )
             :when(
               function()
@@ -213,7 +213,7 @@ function TestPlayerList:testCanHandleServerEvents()
 
   -- Disconnect the first player
   self.onPlayerRemovedListener
-      :should_be_called_with(playerMockA)
+      :should_be_called_with(playerMockA, 1)
       :when(
         function()
           list:onPlayerDisconnectAfter(5)
@@ -225,7 +225,7 @@ function TestPlayerList:testCanHandleServerEvents()
 
   -- Disconnect the second player
   self.onPlayerRemovedListener
-      :should_be_called_with(playerMockB)
+      :should_be_called_with(playerMockB, 0)
       :when(
         function()
           list:onPlayerDisconnectAfter(7)

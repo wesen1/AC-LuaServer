@@ -106,7 +106,7 @@ Server.globalInstance = nil
 function Server:new()
 
   -- ExtensionTarget
-  self.name = "server"
+  self.name = "Server"
   self.extensions = {}
   self.isEnabled = true
 
@@ -130,6 +130,15 @@ end
 --
 function Server:getEventManager()
   return self.eventManager
+end
+
+---
+-- Returns the extension manager.
+--
+-- @treturn ExtensionManager The extension manager
+--
+function Server:getExtensionManager()
+  return self.extensionManager
 end
 
 ---
@@ -206,7 +215,7 @@ end
 function Server:configure(_configuration)
 
   if (type(_configuration) == "table") then
-    if (type(_configuration["Output"] == "table")) then
+    if (type(_configuration["Output"]) == "table") then
       self.output:configure(_configuration["Output"])
     end
   end
@@ -222,16 +231,7 @@ function Server:initialize()
   self.playerList:initialize()
   self.voteListener:initialize()
   self:registerAllServerEventListeners()
-end
 
-
----
--- Adds an extension to this Server or to one of its extensions.
---
--- @tparam BaseExtension _extension The extension to add
---
-function Server:addExtension(_extension)
-  self.extensionManager:addExtension(_extension)
 end
 
 
