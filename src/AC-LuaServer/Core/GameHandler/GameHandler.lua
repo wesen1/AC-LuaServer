@@ -159,12 +159,10 @@ end
 ---
 -- Event handler that is called after a Player was added to the player list.
 --
--- @tparam Player _player The Player that was added
--- @tparam int _numberOfPlayers The number of players in the player list
---
-function GameHandler:onPlayerConnected(_player, _numberOfPlayers)
+function GameHandler:onPlayerConnected()
 
-  if (_numberOfPlayers == 1) then
+  if (LuaServerApi.getgamemillis() == 0) then
+
     self.currentGame = ActiveGame(
       LuaServerApi.getmapname(),
       LuaServerApi.getgamemode()

@@ -485,21 +485,26 @@ end
 function TestGameHandler:testCanHandlePlayerConnection()
 
   local LuaServerApiMock = self.dependencyMocks.LuaServerApi
+  LuaServerApiMock.getgamemillis = self.mach.mock_function("getgamemillis")
   LuaServerApiMock.getmapname = self.mach.mock_function("getmapname")
   LuaServerApiMock.getgamemode = self.mach.mock_function("getgamemode")
 
   local gameHandler = self:createTestGameHandlerInstance()
-  local playerMockA = self:getMock("AC-LuaServer.Core.PlayerList.Player", "PlayerMockA")
   local activeGameMock = self:getMock("AC-LuaServer.Core.GameHandler.Game.ActiveGame", "ActiveGameMock")
 
-  -- Server had 0 connected players before this player connected, so this connection triggers a Game start
-  LuaServerApiMock.getmapname
+  -- The gamemillis are 0 so the player connection triggered a Game start
+  LuaServerApiMock.getgamemillis
                   :should_be_called()
-                  :and_will_return("ac_desert3")
-                  :and_also(
-                    LuaServerApiMock.getgamemode
+                  :and_will_return(0)
+                  :and_then(
+                    LuaServerApiMock.getmapname
                                     :should_be_called()
-                                    :and_will_return(4)
+                                    :and_will_return("ac_desert3")
+                                    :and_also(
+                                      LuaServerApiMock.getgamemode
+                                                      :should_be_called()
+                                                      :and_will_return(4)
+                                    )
                   )
                   :and_then(
                     self.dependencyMocks.ActiveGame.__call
@@ -512,16 +517,29 @@ function TestGameHandler:testCanHandlePlayerConnection()
                   )
                   :when(
                     function()
-                      gameHandler:onPlayerConnected(playerMockA, 1)
+                      gameHandler:onPlayerConnected()
                     end
                   )
 
-  -- Should do nothing when the number of connected players is not 1
-  local playerMockB = self:getMock("AC-LuaServer.Core.PlayerList.Player", "PlayerMockB")
-  gameHandler:onPlayerConnected(playerMockB, 2)
 
-  local playerMockC = self:getMock("AC-LuaServer.Core.PlayerList.Player", "PlayerMockC")
-  gameHandler:onPlayerConnected(playerMockC, 10)
+  -- Should do nothing when the gamemillis are not 0
+  LuaServerApiMock.getgamemillis
+                  :should_be_called()
+                  :and_will_return(1)
+                  :when(
+                    function()
+                      gameHandler:onPlayerConnected()
+                    end
+                  )
+
+  LuaServerApiMock.getgamemillis
+                  :should_be_called()
+                  :and_will_return(6000)
+                  :when(
+                    function()
+                      gameHandler:onPlayerConnected()
+                    end
+                  )
 
 end
 
