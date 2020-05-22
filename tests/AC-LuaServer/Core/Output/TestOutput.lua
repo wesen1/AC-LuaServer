@@ -5,7 +5,7 @@
 -- @license MIT
 --
 
-local TestCase = require "TestFrameWork.TestCase"
+local TestCase = require "wLuaUnit.TestCase"
 
 ---
 -- Checks that the Output works as expected.
