@@ -17,9 +17,8 @@ install:
   - luarocks install lua-resty-template
   - luarocks install penlight
   - luarocks install luacov
-  - luarocks install luaunit
+  - luarocks install wluaunit
   - luarocks install luafilesystem
-  - luarocks install mach
 
 script:
   - cd tests

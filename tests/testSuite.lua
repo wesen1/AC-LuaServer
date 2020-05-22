@@ -5,7 +5,7 @@
 -- @license MIT
 --
 
-local TestRunner = require "TestFrameWork.TestRunner"
+local TestRunner = require "wLuaUnit.TestRunner"
 
 --
 -- Add the path to the AC-LuaServer classes to the package path list, so the require paths can match

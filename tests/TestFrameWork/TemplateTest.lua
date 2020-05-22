@@ -5,7 +5,7 @@
 -- @license MIT
 --
 
-local TestCase = require "TestFrameWork.TestCase"
+local TestCase = require "wLuaUnit.TestCase"
 
 ---
 -- Base class for tests that test the output of a template.

@@ -1,21 +1,22 @@
 #!/bin/bash
 
-sudo apt-get update
+apt-get update
 
 # Required for luacov-multiple
-sudo apt-get install git
+apt-get install -y git
 
 
-sudo apt-get install -y luarocks
+apt-get install -y luarocks
 
 # Install the dependencies
 luarocks install classic
+luarocks install lua-resty-template
+luarocks install ac-clientoutput
 
 # Install the test framework dependencies
+luarocks install wluaunit
 luarocks install luacov
 luarocks install luacov-multiple
-luarocks install luaunit
-luarocks install mach
 
 # Install LDoc
 luarocks install penlight
