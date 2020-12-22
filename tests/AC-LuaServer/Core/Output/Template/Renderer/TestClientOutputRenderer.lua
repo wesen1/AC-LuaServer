@@ -450,7 +450,6 @@ function TestClientOutputRenderer:createTestInstance()
   local ClientOutputRenderer = self.testClass
 
   local ClientOutputFactoryMock = self.dependencyMocks.ClientOutputFactory
-  ClientOutputFactoryMock.__call = self.mach.mock_method("__call")
 
   local clientOutputRenderer
   ClientOutputFactoryMock.__call
