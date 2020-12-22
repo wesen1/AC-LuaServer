@@ -17,7 +17,7 @@ dependencies = {
   "classic = 0.1.0-1",
   "penlight >= 1.0, < 2.0",
   "lua-resty-template < 3.0",
-  "ac-clientoutput",
+  "ac-clientoutput"
 }
 
 build = {
