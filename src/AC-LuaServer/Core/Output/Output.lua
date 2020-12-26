@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2017-2019 wesen <wesen-ac@web.de>
+-- @copyright 2017-2020 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -100,7 +100,7 @@ end
 --
 function Output:printException(_exception, _player)
   self:printTextTemplate(
-    "Core/Output/ExceptionMessage", { errorMessage = _exception:getMessage() }, _player
+    "Core/Output/ExceptionMessage", { exceptionMessage = _exception:getMessage() }, _player
   )
 end
 
