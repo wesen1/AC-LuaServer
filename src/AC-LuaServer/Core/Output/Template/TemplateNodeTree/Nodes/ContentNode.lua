@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2019 wesen <wesen-ac@web.de>
+-- @copyright 2019-2020 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -35,7 +35,7 @@ ContentNode.name = "content"
 --
 function ContentNode:addInnerText(_text)
   local rowNode = RowNode()
-  self.super.addInnerNode(self, rowNode)
+  BaseContentNode.addInnerNode(self, rowNode)
 
   return rowNode:addInnerText(_text)
 end
@@ -50,11 +50,11 @@ end
 function ContentNode:addInnerNode(_node)
 
   if (_node:is(RowNode)) then
-    return self.super.addInnerNode(self, _node)
+    return BaseContentNode.addInnerNode(self, _node)
   else
 
     local rowNode = RowNode()
-    self.super.addInnerNode(self, rowNode)
+    BaseContentNode.addInnerNode(self, rowNode)
 
     return rowNode:addInnerNode(_node)
 

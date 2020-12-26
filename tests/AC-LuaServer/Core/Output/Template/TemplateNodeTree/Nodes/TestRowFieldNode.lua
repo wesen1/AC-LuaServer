@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2019 wesen <wesen-ac@web.de>
+-- @copyright 2019-2020 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -112,12 +112,12 @@ function TestRowFieldNode:testCanReturnWhetherItIsOpenedByTag()
      :and_will_return("row-field")
      :and_then(
        TableUtilsMock.tableHasValue
-         :should_be_called_with(self.mach.match({ "row-field" }), "row-field")
-         :and_will_return(true)
+         :should_be_called_with(self.mach.match({}), "row-field")
+         :and_will_return(false)
      )
      :when(
        function()
-         self:assertTrue(rowFieldNode:isOpenedByTag(tag))
+         self:assertFalse(rowFieldNode:isOpenedByTag(tag))
        end
      )
 
@@ -129,7 +129,7 @@ function TestRowFieldNode:testCanReturnWhetherItIsOpenedByTag()
           :and_will_return("content")
           :and_then(
             TableUtilsMock.tableHasValue
-                          :should_be_called_with(self.mach.match({ "row-field" }), "content")
+                          :should_be_called_with(self.mach.match({}), "content")
                           :and_will_return(false)
           )
           :when(
@@ -137,6 +137,29 @@ function TestRowFieldNode:testCanReturnWhetherItIsOpenedByTag()
               self:assertFalse(rowFieldNode:isOpenedByTag(otherTag))
             end
           )
+
+end
+
+---
+-- Checks that a RowFieldNode can be converted to its table representation as expected.
+--
+function TestRowFieldNode:testCanBeConvertedToTable()
+
+  local RowFieldNode = self.testClass
+
+  local emptyRowFieldNode = RowFieldNode()
+  self:assertEquals("", emptyRowFieldNode:toTable())
+
+  local rowFieldNodeWithSingleInnerText = RowFieldNode()
+  rowFieldNodeWithSingleInnerText:addInnerText("Welcome player")
+  self:assertEquals("Welcome player", rowFieldNodeWithSingleInnerText:toTable())
+
+  local rowFieldNodeWithMultipleInnerTexts = RowFieldNode()
+  rowFieldNodeWithMultipleInnerTexts:addInnerText("some")
+  rowFieldNodeWithMultipleInnerTexts:addInnerText("text")
+  rowFieldNodeWithMultipleInnerTexts:addInnerText("that will be glued together")
+
+  self:assertEquals("sometextthat will be glued together", rowFieldNodeWithMultipleInnerTexts:toTable())
 
 end
 

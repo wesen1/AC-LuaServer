@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2019 wesen <wesen-ac@web.de>
+-- @copyright 2019-2020 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -107,12 +107,12 @@ function TestRowNode:testCanReturnWhetherItIsOpenedByTag()
      :and_will_return("row")
      :and_then(
        TableUtilsMock.tableHasValue
-                     :should_be_called_with(self.mach.match({ "row" }), "row")
-                     :and_will_return(true)
+                     :should_be_called_with(self.mach.match({}), "row")
+                     :and_will_return(false)
      )
      :when(
        function()
-         self:assertTrue(rowNode:isOpenedByTag(tag))
+         self:assertFalse(rowNode:isOpenedByTag(tag))
        end
      )
 
@@ -124,7 +124,7 @@ function TestRowNode:testCanReturnWhetherItIsOpenedByTag()
           :and_will_return("custom-field")
           :and_then(
             TableUtilsMock.tableHasValue
-                          :should_be_called_with(self.mach.match({ "row" }), "custom-field")
+                          :should_be_called_with(self.mach.match({}), "custom-field")
                           :and_will_return(false)
           )
           :when(
