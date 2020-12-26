@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2019 wesen <wesen-ac@web.de>
+-- @copyright 2019-2020 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -57,6 +57,18 @@ function GameModeManager:new()
 
   self.gameModes = {}
   self.onActiveGameModeDisabledEventCallback = EventCallback({ object = self, methodName = "onActiveGameModeDisabled"})
+end
+
+
+-- Getters and Setters
+
+---
+-- Returns the currently active game mode.
+--
+-- @treturn BaseGameMode The currently active game mode
+--
+function GameModeManager:getActiveGameMode()
+  return self.activeGameMode
 end
 
 
