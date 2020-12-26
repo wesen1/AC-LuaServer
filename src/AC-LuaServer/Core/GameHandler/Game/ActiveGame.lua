@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2018-2019 wesen <wesen-ac@web.de>
+-- @copyright 2018-2020 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -112,7 +112,7 @@ function ActiveGame:setRemainingTimeInMilliseconds(_newRemainingTimeInMillisecon
   if (newGameLimit > maximumGameLimit) then
     error(MaximumRemainingTimeExceededException(newGameLimit - maximumGameLimit, (gamemillis >= 60000)))
   else
-    LuaServerApi.settimeleft(_newRemainingTimeInMilliseconds)
+    LuaServerApi.settimeleftmillis(_newRemainingTimeInMilliseconds)
   end
 
 end
