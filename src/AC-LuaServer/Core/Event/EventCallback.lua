@@ -99,7 +99,7 @@ function EventCallback:call(...)
       end
     end
 
-    for i = highestAdditionalParameterNumber - #parameters, highestAdditionalParameterNumber, 1 do
+    for i = #parameters + 1, highestAdditionalParameterNumber, 1 do
       if (self.additionalCallbackFunctionParameters[i] ~= nil) then
         table.insert(callbackFunctionParameters, self.additionalCallbackFunctionParameters[i])
       else
