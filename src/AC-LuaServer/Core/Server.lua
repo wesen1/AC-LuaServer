@@ -5,12 +5,6 @@
 -- @license MIT
 --
 
---
--- Require the penlight compatibility module that adds some global functions that are missing in Lua5.1
--- such as package.searchpath, table.unpack and table.pack
---
-require "pl.compat"
-
 local Object = require "classic"
 local ExtensionManager = require "AC-LuaServer.Core.Extension.ExtensionManager"
 local ExtensionTarget = require "AC-LuaServer.Core.Extension.ExtensionTarget"
