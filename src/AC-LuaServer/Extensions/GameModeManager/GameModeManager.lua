@@ -83,8 +83,7 @@ function GameModeManager:initialize()
 
   local gameHandler = self.target:getGameHandler()
   gameHandler:on("onGameChangeVoteCalled", EventCallback({ object = self, methodName = "onGameChangeVoteCalled" }))
-  gameHandler:on("onGameWillChange", EventCallback({ object = self, methodName = "onGameWillOrDidChange" }))
-  gameHandler:on("onGameChangedPlayerConnected", EventCallback({ object = self, methodName = "onGameWillOrDidChange" }))
+  gameHandler:on("onGameChangedMapChange", EventCallback({ object = self, methodName = "onGameChanged" }))
 
 
   -- Enable non GameMode extensions
@@ -132,19 +131,17 @@ function GameModeManager:onGameChangeVoteCalled(_game)
         nextGameModeName = potentialNextGameMode:getDisplayName()
     })
 
-    self:emit("onGameModeMightChange", self.activeGameMode, potentialNextGameMode)
+    self:emit("onGameModeMightChange", self.activeGameMode, potentialNextGameMode, _game)
   end
 
 end
 
 ---
--- Event handler that is called when the current Game ended and the next Game is about to be started.
--- It will also be called when the Game changed to handle the Game's that are started when a Player
--- connects.
+-- Event handler that is called after the Game changed.
 --
--- @tparam Game _game The next game or the new current game
+-- @tparam Game _game The new current game
 --
-function GameModeManager:onGameWillOrDidChange(_game)
+function GameModeManager:onGameChanged(_game)
 
   local nextGameMode = self:getGameModeForGame(_game)
   if (nextGameMode ~= self.activeGameMode) then
@@ -157,7 +154,9 @@ function GameModeManager:onGameWillOrDidChange(_game)
         newGameModeName = self.activeGameMode:getDisplayName()
     })
 
-    self:emit("onGameModeChanged", previousGameMode, self.activeGameMode)
+    self:emit("onGameModeChanged", previousGameMode, self.activeGameMode, _game)
+  else
+    self:emit("onGameModeStaysEnabledAfterGameChange", self.activeGameMode, _game)
   end
 
 end
@@ -167,13 +166,13 @@ end
 --
 function GameModeManager:onActiveGameModeDisabled()
 
-  local gameHandler = self.target:getGameHandler()
+  local currentGame = self.target:getGameHandler():getCurrentGame()
 
   local previousGameMode = self.activeGameMode
-  local gameMode = self:getGameModeForGame(gameHandler:getCurrentGame())
+  local gameMode = self:getGameModeForGame(currentGame)
   self:enableGameMode(gameMode)
 
-  self:emit("onGameModeChanged", previousGameMode, self.activeGameMode)
+  self:emit("onGameModeChanged", previousGameMode, self.activeGameMode, currentGame)
 
 end
 
