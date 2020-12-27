@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2019 wesen <wesen-ac@web.de>
+-- @copyright 2019-2020 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -15,11 +15,9 @@ local Object = require "classic"
 local ExtensionManager = require "AC-LuaServer.Core.Extension.ExtensionManager"
 local ExtensionTarget = require "AC-LuaServer.Core.Extension.ExtensionTarget"
 local GameHandler = require "AC-LuaServer.Core.GameHandler.GameHandler"
-local LuaServerApi = require "AC-LuaServer.Core.LuaServerApi"
 local MapRotation = require "AC-LuaServer.Core.MapRotation.MapRotation"
 local Output = require "AC-LuaServer.Core.Output.Output"
 local PlayerList = require "AC-LuaServer.Core.PlayerList.PlayerList"
-local ServerEventListener = require "AC-LuaServer.Core.ServerEvent.ServerEventListener"
 local ServerEventManager = require "AC-LuaServer.Core.ServerEvent.ServerEventManager"
 local VoteListener = require "AC-LuaServer.Core.VoteListener.VoteListener"
 
@@ -30,17 +28,6 @@ local VoteListener = require "AC-LuaServer.Core.VoteListener.VoteListener"
 --
 local Server = Object:extend()
 Server:implement(ExtensionTarget)
-Server:implement(ServerEventListener)
-
-
----
--- The list of server events for which this class listens
---
--- @tfield table serverEventListeners
---
-Server.serverEventListeners = {
-  onPlayerSayText = { methodName = "onPlayerSayText", priority = 0 }
-}
 
 
 ---
@@ -230,28 +217,6 @@ function Server:initialize()
   self.gameHandler:initialize()
   self.playerList:initialize()
   self.voteListener:initialize()
-  self:registerAllServerEventListeners()
-
-end
-
-
----
--- Event handler which is called when a player says text.
---
--- @tparam int _cn The client number of the player
--- @tparam string _text The text that the player sent
---
-function Server:onPlayerSayText(_cn, _text)
-
-  local player = self.playerList:getPlayerByCn(_cn)
-
-  LuaServerApi.logline(
-    LuaServerApi.ACLOG_INFO,
-    string.format(
-      "[%s] %s says: '%s'",
-      player:getIp(), player:getName(), _text
-    )
-  )
 
 end
 
