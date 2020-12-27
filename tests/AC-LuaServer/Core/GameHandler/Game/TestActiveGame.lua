@@ -149,7 +149,8 @@ function TestActiveGame:testCanDetectInvalidRemainingTimeInMilliseconds()
                   )
   self:assertTrue(exception:is(MaximumRemainingTimeExceededException))
   self:assertEquals(1, exception:getExceedanceInMilliseconds())
-  self:assertTrue(exception:getIsExtraMinuteAvailable())
+  self:assertEquals(2146980647, exception:getMaximumNumberOfExtendMilliseconds())
+  self:assertEquals(-443000, exception:getMillisecondsUntilExtraMinuteCanBeUsed())
 
   -- Clearly above limit
   LuaServerApiMock.getgamemillis
@@ -166,7 +167,8 @@ function TestActiveGame:testCanDetectInvalidRemainingTimeInMilliseconds()
                   )
   self:assertTrue(exception:is(MaximumRemainingTimeExceededException))
   self:assertEquals(1853019354, exception:getExceedanceInMilliseconds())
-  self:assertTrue(exception:getIsExtraMinuteAvailable())
+  self:assertEquals(2146980647, exception:getMaximumNumberOfExtendMilliseconds())
+  self:assertEquals(-443000, exception:getMillisecondsUntilExtraMinuteCanBeUsed())
 
 
   -- gamemillis < 60000
@@ -200,7 +202,8 @@ function TestActiveGame:testCanDetectInvalidRemainingTimeInMilliseconds()
                   )
   self:assertTrue(exception:is(MaximumRemainingTimeExceededException))
   self:assertEquals(2, exception:getExceedanceInMilliseconds())
-  self:assertFalse(exception:getIsExtraMinuteAvailable())
+  self:assertEquals(2147403647, exception:getMaximumNumberOfExtendMilliseconds())
+  self:assertEquals(40000, exception:getMillisecondsUntilExtraMinuteCanBeUsed())
 
   -- Clearly above limit
   LuaServerApiMock.getgamemillis
@@ -217,7 +220,8 @@ function TestActiveGame:testCanDetectInvalidRemainingTimeInMilliseconds()
                   )
   self:assertTrue(exception:is(MaximumRemainingTimeExceededException))
   self:assertEquals(7851484123, exception:getExceedanceInMilliseconds())
-  self:assertFalse(exception:getIsExtraMinuteAvailable())
+  self:assertEquals(2147403647, exception:getMaximumNumberOfExtendMilliseconds())
+  self:assertEquals(40000, exception:getMillisecondsUntilExtraMinuteCanBeUsed())
 
 end
 

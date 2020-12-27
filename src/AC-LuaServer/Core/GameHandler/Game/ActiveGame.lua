@@ -110,7 +110,14 @@ function ActiveGame:setRemainingTimeInMilliseconds(_newRemainingTimeInMillisecon
   end
 
   if (newGameLimit > maximumGameLimit) then
-    error(MaximumRemainingTimeExceededException(newGameLimit - maximumGameLimit, (gamemillis >= 60000)))
+    local exceedanceInMilliseconds = newGameLimit - maximumGameLimit
+    local maximumNumberOfExtendMilliseconds = _newRemainingTimeInMilliseconds - exceedanceInMilliseconds
+    local millisecondsUntilExtraMinuteCanBeUsed = 60000 - gamemillis
+    error(MaximumRemainingTimeExceededException(
+      exceedanceInMilliseconds,
+      maximumNumberOfExtendMilliseconds,
+      millisecondsUntilExtraMinuteCanBeUsed
+    ))
   else
     LuaServerApi.settimeleftmillis(_newRemainingTimeInMilliseconds)
   end
