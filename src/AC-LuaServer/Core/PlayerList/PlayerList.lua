@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2019 wesen <wesen-ac@web.de>
+-- @copyright 2019-2020 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -27,19 +27,35 @@ PlayerList:implement(ServerEventListener)
 -- @tfield table serverEventListeners
 --
 PlayerList.serverEventListeners = {
+  onPlayerPreconnect = "onPlayerPreconnect",
   onPlayerConnect = "onPlayerConnect",
   onPlayerDisconnectAfter = "onPlayerDisconnectAfter",
   onPlayerNameChange = "onPlayerNameChange",
   onPlayerRoleChange = "onPlayerRoleChange"
 }
 
+---
+-- The list of players
+--
+-- @tfield Player[] players
+--
+PlayerList.players = nil
+
+---
+-- The class that will be used to create Player objects
+--
+-- @tfield Object playerImplementationClass
+--
+PlayerList.playerImplementationClass = nil
+
 
 ---
 -- PlayerList constructor.
 --
 function PlayerList:new()
-  self.players = {}
   self.eventCallbacks = {}
+  self.players = {}
+  self.playerImplementationClass = Player
 end
 
 
@@ -56,6 +72,24 @@ function PlayerList:getPlayerByCn(_cn)
   return self.players[_cn]
 end
 
+---
+-- Returns the list of currently connected Player's.
+--
+-- @treturn Player[] The list of currently connected Player's
+--
+function PlayerList:getPlayers()
+  return self.players
+end
+
+---
+-- Sets the class that should be used to create Player objects.
+--
+-- @tparam Object _playerImplementationClass The class to use to create Player objects
+--
+function PlayerList:setPlayerImplementationClass(_playerImplementationClass)
+  self.playerImplementationClass = _playerImplementationClass
+end
+
 
 -- Event handlers
 
@@ -68,16 +102,24 @@ end
 
 ---
 -- Event handler that is called when a player connects to the server.
+-- This event handler will be called before bans/blacklist entries are applied.
+--
+-- @tparam int _cn The client number of the player who connected
+--
+function PlayerList:onPlayerPreconnect(_cn)
+  self.players[_cn] = self.playerImplementationClass.createFromConnectedPlayer(_cn)
+end
+
+---
+-- Event handler that is called when a player connects to the server.
+-- This event handler will be called after bans/blacklist entries were applied.
 --
 -- @tparam int _cn The client number of the player who connected
 --
 -- @emits The "onPlayerAdded" event after the player was added to this PlayerList
 --
 function PlayerList:onPlayerConnect(_cn)
-  local connectedPlayer = Player.createFromConnectedPlayer(_cn)
-  self.players[_cn] = connectedPlayer
-
-  self:emit("onPlayerAdded", connectedPlayer, self:calculateNumberOfPlayers())
+  self:emit("onPlayerAdded", self.players[_cn], self:calculateNumberOfPlayers())
 end
 
 ---
