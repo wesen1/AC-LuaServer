@@ -90,15 +90,39 @@ function TestEventCallback:testCanBeCreatedFromObjectMethodWithNoParameters()
   local EventCallback = self.testClass
 
   local objectMock = {
-    ["myProperty"] = "perfect",
-    ["methodA"] = function(_self)
-      return _self.myProperty
-    end
+    ["myPropertyA"] = "perfect",
+    ["myPropertyB"] = "works",
+    ["myPropertyC"] = "fine"
   }
 
-  local callback = EventCallback({["object"] = objectMock, ["methodName"] = "methodA"})
+  objectMock["methodWithNoParameters"] = function(...)
+    local parameters = {...}
+    self:assertEquals({ objectMock }, parameters)
 
-  self:assertEquals("perfect", callback:call())
+    return objectMock.myPropertyA
+  end
+
+  objectMock["methodWithSingleParameter"] = function(...)
+    local parameters = {...}
+    self:assertEquals({ objectMock, 8 }, parameters)
+
+    return objectMock.myPropertyB
+  end
+
+  objectMock["methodWithMultipleParameters"] = function(...)
+    local parameters = {...}
+    self:assertEquals({ objectMock, "bla", "blub" }, parameters)
+
+    return objectMock.myPropertyC
+  end
+
+  local callbackA = EventCallback({["object"] = objectMock, ["methodName"] = "methodWithNoParameters"})
+  local callbackB = EventCallback({["object"] = objectMock, ["methodName"] = "methodWithSingleParameter"})
+  local callbackC = EventCallback({["object"] = objectMock, ["methodName"] = "methodWithMultipleParameters"})
+
+  self:assertEquals("perfect", callbackA:call())
+  self:assertEquals("works", callbackB:call(8))
+  self:assertEquals("fine", callbackC:call("bla", "blub"))
 
 end
 
