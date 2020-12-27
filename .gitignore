@@ -1,3 +1,3 @@
 .vagrant
 luacov*
-coverage_report
+coverage-report

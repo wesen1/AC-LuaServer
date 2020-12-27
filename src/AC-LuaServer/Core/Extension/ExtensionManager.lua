@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2019 wesen <wesen-ac@web.de>
+-- @copyright 2019-2020 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -63,6 +63,24 @@ function ExtensionManager:addExtension(_extension)
 
 end
 
+---
+-- Returns a Extension whose name matches a given extension name.
+-- Will return nil if there is no Extension with the given name.
+--
+-- @tparam string _extensionName The extension name to search for
+--
+-- @treturn BaseExtension|nil The Extension that matches the given extension name
+--
+function ExtensionManager:getExtensionByName(_extensionName)
+
+  for _, extension in ipairs(self.managedExtensions) do
+    if (extension:getName() == _extensionName) then
+      return extension
+    end
+  end
+
+end
+
 
 -- Private Methods
 
@@ -78,13 +96,7 @@ function ExtensionManager:getExtensionTargetByName(_targetName)
   if (_targetName == "Server") then
     return self.parentServer
   else
-
-    for _, extension in ipairs(self.managedExtensions) do
-      if (extension:getName() == _targetName) then
-        return extension
-      end
-    end
-
+    return self:getExtensionByName(_targetName)
   end
 
 end

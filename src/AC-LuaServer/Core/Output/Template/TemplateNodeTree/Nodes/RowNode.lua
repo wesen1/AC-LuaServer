@@ -24,13 +24,6 @@ local RowNode = BaseContentNode:extend()
 RowNode.name = "row"
 
 ---
--- The list of tag names that open a node of this type when they occur during the tree parsing
---
--- @tfield string[] openedByTagNames
---
-RowNode.openedByTagNames = { "row" }
-
----
 -- The list of tag names that close a node of this type when they occur during the tree parsing
 --
 -- @tfield string[] closedByTagNames

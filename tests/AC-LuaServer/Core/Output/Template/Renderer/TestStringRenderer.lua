@@ -1,11 +1,12 @@
 ---
 -- @author wesen
--- @copyright 2019 wesen <wesen-ac@web.de>
+-- @copyright 2019-2020 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
 
 local TestCase = require "wLuaUnit.TestCase"
+local tablex = require "pl.tablex"
 
 ---
 -- Checks that the StringRenderer works as expected.
@@ -29,8 +30,19 @@ TestStringRenderer.testClassPath = "AC-LuaServer.Core.Output.Template.Renderer.S
 --
 TestStringRenderer.dependencyPaths = {
   { id = "LuaRestyTemplateEngine", path = "resty.template", ["type"] = "table" },
-  { id = "Path", path = "AC-LuaServer.Core.Path", ["type"] = "table" }
+  { id = "Path", path = "AC-LuaServer.Core.Path", ["type"] = "table" },
+  { id = "path", path = "pl.path", ["type"] = "table" }
 }
+
+
+---
+-- Method that is called before a test is executed.
+-- Sets up the pl.path method mocks.
+--
+function TestStringRenderer:setUp()
+  TestCase.setUp(self)
+  self.dependencyMocks.path.exists = self.mach.mock_function("pathmock.exists")
+end
 
 
 ---
@@ -38,11 +50,10 @@ TestStringRenderer.dependencyPaths = {
 --
 function TestStringRenderer:testCanRenderStringWithoutTemplateValues()
 
-  local StringRenderer = self.testClass
-  local renderer = StringRenderer()
+  local pathMock = self.dependencyMocks.path
+  local renderer = self:createTestInstance("/tmp/src")
   local renderedString
 
-  local PathMock = self.dependencyMocks.Path
   local templateMock = self:getMock(
     "AC-LuaServer.Core.Output.Template.Template", "TemplateMock"
   )
@@ -50,9 +61,9 @@ function TestStringRenderer:testCanRenderStringWithoutTemplateValues()
               :should_be_called()
               :and_will_return("TimeExtended")
               :and_then(
-                PathMock.getSourceDirectoryPath
-                        :should_be_called()
-                        :and_will_return("/tmp/src")
+                pathMock.exists
+                        :should_be_called_with("/tmp/src/AC-LuaServer/Templates/TimeExtended.template")
+                        :and_will_return(true)
               )
               :and_also(
                 templateMock.getTemplateValues
@@ -62,7 +73,10 @@ function TestStringRenderer:testCanRenderStringWithoutTemplateValues()
               :and_then(
                 self:expectLuaRestyTemplateEngineRendering(
                   "/tmp/src/AC-LuaServer/Templates/TimeExtended.template",
-                  { getAbsoluteTemplatePath = StringRenderer.getAbsoluteTemplatePath },
+                  { getAbsoluteTemplatePath = function(_value)
+                      return (type(_value) == "function")
+                    end
+                  },
                   "Time extended by 10 minutes"
                 )
               )
@@ -81,15 +95,14 @@ end
 --
 function TestStringRenderer:testCanRenderStringWithOnlyDefaultTemplateValues()
 
-  local StringRenderer = self.testClass
-  local renderer = StringRenderer()
+  local pathMock = self.dependencyMocks.path
+  local renderer = self:createTestInstance("/home/wesen/server")
   local renderedString
 
   renderer:configure({
       defaultTemplateValues = { serverOwner = "unarmed" }
   })
 
-  local PathMock = self.dependencyMocks.Path
   local templateMock = self:getMock(
     "AC-LuaServer.Core.Output.Template.Template", "TemplateMock"
   )
@@ -97,9 +110,9 @@ function TestStringRenderer:testCanRenderStringWithOnlyDefaultTemplateValues()
               :should_be_called()
               :and_will_return("ServerInfo")
               :and_then(
-                PathMock.getSourceDirectoryPath
-                        :should_be_called()
-                        :and_will_return("/home/wesen/server")
+                pathMock.exists
+                        :should_be_called_with("/home/wesen/server/AC-LuaServer/Templates/ServerInfo.template")
+                        :and_will_return(true)
               )
               :and_also(
                 templateMock.getTemplateValues
@@ -109,9 +122,10 @@ function TestStringRenderer:testCanRenderStringWithOnlyDefaultTemplateValues()
               :and_then(
                 self:expectLuaRestyTemplateEngineRendering(
                   "/home/wesen/server/AC-LuaServer/Templates/ServerInfo.template",
-                  {
-                    serverOwner = "unarmed",
-                    getAbsoluteTemplatePath = StringRenderer.getAbsoluteTemplatePath
+                  { getAbsoluteTemplatePath = function(_value)
+                      return (type(_value) == "function")
+                    end,
+                    serverOwner = "unarmed"
                   },
                   "AC-LuaServer hosted by unarmed"
                 )
@@ -131,11 +145,10 @@ end
 --
 function TestStringRenderer:testCanRenderStringWithOnlyCustomTemplateValues()
 
-  local StringRenderer = self.testClass
-  local renderer = StringRenderer()
+  local pathMock = self.dependencyMocks.path
+  local renderer = self:createTestInstance("/src")
   local renderedString
 
-  local PathMock = self.dependencyMocks.Path
   local templateMock = self:getMock(
     "AC-LuaServer.Core.Output.Template.Template", "TemplateMock"
   )
@@ -143,9 +156,9 @@ function TestStringRenderer:testCanRenderStringWithOnlyCustomTemplateValues()
               :should_be_called()
               :and_will_return("PlayerDisconnected")
               :and_then(
-                PathMock.getSourceDirectoryPath
-                        :should_be_called()
-                        :and_will_return("/src")
+                pathMock.exists
+                        :should_be_called_with("/src/AC-LuaServer/Templates/PlayerDisconnected.template")
+                        :and_will_return(true)
               )
               :and_also(
                 templateMock.getTemplateValues
@@ -155,7 +168,11 @@ function TestStringRenderer:testCanRenderStringWithOnlyCustomTemplateValues()
               :and_then(
                 self:expectLuaRestyTemplateEngineRendering(
                   "/src/AC-LuaServer/Templates/PlayerDisconnected.template",
-                  { reason = "banned", getAbsoluteTemplatePath = StringRenderer.getAbsoluteTemplatePath },
+                  { getAbsoluteTemplatePath = function(_value)
+                      return (type(_value) == "function")
+                    end,
+                    reason = "banned"
+                  },
                   "Player could not connect (banned)"
                 )
               )
@@ -174,15 +191,14 @@ end
 --
 function TestStringRenderer:testCanRenderStringWithDefaultAndCustomTemplateValues()
 
-  local StringRenderer = self.testClass
-  local renderer = StringRenderer()
+  local pathMock = self.dependencyMocks.path
+  local renderer = self:createTestInstance("/etc/lua")
   local renderedString
 
   renderer:configure({
       defaultTemplateValues = { serverName = "best-server" }
   })
 
-  local PathMock = self.dependencyMocks.Path
   local templateMock = self:getMock(
     "AC-LuaServer.Core.Output.Template.Template", "TemplateMock"
   )
@@ -190,9 +206,9 @@ function TestStringRenderer:testCanRenderStringWithDefaultAndCustomTemplateValue
               :should_be_called()
               :and_will_return("Greeting")
               :and_then(
-                PathMock.getSourceDirectoryPath
-                        :should_be_called()
-                        :and_will_return("/etc/lua")
+                pathMock.exists
+                        :should_be_called_with("/etc/lua/AC-LuaServer/Templates/Greeting.template")
+                        :and_will_return(true)
               )
               :and_also(
                 templateMock.getTemplateValues
@@ -202,10 +218,11 @@ function TestStringRenderer:testCanRenderStringWithDefaultAndCustomTemplateValue
               :and_then(
                 self:expectLuaRestyTemplateEngineRendering(
                   "/etc/lua/AC-LuaServer/Templates/Greeting.template",
-                  {
+                  { getAbsoluteTemplatePath = function(_value)
+                      return (type(_value) == "function")
+                    end,
                     serverName = "best-server",
-                    playerName = "random",
-                    getAbsoluteTemplatePath = StringRenderer.getAbsoluteTemplatePath
+                    playerName = "random"
                   },
                   "[best-server] Welcome to our server random!"
                 )
@@ -225,11 +242,10 @@ end
 --
 function TestStringRenderer:testCanRemoveLineEndingsAndBorderingWhitespace()
 
-  local StringRenderer = self.testClass
-  local renderer = StringRenderer()
+  local pathMock = self.dependencyMocks.path
+  local renderer = self:createTestInstance("/othertmp/src")
   local renderedString
 
-  local PathMock = self.dependencyMocks.Path
   local templateMock = self:getMock(
     "AC-LuaServer.Core.Output.Template.Template", "TemplateMock"
   )
@@ -237,9 +253,9 @@ function TestStringRenderer:testCanRemoveLineEndingsAndBorderingWhitespace()
               :should_be_called()
               :and_will_return("WithEmptyLines")
               :and_then(
-                PathMock.getSourceDirectoryPath
-                        :should_be_called()
-                        :and_will_return("/othertmp/src")
+                pathMock.exists
+                        :should_be_called_with("/othertmp/src/AC-LuaServer/Templates/WithEmptyLines.template")
+                        :and_will_return(true)
               )
               :and_also(
                 templateMock.getTemplateValues
@@ -249,7 +265,10 @@ function TestStringRenderer:testCanRemoveLineEndingsAndBorderingWhitespace()
               :and_then(
                 self:expectLuaRestyTemplateEngineRendering(
                   "/othertmp/src/AC-LuaServer/Templates/WithEmptyLines.template",
-                  { getAbsoluteTemplatePath = StringRenderer.getAbsoluteTemplatePath },
+                  { getAbsoluteTemplatePath = function(_value)
+                      return (type(_value) == "function")
+                    end
+                  },
                   "    Next line is empty   \n\n\n\n   Next line is empty with whitespace\n  \n  \n\nSee?   "
                 )
               )
@@ -269,11 +288,10 @@ end
 function TestStringRenderer:testCanReplaceWhitespaceTags()
 
   -- Test A: <whitespace> (Should result in " ")
-  local StringRenderer = self.testClass
-  local renderer = StringRenderer()
+  local pathMock = self.dependencyMocks.path
+  local renderer = self:createTestInstance("/final")
   local renderedString
 
-  local PathMock = self.dependencyMocks.Path
   local templateMockA = self:getMock(
     "AC-LuaServer.Core.Output.Template.Template", "TemplateMockA"
   )
@@ -281,9 +299,9 @@ function TestStringRenderer:testCanReplaceWhitespaceTags()
                :should_be_called()
                :and_will_return("WhitespaceUsageA")
                :and_then(
-                 PathMock.getSourceDirectoryPath
-                         :should_be_called()
-                         :and_will_return("/final")
+                 pathMock.exists
+                         :should_be_called_with("/final/AC-LuaServer/Templates/WhitespaceUsageA.template")
+                         :and_will_return(true)
                )
                :and_also(
                  templateMockA.getTemplateValues
@@ -293,7 +311,10 @@ function TestStringRenderer:testCanReplaceWhitespaceTags()
                :and_then(
                  self:expectLuaRestyTemplateEngineRendering(
                    "/final/AC-LuaServer/Templates/WhitespaceUsageA.template",
-                   { getAbsoluteTemplatePath = StringRenderer.getAbsoluteTemplatePath },
+                   { getAbsoluteTemplatePath = function(_value)
+                       return (type(_value) == "function")
+                     end
+                   },
                    "Whitespace in separate line upcoming:\n<whitespace>\nDone"
                  )
                )
@@ -314,9 +335,9 @@ function TestStringRenderer:testCanReplaceWhitespaceTags()
                :should_be_called()
                :and_will_return("WhitespaceUsageB")
                :and_then(
-                 PathMock.getSourceDirectoryPath
-                         :should_be_called()
-                         :and_will_return("/lib/luarocks")
+                 pathMock.exists
+                         :should_be_called_with("/final/AC-LuaServer/Templates/WhitespaceUsageB.template")
+                         :and_will_return(true)
                )
                :and_also(
                  templateMockB.getTemplateValues
@@ -325,8 +346,11 @@ function TestStringRenderer:testCanReplaceWhitespaceTags()
                )
                :and_then(
                  self:expectLuaRestyTemplateEngineRendering(
-                   "/lib/luarocks/AC-LuaServer/Templates/WhitespaceUsageB.template",
-                   { getAbsoluteTemplatePath = StringRenderer.getAbsoluteTemplatePath },
+                   "/final/AC-LuaServer/Templates/WhitespaceUsageB.template",
+                   { getAbsoluteTemplatePath = function(_value)
+                       return (type(_value) == "function")
+                     end
+                   },
                    "Multiple whitespaces in a row:\n<whitespace:5>\nCool!"
                  )
                )
@@ -337,6 +361,158 @@ function TestStringRenderer:testCanReplaceWhitespaceTags()
                )
 
   self:assertEquals("Multiple whitespaces in a row:     Cool!", renderedString)
+
+end
+
+
+---
+-- Checks that the StringRenderer handles non existing templates as expected.
+--
+function TestStringRenderer:testCanHandleTemplateNotExisting()
+
+  local pathMock = self.dependencyMocks.path
+  local renderer = self:createTestInstance("/custom/stuff")
+  local renderedString
+
+  local templateMock = self:getMock(
+    "AC-LuaServer.Core.Output.Template.Template", "TemplateMock"
+  )
+  templateMock.getTemplatePath
+              :should_be_called()
+              :and_will_return("NotFound404")
+              :and_then(
+                pathMock.exists
+                        :should_be_called_with("/custom/stuff/AC-LuaServer/Templates/NotFound404.template")
+                        :and_will_return(false)
+              )
+              :and_also(
+                templateMock.getTemplateValues
+                            :should_be_called()
+                            :and_will_return({})
+              )
+              :and_then(
+                self:expectLuaRestyTemplateEngineRendering(
+                  "NotFound404",
+                  { getAbsoluteTemplatePath = function(_value)
+                      return (type(_value) == "function")
+                    end
+                  },
+                  "You gave me a wrong path"
+                )
+              )
+              :when(
+                function()
+                  renderedString = renderer:render(templateMock)
+                end
+              )
+
+  self:assertEquals("You gave me a wrong path", renderedString)
+
+end
+
+---
+-- Checks that custom template base paths can be configured as expected.
+--
+function TestStringRenderer:testCanConfigureCustomTemplateBasePaths()
+
+  local pathMock = self.dependencyMocks.path
+  local renderer = self:createTestInstance("/custom/stuff")
+
+  -- Configure some custom template base paths
+  renderer:configure({
+    templateBaseDirectoryPaths = {
+      "/more/templates/",
+      "my-templates-relative/path/"
+    }
+  })
+
+  local renderedString
+
+  -- Case A: Template does not exist
+  local templateMock = self:getMock(
+    "AC-LuaServer.Core.Output.Template.Template", "TemplateMock"
+  )
+  templateMock.getTemplatePath
+              :should_be_called()
+              :and_will_return("CommandList")
+              :and_then(
+                pathMock.exists
+                        :should_be_called_with("/more/templates/CommandList.template")
+                        :and_will_return(false)
+              )
+              :and_then(
+                pathMock.exists
+                        :should_be_called_with("my-templates-relative/path/CommandList.template")
+                        :and_will_return(false)
+              )
+              :and_then(
+                pathMock.exists
+                        :should_be_called_with("/custom/stuff/AC-LuaServer/Templates/CommandList.template")
+                        :and_will_return(false)
+              )
+              :and_also(
+                templateMock.getTemplateValues
+                            :should_be_called()
+                            :and_will_return({})
+              )
+              :and_then(
+                self:expectLuaRestyTemplateEngineRendering(
+                  "CommandList",
+                  { getAbsoluteTemplatePath = function(_value)
+                      return (type(_value) == "function")
+                    end
+                  },
+                  "Template not found"
+                )
+              )
+              :when(
+                function()
+                  renderedString = renderer:render(templateMock)
+                end
+              )
+
+  self:assertEquals("Template not found", renderedString)
+
+
+    -- Case B: Template exists in one of the custom directories
+  templateMock = self:getMock(
+    "AC-LuaServer.Core.Output.Template.Template", "TemplateMock"
+  )
+  templateMock.getTemplatePath
+              :should_be_called()
+              :and_will_return("MapScoreManager/MapTop")
+              :and_then(
+                pathMock.exists
+                        :should_be_called_with("/more/templates/MapScoreManager/MapTop.template")
+                        :and_will_return(false)
+              )
+              :and_then(
+                pathMock.exists
+                        :should_be_called_with("my-templates-relative/path/MapScoreManager/MapTop.template")
+                        :and_will_return(true)
+              )
+              :and_also(
+                templateMock.getTemplateValues
+                            :should_be_called()
+                            :and_will_return({})
+              )
+              :and_then(
+                self:expectLuaRestyTemplateEngineRendering(
+                  "my-templates-relative/path/MapScoreManager/MapTop.template",
+                  { getAbsoluteTemplatePath = function(_value)
+                      return (type(_value) == "function")
+                    end
+                  },
+                  "No map scores found for this map"
+                )
+              )
+              :when(
+                function()
+                  renderedString = renderer:render(templateMock)
+                end
+              )
+
+  self:assertEquals("No map scores found for this map", renderedString)
 
 end
 
@@ -360,10 +536,60 @@ function TestStringRenderer:expectLuaRestyTemplateEngineRendering(_templatePath,
                                    :and_will_return(compiledTemplateFunctionMock)
                                    :and_then(
                                      compiledTemplateFunctionMock.should_be_called_with(
-                                                                   self.mach.match(_templateValues)
-                                                                 )
-                                                                 :and_will_return(_returnValue)
+                                       self.mach.match(
+                                         _templateValues,
+                                         function(_expectedTemplateValues, _actualTemplateValues)
+                                           self:assertEquals(
+                                             tablex.keys(_templateValues),
+                                             tablex.keys(_actualTemplateValues)
+                                           )
+
+                                           for key, expectedTemplateValue in pairs(_expectedTemplateValues) do
+                                             local actualTemplateValue = _actualTemplateValues[key]
+                                             if (type(expectedTemplateValue) == "function") then
+                                               if (expectedTemplateValue(actualTemplateValue) == false) then
+                                                 -- Custom matcher did not match
+                                                 return false
+                                               end
+                                             else
+                                               if (expectedTemplateValue ~= actualTemplateValue) then
+                                                 return false
+                                               end
+                                             end
+                                           end
+
+                                           return true
+                                         end
+                                       )
+                                     )
+                                     :and_will_return(_returnValue)
                                    )
+
+end
+
+---
+-- Creates and returns a StringRenderer instance.
+--
+-- @tparam string _sourceDirectoryPath The source directory path to inject into the StringRenderer instance
+--
+-- @treturn StringRenderer The created StringRenderer instance
+--
+function TestStringRenderer:createTestInstance(_sourceDirectoryPath)
+
+  local StringRenderer = self.testClass
+  local PathMock = self.dependencyMocks.Path
+
+  local stringRenderer
+  PathMock.getSourceDirectoryPath
+          :should_be_called()
+          :and_will_return(_sourceDirectoryPath)
+          :when(
+            function()
+              stringRenderer = StringRenderer()
+            end
+          )
+
+  return stringRenderer
 
 end
 

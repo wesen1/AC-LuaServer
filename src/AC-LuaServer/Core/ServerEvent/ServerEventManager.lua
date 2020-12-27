@@ -1,14 +1,16 @@
 ---
 -- @author wesen
--- @copyright 2018-2019 wesen <wesen-ac@web.de>
+-- @copyright 2018-2020 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
 
 local EventCallback = require "AC-LuaServer.Core.Event.EventCallback"
 local EventEmitter = require "AC-LuaServer.Core.Event.EventEmitter"
+local Exception = require "AC-LuaServer.Core.Util.Exception.Exception"
 local LuaServerApi = require "AC-LuaServer.Core.LuaServerApi"
 local Object = require "classic"
+local TemplateException = require "AC-LuaServer.Core.Util.Exception.TemplateException"
 
 ---
 -- Wrapper for AssaultCube server events.
@@ -69,7 +71,24 @@ function ServerEventManager:manageServerEvent(_eventName)
   -- that passes all arguments as well as the event name to the "emit" method
   --
   LuaServerApi[_eventName] = function(...)
-    return self:emit(_eventName, ...)
+
+    local success, result = pcall(self.emit, self, _eventName, ...)
+    if (success) then
+      return result
+    else
+
+      local exception = result
+      if (exception.is and exception:is(TemplateException)) then
+        local Server = require "AC-LuaServer.Core.Server"
+        Server.getInstance():getOutput():printException(exception)
+      elseif (exception.is and exception:is(Exception)) then
+        error(exception:getMessage())
+      else
+        error(exception)
+      end
+
+    end
+
   end
 
 end

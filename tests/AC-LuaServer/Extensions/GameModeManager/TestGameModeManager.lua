@@ -71,6 +71,14 @@ TestGameModeManager.onGameModeMightChangeListener = nil
 --
 TestGameModeManager.onGameModeChangedListener = nil
 
+---
+-- The listener for the "onGameModeStaysEnabledAfterGameChange" event that will be attached to the test
+-- GameModeManager instance
+--
+-- @tfield table onGameModeStaysEnabledAfterGameChangeListener
+--
+TestGameModeManager.onGameModeStaysEnabledAfterGameChangeListener = nil
+
 
 ---
 -- Method that is called before a test is executed.
@@ -87,6 +95,7 @@ function TestGameModeManager:setUp()
 
   self.onGameModeMightChangeListener = self.mach.mock_function("onGameModeMightChange")
   self.onGameModeChangedListener = self.mach.mock_function("onGameModeChanged")
+  self.onGameModeStaysEnabledAfterGameChangeListener = self.mach.mock_function("onGameModeStaysEnabledAfterGameChange")
 end
 
 ---
@@ -101,6 +110,7 @@ function TestGameModeManager:tearDown()
   self.serverMock = nil
   self.onGameModeMightChangeListener = nil
   self.onGameModeChangedListener = nil
+  self.onGameModeStaysEnabledAfterGameChangeListener = nil
 end
 
 
@@ -108,12 +118,13 @@ end
 -- Checks that a "Game will change or did change" event can be handled when there are no additional
 -- game modes configured besides the default game mode.
 --
-function TestGameModeManager:testCanHandleGameWillOrDidChangeEventsWhenThereAreNoAdditionalGameModes()
+function TestGameModeManager:testCanHandleGameChangeEventsWhenThereAreNoAdditionalGameModes()
 
   local gameModeManager = self:createEnabledTestInstance()
   local outputMock = self:getMock("AC-LuaServer.Core.Output.Output", "OutputMock")
 
   -- No game mode enabled yet and only the default game mode is available
+  self:assertNil(gameModeManager:getActiveGameMode())
   local gameMockA = self:getMock("AC-LuaServer.Core.GameHandler.Game.Game", "GameMockA")
   self.defaultGameModeMock.canBeEnabledForGame
                           :should_be_called_with(gameMockA)
@@ -140,11 +151,12 @@ function TestGameModeManager:testCanHandleGameWillOrDidChangeEventsWhenThereAreN
                           )
                           :and_then(
                             self.onGameModeChangedListener
-                                :should_be_called_with(nil, self.defaultGameModeMock)
+                                :should_be_called_with(nil, self.defaultGameModeMock, gameMockA)
                           )
                           :when(
                             function()
-                              gameModeManager:onGameWillOrDidChange(gameMockA)
+                              gameModeManager:onGameChanged(gameMockA)
+                              self:assertEquals(self.defaultGameModeMock, gameModeManager:getActiveGameMode())
                             end
                           )
 
@@ -153,9 +165,14 @@ function TestGameModeManager:testCanHandleGameWillOrDidChangeEventsWhenThereAreN
   self.defaultGameModeMock.canBeEnabledForGame
                           :should_be_called_with(gameMockB)
                           :and_will_return(true)
+                          :and_then(
+                            self.onGameModeStaysEnabledAfterGameChangeListener
+                                :should_be_called_with(self.defaultGameModeMock, gameMockB)
+                          )
                           :when(
                             function()
-                              gameModeManager:onGameWillOrDidChange(gameMockB)
+                              gameModeManager:onGameChanged(gameMockB)
+                              self:assertEquals(self.defaultGameModeMock, gameModeManager:getActiveGameMode())
                             end
                           )
 
@@ -165,7 +182,7 @@ end
 -- Checks that a "Game will change or did change" event can be handled when there are additional
 -- game modes configured besides the default game mode.
 --
-function TestGameModeManager:testCanHandleGameWillOrDidChangeEventsWhenThereAreAdditionalGameModes()
+function TestGameModeManager:testCanHandleGameChangeEventsWhenThereAreAdditionalGameModes()
 
   local BaseGameMode = require "AC-LuaServer.Extensions.GameModeManager.BaseGameMode"
   local DefaultGameMode = require "AC-LuaServer.Extensions.GameModeManager.DefaultGameMode"
@@ -206,6 +223,7 @@ function TestGameModeManager:testCanHandleGameWillOrDidChangeEventsWhenThereAreA
                )
 
   -- Activate the second additional game mode
+  self:assertNil(gameModeManager:getActiveGameMode())
   local gameMockA = self:getMock("AC-LuaServer.Core.GameHandler.Game.Game", "GameMockA")
   gameModeMockA.canBeEnabledForGame
                :should_be_called_with(gameMockA)
@@ -237,11 +255,12 @@ function TestGameModeManager:testCanHandleGameWillOrDidChangeEventsWhenThereAreA
                )
                :and_then(
                  self.onGameModeChangedListener
-                     :should_be_called_with(nil, gameModeMockB)
+                     :should_be_called_with(nil, gameModeMockB, gameMockA)
                )
                :when(
                  function()
-                   gameModeManager:onGameWillOrDidChange(gameMockA)
+                   gameModeManager:onGameChanged(gameMockA)
+                   self:assertEquals(gameModeMockB, gameModeManager:getActiveGameMode())
                  end
                )
 
@@ -255,9 +274,14 @@ function TestGameModeManager:testCanHandleGameWillOrDidChangeEventsWhenThereAreA
                               :should_be_called_with(gameMockB)
                               :and_will_return(true)
                )
+               :and_then(
+                 self.onGameModeStaysEnabledAfterGameChangeListener
+                     :should_be_called_with(gameModeMockB, gameMockB)
+               )
                :when(
                  function()
-                   gameModeManager:onGameWillOrDidChange(gameMockB)
+                   gameModeManager:onGameChanged(gameMockB)
+                   self:assertEquals(gameModeMockB, gameModeManager:getActiveGameMode())
                  end
                )
 
@@ -298,11 +322,12 @@ function TestGameModeManager:testCanHandleGameWillOrDidChangeEventsWhenThereAreA
                )
                :and_then(
                  self.onGameModeChangedListener
-                     :should_be_called_with(gameModeMockB, self.defaultGameModeMock)
+                     :should_be_called_with(gameModeMockB, self.defaultGameModeMock, gameMockC)
                )
                :when(
                  function()
-                   gameModeManager:onGameWillOrDidChange(gameMockC)
+                   gameModeManager:onGameChanged(gameMockC)
+                   self:assertEquals(self.defaultGameModeMock, gameModeManager:getActiveGameMode())
                  end
                )
 
@@ -321,9 +346,14 @@ function TestGameModeManager:testCanHandleGameWillOrDidChangeEventsWhenThereAreA
                                          :should_be_called_with(gameMockD)
                                          :and_will_return(true)
                )
+               :and_then(
+                 self.onGameModeStaysEnabledAfterGameChangeListener
+                     :should_be_called_with(self.defaultGameModeMock, gameMockD)
+               )
                :when(
                  function()
-                   gameModeManager:onGameWillOrDidChange(gameMockD)
+                   gameModeManager:onGameChanged(gameMockD)
+                   self:assertEquals(self.defaultGameModeMock, gameModeManager:getActiveGameMode())
                  end
                )
 
@@ -374,6 +404,7 @@ function TestGameModeManager:testCanActivateDefaultGameModeAsInitialGameModeWhen
                )
 
   -- Activate the default game mode
+  self:assertNil(gameModeManager:getActiveGameMode())
   local gameMockA = self:getMock("AC-LuaServer.Core.GameHandler.Game.Game", "GameMockA")
   gameModeMockA.canBeEnabledForGame
                :should_be_called_with(gameMockA)
@@ -410,11 +441,12 @@ function TestGameModeManager:testCanActivateDefaultGameModeAsInitialGameModeWhen
                )
                :and_then(
                  self.onGameModeChangedListener
-                     :should_be_called_with(nil, self.defaultGameModeMock)
+                     :should_be_called_with(nil, self.defaultGameModeMock, gameMockA)
                )
                :when(
                  function()
-                   gameModeManager:onGameWillOrDidChange(gameMockA)
+                   gameModeManager:onGameChanged(gameMockA)
+                   self:assertEquals(self.defaultGameModeMock, gameModeManager:getActiveGameMode())
                  end
                )
 
@@ -466,6 +498,7 @@ function TestGameModeManager:testCanHandleGameChangeVoteCall()
 
 
   -- Game changing vote called
+  self:assertNil(gameModeManager:getActiveGameMode())
   local votedGameMock = self:getMock("AC-LuaServer.Core.GameHandler.Game.Game", "VotedGameMock")
 
   gameModeMockA.canBeEnabledForGame
@@ -495,11 +528,12 @@ function TestGameModeManager:testCanHandleGameChangeVoteCall()
                )
                :and_then(
                  self.onGameModeMightChangeListener
-                     :should_be_called_with(nil, gameModeMockB)
+                     :should_be_called_with(nil, gameModeMockB, votedGameMock)
                )
                :when(
                  function()
                    gameModeManager:onGameChangeVoteCalled(votedGameMock)
+                   self:assertNil(gameModeManager:getActiveGameMode())
                  end
                )
 
@@ -550,6 +584,7 @@ function TestGameModeManager:testCanHandleGameChangeVoteCallWhenThereIsACurrentA
 
 
   -- Activate the default game mode
+  self:assertNil(gameModeManager:getActiveGameMode())
   local gameMockA = self:getMock("AC-LuaServer.Core.GameHandler.Game.Game", "GameMockA")
   gameModeMockA.canBeEnabledForGame
                :should_be_called_with(gameMockA)
@@ -586,11 +621,12 @@ function TestGameModeManager:testCanHandleGameChangeVoteCallWhenThereIsACurrentA
                )
                :and_then(
                  self.onGameModeChangedListener
-                     :should_be_called_with(nil, self.defaultGameModeMock)
+                     :should_be_called_with(nil, self.defaultGameModeMock, gameMockA)
                )
                :when(
                  function()
-                   gameModeManager:onGameWillOrDidChange(gameMockA)
+                   gameModeManager:onGameChanged(gameMockA)
+                   self:assertEquals(self.defaultGameModeMock, gameModeManager:getActiveGameMode())
                  end
                )
 
@@ -619,11 +655,12 @@ function TestGameModeManager:testCanHandleGameChangeVoteCallWhenThereIsACurrentA
                )
                :and_then(
                  self.onGameModeMightChangeListener
-                     :should_be_called_with(self.defaultGameModeMock, gameModeMockA)
+                     :should_be_called_with(self.defaultGameModeMock, gameModeMockA, votedGameMockA)
                )
                :when(
                  function()
                    gameModeManager:onGameChangeVoteCalled(votedGameMockA)
+                   self:assertEquals(self.defaultGameModeMock, gameModeManager:getActiveGameMode())
                  end
                )
 
@@ -645,6 +682,7 @@ function TestGameModeManager:testCanHandleGameChangeVoteCallWhenThereIsACurrentA
                :when(
                  function()
                    gameModeManager:onGameChangeVoteCalled(votedGameMockB)
+                   self:assertEquals(self.defaultGameModeMock, gameModeManager:getActiveGameMode())
                  end
                )
 
@@ -694,6 +732,7 @@ function TestGameModeManager:testCanHandleActiveGameModeDisablingItself()
 
 
   -- Activate the first additional game mode
+  self:assertNil(gameModeManager:getActiveGameMode())
   local gameMockA = self:getMock("AC-LuaServer.Core.GameHandler.Game.Game", "GameMockA")
   gameModeMockA.canBeEnabledForGame
                :should_be_called_with(gameMockA)
@@ -720,16 +759,17 @@ function TestGameModeManager:testCanHandleActiveGameModeDisablingItself()
                )
                :and_then(
                  self.onGameModeChangedListener
-                     :should_be_called_with(nil, gameModeMockA)
+                     :should_be_called_with(nil, gameModeMockA, gameMockA)
                )
                :when(
                  function()
-                   gameModeManager:onGameWillOrDidChange(gameMockA)
+                   gameModeManager:onGameChanged(gameMockA)
+                   self:assertEquals(gameModeMockA, gameModeManager:getActiveGameMode())
                  end
                )
 
 
-  -- Make the acitve game mode disable itself
+  -- Make the active game mode disable itself
   local gameHandlerMock = self:getMock(
     "AC-LuaServer.Core.GameHandler.GameHandler", "GameHandlerMock"
   )
@@ -763,11 +803,12 @@ function TestGameModeManager:testCanHandleActiveGameModeDisablingItself()
                  )
                  :and_then(
                    self.onGameModeChangedListener
-                       :should_be_called_with(gameModeMockA, self.defaultGameModeMock)
+                       :should_be_called_with(gameModeMockA, self.defaultGameModeMock, gameMockB)
                  )
                  :when(
                    function()
                      gameModeManager:onActiveGameModeDisabled()
+                     self:assertEquals(self.defaultGameModeMock, gameModeManager:getActiveGameMode())
                    end
                  )
 
@@ -863,6 +904,7 @@ function TestGameModeManager:testCanAddNonGameModeExtensionsWhenNotEnabled()
       :when(
         function()
           gameModeManager:enable(self.serverMock)
+          self:assertNil(gameModeManager:getActiveGameMode())
         end
       )
 
@@ -980,6 +1022,10 @@ function TestGameModeManager:createTestInstance()
     "onGameModeChanged",
     EventCallback(function(...) self.onGameModeChangedListener(...) end)
   )
+  gameModeManager:on(
+    "onGameModeStaysEnabledAfterGameChange",
+    EventCallback(function(...) self.onGameModeStaysEnabledAfterGameChangeListener(...) end)
+  )
 
 
   return gameModeManager
@@ -1047,7 +1093,6 @@ function TestGameModeManager:expectEventListenersSetup()
   local eventCallbackPath = "AC-LuaServer.Core.Event.EventCallback"
   local eventCallbackMockA = self:getMock(eventCallbackPath, "EventCallbackMockA")
   local eventCallbackMockB = self:getMock(eventCallbackPath, "EventCallbackMockB")
-  local eventCallbackMockC = self:getMock(eventCallbackPath, "EventCallbackMockC")
 
   return self.serverMock.getExtensionManager
                         :should_be_called()
@@ -1093,7 +1138,7 @@ function TestGameModeManager:expectEventListenersSetup()
                                                               self.mach.match(
                                                                 {
                                                                   object = GameModeManager,
-                                                                  methodName = "onGameWillOrDidChange"
+                                                                  methodName = "onGameChanged"
                                                                 },
                                                                 TestGameModeManager.matchEventCallback
                                                               ),
@@ -1104,28 +1149,7 @@ function TestGameModeManager:expectEventListenersSetup()
                                          :and_then(
                                            gameHandlerMock.on
                                                           :should_be_called_with(
-                                                            "onGameWillChange", eventCallbackMockB
-                                                          )
-                                         )
-                                         :and_also(
-                                           EventCallbackMock.__call
-                                                            :should_be_called_with(
-                                                              self.mach.match(
-                                                                {
-                                                                  object = GameModeManager,
-                                                                  methodName = "onGameWillOrDidChange"
-                                                                },
-                                                                TestGameModeManager.matchEventCallback
-                                                              ),
-                                                              nil
-                                                            )
-                                                            :and_will_return(eventCallbackMockC)
-                                         )
-                                         :and_then(
-                                           gameHandlerMock.on
-                                                          :should_be_called_with(
-                                                            "onGameChangedPlayerConnected",
-                                                            eventCallbackMockC
+                                                            "onGameChangedMapChange", eventCallbackMockB
                                                           )
                                          )
                         )

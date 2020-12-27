@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2019 wesen <wesen-ac@web.de>
+-- @copyright 2019-2020 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -24,23 +24,32 @@ local MaximumRemainingTimeExceededException = Exception:extend()
 MaximumRemainingTimeExceededException.exceedanceInMilliseconds = nil
 
 ---
--- Stores whether the extra minute that may be unavailable because of the integer overflow
--- in the intermission check is currently available
+-- The maximum allowed number of extend milliseconds
 --
--- @tfield bool isExtraMinuteAvailable
+-- @tfield int maximumNumberOfExtendMilliseconds
 --
-MaximumRemainingTimeExceededException.isExtraMinuteAvailable = nil
+MaximumRemainingTimeExceededException.maximumNumberOfExtendMilliseconds = nil
+
+---
+-- The time in milliseconds until the extra minute that may be unavailable because of the
+-- integer overflow in the intermission check is available
+--
+-- @tfield int millisecondsUntilExtraMinuteCanBeUsed
+--
+MaximumRemainingTimeExceededException.millisecondsUntilExtraMinuteCanBeUsed = nil
 
 
 ---
 -- MaximumRemainingTimeExceededException constructor.
 --
 -- @tparam int _exceedanceInMilliseconds The exceedance of the maximum remaining time in milliseconds
--- @tparam bool _isExtraMinuteAvailable True if the extra minute is currently available, false otherwise
+-- @tparam int _maximumNumberOfExtendMilliseconds The maxmimum allowed number of extend milliseconds
+-- @tparam int _millisecondsUntilExtraMinuteCanBeUsed The time until the extra minute is available
 --
-function MaximumRemainingTimeExceededException:new(_exceedanceInMilliseconds, _isExtraMinuteAvailable)
+function MaximumRemainingTimeExceededException:new(_exceedanceInMilliseconds, _maximumNumberOfExtendMilliseconds, _millisecondsUntilExtraMinuteCanBeUsed)
   self.exceedanceInMilliseconds = _exceedanceInMilliseconds
-  self.isExtraMinuteAvailable = _isExtraMinuteAvailable
+  self.maximumNumberOfExtendMilliseconds = _maximumNumberOfExtendMilliseconds
+  self.millisecondsUntilExtraMinuteCanBeUsed = _millisecondsUntilExtraMinuteCanBeUsed
 end
 
 
@@ -56,12 +65,21 @@ function MaximumRemainingTimeExceededException:getExceedanceInMilliseconds()
 end
 
 ---
--- Returns whether the extra minute is currently available.
+-- Returns the maxmimum allowed number of extend milliseconds.
 --
--- @treturn bool True if the extra minute is currently available, false otherwise
+-- @treturn int The maxmimum allowed number of extend milliseconds
 --
-function MaximumRemainingTimeExceededException:getIsExtraMinuteAvailable()
-  return self.isExtraMinuteAvailable
+function MaximumRemainingTimeExceededException:getMaximumNumberOfExtendMilliseconds()
+  return self.maximumNumberOfExtendMilliseconds
+end
+
+---
+-- Returns the time until the extra minute is available.
+--
+-- @treturn int The time until the extra minute is available
+--
+function MaximumRemainingTimeExceededException:getMillisecondsUntilExtraMinuteCanBeUsed()
+  return self.millisecondsUntilExtraMinuteCanBeUsed
 end
 
 

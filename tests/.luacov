@@ -64,12 +64,10 @@ return {
   modules = {
   },
 
-  reporter = "multiple",
+  reporter = "html",
 
-  multiple = {
-    reporters = {"default", "multiple.html"},
-    html = {
-      reportfile = "coverage_report/report/index.html"
-    }
+  html = {
+    outputDirectory = "coverage-report",
+    projectName = "AC-LuaServer"
   }
 }

@@ -16,7 +16,7 @@ luarocks install ac-clientoutput
 # Install the test framework dependencies
 luarocks install wluaunit
 luarocks install luacov
-luarocks install luacov-multiple
+luarocks install luacov-html
 
 # Install LDoc
 luarocks install penlight

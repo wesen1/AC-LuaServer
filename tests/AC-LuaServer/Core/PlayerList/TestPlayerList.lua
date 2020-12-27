@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2019 wesen <wesen-ac@web.de>
+-- @copyright 2019-2020 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -94,6 +94,7 @@ function TestPlayerList:testCanHandleServerEvents()
   local list = self:createPlayerListInstance()
 
   self:assertNil(list:getPlayerByCn(5))
+  self:assertEquals({}, list:getPlayers())
 
   local PlayerMock = self.dependencyMocks.Player
   local playerMockA = self:getMock("AC-LuaServer.Core.PlayerList.Player", "PlayerMockA")
@@ -109,9 +110,12 @@ function TestPlayerList:testCanHandleServerEvents()
             )
             :when(
               function()
+                list:onPlayerPreconnect(5)
                 list:onPlayerConnect(5)
               end
             )
+  self:assertEquals(playerMockA, list:getPlayerByCn(5))
+  self:assertEquals({ [5] = playerMockA }, list:getPlayers())
 
   -- Connect another playyer
   PlayerMock.createFromConnectedPlayer
@@ -123,6 +127,7 @@ function TestPlayerList:testCanHandleServerEvents()
             )
             :when(
               function()
+                list:onPlayerPreconnect(7)
                 list:onPlayerConnect(7)
               end
             )
@@ -130,6 +135,7 @@ function TestPlayerList:testCanHandleServerEvents()
   -- Check that the two players are connected
   self:assertEquals(playerMockA, list:getPlayerByCn(5))
   self:assertEquals(playerMockB, list:getPlayerByCn(7))
+  self:assertEquals({ [5] = playerMockA, [7] = playerMockB }, list:getPlayers())
 
 
   -- Rename the second player
@@ -222,6 +228,8 @@ function TestPlayerList:testCanHandleServerEvents()
 
   self:assertEquals(nil, list:getPlayerByCn(5))
   self:assertEquals(playerMockB, list:getPlayerByCn(7))
+  self:assertEquals({ [7] = playerMockB }, list:getPlayers())
+
 
   -- Disconnect the second player
   self.onPlayerRemovedListener
@@ -234,6 +242,44 @@ function TestPlayerList:testCanHandleServerEvents()
 
   self:assertEquals(nil, list:getPlayerByCn(5))
   self:assertEquals(nil, list:getPlayerByCn(7))
+  self:assertEquals({}, list:getPlayers())
+
+end
+
+---
+-- Checks that a custom Player implementation class can be set as expected.
+--
+function TestPlayerList:testCanUseCustomPlayerImplementationClass()
+
+  -- Fake class that just provides a mocked static method "createFromConnectedPlayer"
+  local playerImplementationClass = {
+    createFromConnectedPlayer = self.mach.mock_function("createFromConnectedPlayer")
+  }
+
+  local list = self:createPlayerListInstance()
+  list:setPlayerImplementationClass(playerImplementationClass)
+
+  self:assertNil(list:getPlayerByCn(12))
+  self:assertEquals({}, list:getPlayers())
+
+  local playerMock = {}
+
+  -- Connect a player
+  playerImplementationClass.createFromConnectedPlayer
+                           :should_be_called_with(12)
+                           :and_will_return(playerMock)
+                           :and_then(
+                             self.onPlayerAddedListener
+                                 :should_be_called_with(playerMock, 1)
+                           )
+                           :when(
+                             function()
+                               list:onPlayerPreconnect(12)
+                               list:onPlayerConnect(12)
+                             end
+                           )
+  self:assertEquals(playerMock, list:getPlayerByCn(12))
+  self:assertEquals({ [12] = playerMock }, list:getPlayers())
 
 end
 
@@ -260,6 +306,7 @@ function TestPlayerList:createPlayerListInstance()
   local eventCallbackMockB = self:getMock(eventCallbackPath, "EventCallbackMock")
   local eventCallbackMockC = self:getMock(eventCallbackPath, "EventCallbackMock")
   local eventCallbackMockD = self:getMock(eventCallbackPath, "EventCallbackMock")
+  local eventCallbackMockE = self:getMock(eventCallbackPath, "EventCallbackMock")
 
   -- Initialize event callbacks and register the event handlers
   EventCallbackMock.__call
@@ -275,7 +322,7 @@ function TestPlayerList:createPlayerListInstance()
                      EventCallbackMock.__call
                                       :should_be_called_with(
                                         self.mach.match(
-                                          { object = PlayerList, methodName = "onPlayerDisconnectAfter" },
+                                          { object = PlayerList, methodName = "onPlayerPreconnect" },
                                           TestPlayerList.matchEventCallback
                                         ),
                                         nil
@@ -286,7 +333,7 @@ function TestPlayerList:createPlayerListInstance()
                      EventCallbackMock.__call
                                       :should_be_called_with(
                                         self.mach.match(
-                                          { object = PlayerList, methodName = "onPlayerNameChange" },
+                                          { object = PlayerList, methodName = "onPlayerDisconnectAfter" },
                                           TestPlayerList.matchEventCallback
                                         ),
                                         nil
@@ -297,12 +344,23 @@ function TestPlayerList:createPlayerListInstance()
                      EventCallbackMock.__call
                                       :should_be_called_with(
                                         self.mach.match(
-                                          { object = PlayerList, methodName = "onPlayerRoleChange" },
+                                          { object = PlayerList, methodName = "onPlayerNameChange" },
                                           TestPlayerList.matchEventCallback
                                         ),
                                         nil
                                       )
                                       :and_will_return(eventCallbackMockD)
+                   )
+                   :and_also(
+                     EventCallbackMock.__call
+                                      :should_be_called_with(
+                                        self.mach.match(
+                                          { object = PlayerList, methodName = "onPlayerRoleChange" },
+                                          TestPlayerList.matchEventCallback
+                                        ),
+                                        nil
+                                      )
+                                      :and_will_return(eventCallbackMockE)
                    )
                    :and_then(
                      self.dependencyMocks.Server.getInstance
@@ -320,15 +378,19 @@ function TestPlayerList:createPlayerListInstance()
                    )
                    :and_also(
                      serverEventManagerMock.on
-                                           :should_be_called_with("onPlayerDisconnectAfter", eventCallbackMockB)
+                                           :should_be_called_with("onPlayerPreconnect", eventCallbackMockB)
                    )
                    :and_also(
                      serverEventManagerMock.on
-                                           :should_be_called_with("onPlayerNameChange", eventCallbackMockC)
+                                           :should_be_called_with("onPlayerDisconnectAfter", eventCallbackMockC)
                    )
                    :and_also(
                      serverEventManagerMock.on
-                                           :should_be_called_with("onPlayerRoleChange", eventCallbackMockD)
+                                           :should_be_called_with("onPlayerNameChange", eventCallbackMockD)
+                   )
+                   :and_also(
+                     serverEventManagerMock.on
+                                           :should_be_called_with("onPlayerRoleChange", eventCallbackMockE)
                    )
                    :when(
                      function()

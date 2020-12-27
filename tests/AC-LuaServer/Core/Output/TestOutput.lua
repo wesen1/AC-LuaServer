@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2019 wesen <wesen-ac@web.de>
+-- @copyright 2019-2020 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -239,7 +239,7 @@ function TestOutput:testCanPrintException()
                              :should_be_called_with(
                                "Core/Output/ExceptionMessage",
                                self.mach.match(
-                                 { errorMessage = "Could not extend time: No extend minutes remaining" }
+                                 { exceptionMessage = "Could not extend time: No extend minutes remaining" }
                                )
                              )
                              :and_will_return(templateMock)

@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2019 wesen <wesen-ac@web.de>
+-- @copyright 2019-2020 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -152,47 +152,6 @@ function TestServer:testCanConfigureOutput()
 
 end
 
----
--- Checks that "playerSayText" server events are handled as expected.
---
-function TestServer:testCanHandlePlayerSayTextEvent()
-
-  local server = self:createTestServerInstance()
-
-  local playerMock = self:getMock("AC-LuaServer.Core.PlayerList.Player", "PlayerMock")
-
-  local LuaServerApiMock = self.dependencyMocks.LuaServerApi
-  LuaServerApiMock.logline = self.mach.mock_function("logline")
-  LuaServerApiMock.ACLOG_INFO = 2
-
-  self.playerListMock.getPlayerByCn
-                     :should_be_called_with(6)
-                     :and_will_return(playerMock)
-                     :and_then(
-                       playerMock.getIp
-                                 :should_be_called()
-                                 :and_will_return("172.16.0.0")
-                     )
-                     :and_then(
-                       playerMock.getName
-                                 :should_be_called()
-                                 :and_will_return("newplayer")
-                     )
-                     :and_then(
-                       LuaServerApiMock.logline
-                                       :should_be_called_with(
-                                         LuaServerApiMock.ACLOG_INFO,
-                                         "[172.16.0.0] newplayer says: '!help cmds'"
-                                       )
-                     )
-                     :when(
-                       function()
-                         server:onPlayerSayText(6, "!help cmds")
-                       end
-                     )
-
-end
-
 
 ---
 -- Creates and returns a Server test instance.
@@ -247,21 +206,6 @@ function TestServer:createTestServerInstance()
                         self.dependencyMocks.VoteListener.__call
                                                          :should_be_called()
                                                          :and_will_return(self.voteListenerMock)
-                      )
-                      :and_then(
-                        EventCallbackMock.__call
-                                         :should_be_called_with(
-                                           self.mach.match(
-                                             { object = Server, methodName = "onPlayerSayText" },
-                                             TestServer.matchEventCallback
-                                           ),
-                                           0
-                                         )
-                                         :and_will_return(eventCallbackMockA)
-                      )
-                      :and_also(
-                        serverEventManagerMock.on
-                                              :should_be_called_with("onPlayerSayText", eventCallbackMockA)
                       )
                       :and_also(
                         self.playerListMock.initialize

@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2019 wesen <wesen-ac@web.de>
+-- @copyright 2019-2020 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -70,14 +70,14 @@ function TestActiveGame:testCanSetRemainingTimeInMilliseconds()
 
   local LuaServerApiMock = self.dependencyMocks.LuaServerApi
   LuaServerApiMock.getgamemillis = self.mach.mock_function("getgamemillis")
-  LuaServerApiMock.settimeleft = self.mach.mock_function("settimeleft")
+  LuaServerApiMock.settimeleftmillis = self.mach.mock_function("settimeleftmillis")
 
   -- gamemillis >= 60000
   LuaServerApiMock.getgamemillis
                   :should_be_called()
                   :and_will_return(503000) -- 08:23,00 minutes
                   :and_then(
-                    LuaServerApiMock.settimeleft
+                    LuaServerApiMock.settimeleftmillis
                                     :should_be_called_with(1200000) -- 20 minutes
                   )
                   :when(
@@ -91,7 +91,7 @@ function TestActiveGame:testCanSetRemainingTimeInMilliseconds()
                   :should_be_called()
                   :and_will_return(20000) -- 00:20,00 minutes
                   :and_then(
-                    LuaServerApiMock.settimeleft
+                    LuaServerApiMock.settimeleftmillis
                                     :should_be_called_with(36000000) -- 600 minutes
                   )
                   :when(
@@ -115,7 +115,7 @@ function TestActiveGame:testCanDetectInvalidRemainingTimeInMilliseconds()
 
   local LuaServerApiMock = self.dependencyMocks.LuaServerApi
   LuaServerApiMock.getgamemillis = self.mach.mock_function("getgamemillis")
-  LuaServerApiMock.settimeleft = self.mach.mock_function("settimeleft")
+  LuaServerApiMock.settimeleftmillis = self.mach.mock_function("settimeleftmillis")
 
 
   -- gamemillis >= 60000
@@ -125,7 +125,7 @@ function TestActiveGame:testCanDetectInvalidRemainingTimeInMilliseconds()
                   :should_be_called()
                   :and_will_return(503000) -- 08:23,00 minutes
                   :and_then(
-                    LuaServerApiMock.settimeleft
+                    LuaServerApiMock.settimeleftmillis
                                     :should_be_called_with(2146980647)
                   )
                   :when(
@@ -149,7 +149,8 @@ function TestActiveGame:testCanDetectInvalidRemainingTimeInMilliseconds()
                   )
   self:assertTrue(exception:is(MaximumRemainingTimeExceededException))
   self:assertEquals(1, exception:getExceedanceInMilliseconds())
-  self:assertTrue(exception:getIsExtraMinuteAvailable())
+  self:assertEquals(2146980647, exception:getMaximumNumberOfExtendMilliseconds())
+  self:assertEquals(-443000, exception:getMillisecondsUntilExtraMinuteCanBeUsed())
 
   -- Clearly above limit
   LuaServerApiMock.getgamemillis
@@ -166,7 +167,8 @@ function TestActiveGame:testCanDetectInvalidRemainingTimeInMilliseconds()
                   )
   self:assertTrue(exception:is(MaximumRemainingTimeExceededException))
   self:assertEquals(1853019354, exception:getExceedanceInMilliseconds())
-  self:assertTrue(exception:getIsExtraMinuteAvailable())
+  self:assertEquals(2146980647, exception:getMaximumNumberOfExtendMilliseconds())
+  self:assertEquals(-443000, exception:getMillisecondsUntilExtraMinuteCanBeUsed())
 
 
   -- gamemillis < 60000
@@ -176,7 +178,7 @@ function TestActiveGame:testCanDetectInvalidRemainingTimeInMilliseconds()
                   :should_be_called()
                   :and_will_return(20000) -- 00:20,00 minutes
                   :and_then(
-                    LuaServerApiMock.settimeleft
+                    LuaServerApiMock.settimeleftmillis
                                     :should_be_called_with(2147403647)
                   )
                   :when(
@@ -200,7 +202,8 @@ function TestActiveGame:testCanDetectInvalidRemainingTimeInMilliseconds()
                   )
   self:assertTrue(exception:is(MaximumRemainingTimeExceededException))
   self:assertEquals(2, exception:getExceedanceInMilliseconds())
-  self:assertFalse(exception:getIsExtraMinuteAvailable())
+  self:assertEquals(2147403647, exception:getMaximumNumberOfExtendMilliseconds())
+  self:assertEquals(40000, exception:getMillisecondsUntilExtraMinuteCanBeUsed())
 
   -- Clearly above limit
   LuaServerApiMock.getgamemillis
@@ -217,7 +220,8 @@ function TestActiveGame:testCanDetectInvalidRemainingTimeInMilliseconds()
                   )
   self:assertTrue(exception:is(MaximumRemainingTimeExceededException))
   self:assertEquals(7851484123, exception:getExceedanceInMilliseconds())
-  self:assertFalse(exception:getIsExtraMinuteAvailable())
+  self:assertEquals(2147403647, exception:getMaximumNumberOfExtendMilliseconds())
+  self:assertEquals(40000, exception:getMillisecondsUntilExtraMinuteCanBeUsed())
 
 end
 

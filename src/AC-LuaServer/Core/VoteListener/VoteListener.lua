@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2019 wesen <wesen-ac@web.de>
+-- @copyright 2019-2020 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -9,7 +9,7 @@ local EventEmitter = require "AC-LuaServer.Core.Event.EventEmitter"
 local LuaServerApi = require "AC-LuaServer.Core.LuaServerApi"
 local MapVote = require "AC-LuaServer.Core.VoteListener.Vote.MapVote"
 local Object = require "classic"
-local ServerEventListener = require  "AC-LuaServer.Core.ServerEvent.ServerEventListener"
+local ServerEventListener = require "AC-LuaServer.Core.ServerEvent.ServerEventListener"
 local Vote = require "AC-LuaServer.Core.VoteListener.Vote.Vote"
 
 ---
