@@ -37,11 +37,11 @@ Path.sourceDirectoryPath = nil
 -- @treturn string The path to the "src" directory
 --
 function Path.getSourceDirectoryPath()
-  if (not Path.searchDirectoryPath) then
-    Path.searchDirectoryPath = Path.searchSourceDirectoryPath()
+  if (not Path.sourceDirectoryPath) then
+    Path.sourceDirectoryPath = Path.searchSourceDirectoryPath()
   end
 
-  return Path.searchDirectoryPath
+  return Path.sourceDirectoryPath
 end
 
 
