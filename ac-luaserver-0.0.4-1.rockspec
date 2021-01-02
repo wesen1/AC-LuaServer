@@ -1,5 +1,5 @@
 package = "AC-LuaServer"
-version = "0.0.3-1"
+version = "0.0.4-1"
 
 description = {
   summary = "Framework for AssaultCube Lua servers",
@@ -9,7 +9,7 @@ description = {
 
 source = {
   url = "git+https://github.com/wesen1/AC-LuaServer.git",
-  tag = "v0.0.3"
+  tag = "v0.0.4"
 }
 
 dependencies = {
