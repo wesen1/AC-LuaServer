@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2020 wesen <wesen-ac@web.de>
+-- @copyright 2020-2021 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -24,29 +24,85 @@ TestLuaServerApi.testClassPath = "AC-LuaServer.Core.LuaServerApi"
 
 
 ---
--- Checks that the removemap() method works as expected.
+-- Checks that LuaServer Api functions with no arguments can be called with emitting of the
+-- "before_<function name>" and "after_<function name>" events.
 --
-function TestLuaServerApi:testCanRemoveMap()
+function TestLuaServerApi:testCanCallLuaServerApiFunctionsWithNoArgumentsWithEmittingEvents()
 
   local EventCallback = require "AC-LuaServer.Core.Event.EventCallback"
   local LuaServerApi = self.testClass
 
-  _G.removemap = self.mach.mock_function("removemapMock")
+  local removebansMock = self.mach.mock_function("removebansMock")
+  _G.removebans = function(...)
+    removebansMock(...)
+  end
+
+  local onBeforeBansRemoveListener = self.mach.mock_function("onBeforeBansRemoveListener")
+  local onBansRemovedListener = self.mach.mock_function("onBansRemovedListener")
+
+  LuaServerApi:on(
+    "before_removebans",
+    EventCallback(function(...) return onBeforeBansRemoveListener(...) end)
+  )
+  LuaServerApi:on(
+    "after_removebans",
+    EventCallback(function(...) onBansRemovedListener(...) end)
+  )
+
+
+  -- removebans is cancelled by the "before_removebans" event listeners
+  onBeforeBansRemoveListener.should_be_called()
+                            :and_will_return("won't let you do this")
+                            :when(
+                              function()
+                                LuaServerApi:removebans()
+                              end
+                            )
+
+  -- removebans is not cancelled by the "before_removebans" event listeners
+  onBeforeBansRemoveListener.should_be_called()
+                            :and_then(
+                              removebansMock.should_be_called()
+                            )
+                            :and_then(
+                              onBansRemovedListener.should_be_called()
+                            )
+                            :when(
+                              function()
+                                LuaServerApi:removebans()
+                              end
+                            )
+
+end
+
+---
+-- Checks that LuaServer Api functions with a single argument can be called with emitting of the
+-- "before_<function name>" and "after_<function name>" events.
+--
+function TestLuaServerApi:testCanCallLuaServerApiFunctionsWithSingleArgumentWithEmittingEvents()
+
+  local EventCallback = require "AC-LuaServer.Core.Event.EventCallback"
+  local LuaServerApi = self.testClass
+
+  local removemapMock = self.mach.mock_function("removemapMock")
+  _G.removemap = function(...)
+    removemapMock(...)
+  end
 
   local onBeforeMapRemoveListener = self.mach.mock_function("onBeforeMapRemoveListener")
   local onMapRemovedListener = self.mach.mock_function("onMapRemovedListener")
 
   LuaServerApi:on(
-    "beforeMapRemove",
+    "before_removemap",
     EventCallback(function(...) return onBeforeMapRemoveListener(...) end)
   )
   LuaServerApi:on(
-    "mapRemoved",
+    "after_removemap",
     EventCallback(function(...) onMapRemovedListener(...) end)
   )
 
 
-  -- removemap is cancelled by the "beforeMapRemove" event listeners
+  -- removemap is cancelled by the "before_removemap" event listeners
   onBeforeMapRemoveListener.should_be_called_with("unplayable-gema-map")
                            :and_will_return("dont do that!")
                            :when(
@@ -55,10 +111,10 @@ function TestLuaServerApi:testCanRemoveMap()
                              end
                            )
 
-  -- removemap is not cancelled by the "beforeMapRemove" event listeners
+  -- removemap is not cancelled by the "before_removemap" event listeners
   onBeforeMapRemoveListener.should_be_called_with("RoofTopGemaEasy")
                            :and_then(
-                             _G.removemap.should_be_called_with("RoofTopGemaEasy")
+                             removemapMock.should_be_called_with("RoofTopGemaEasy")
                            )
                            :and_then(
                              onMapRemovedListener.should_be_called_with("RoofTopGemaEasy")
@@ -72,23 +128,118 @@ function TestLuaServerApi:testCanRemoveMap()
 end
 
 ---
--- Checks that global API functions and constants can be returned by the LuaServerApi as expected.
+-- Checks that LuaServer Api functions with mulitple arguments can be called with emitting of the
+-- "before_<function name>" and "after_<function name>" events.
 --
-function TestLuaServerApi:testCanReturnGlobalApiFunctionsAndConstants()
+function TestLuaServerApi:testCanCallLuaServerApiFunctionsWithMultipleArgumentsWithEmittingEvents()
+
+  local EventCallback = require "AC-LuaServer.Core.Event.EventCallback"
+  local LuaServerApi = self.testClass
+
+  local disconnectMock = self.mach.mock_function("disconnectMock")
+  _G.disconnect = function(...)
+    disconnectMock(...)
+  end
+
+  local onBeforeDisconnectListener = self.mach.mock_function("onBeforeDisconnectListener")
+  local onDisconnectedListener = self.mach.mock_function("onDisconnectedListener")
+
+  LuaServerApi:on(
+    "before_disconnect",
+    EventCallback(function(...) return onBeforeDisconnectListener(...) end)
+  )
+  LuaServerApi:on(
+    "after_disconnect",
+    EventCallback(function(...) onDisconnectedListener(...) end)
+  )
+
+
+  -- disconnect is cancelled by the "before_disconnect" event listeners
+  onBeforeDisconnectListener.should_be_called_with(5, 19)
+                            :and_will_return("100% not a cheater")
+                            :when(
+                              function()
+                                LuaServerApi:disconnect(5, 19)
+                              end
+                            )
+
+  -- disconnect is not cancelled by the "before_disconnect" event listeners
+  onBeforeDisconnectListener.should_be_called_with(15, 17)
+                            :and_then(
+                              disconnectMock.should_be_called_with(15, 17)
+                            )
+                            :and_then(
+                              onDisconnectedListener.should_be_called_with(15, 17)
+                            )
+                            :when(
+                              function()
+                                LuaServerApi:disconnect(15, 17)
+                              end
+                            )
+
+end
+
+---
+-- Checks that LuaServer Api functions can be called without emitting of the "before_<function name>"
+-- and "after_<function name>" events.
+--
+function TestLuaServerApi:testCanCallLuaServerApiFunctionsWithoutEmittingEvents()
 
   local LuaServerApi = self.testClass
 
-  _G.clientprint = self.mach.mock_function("clientprintMock")
-  _G.getip = self.mach.mock_function("getipMock")
-  _G.flagaction = self.mach.mock_function("flagactionMock")
+  -- No arguments
+  local shuffleteamsMock = self.mach.mock_function("shuffleteamsMock")
+  _G.shuffleteams = function(...)
+    shuffleteamsMock(...)
+  end
+
+  shuffleteamsMock:should_be_called()
+                  :when(
+                    function()
+                      LuaServerApi.shuffleteams()
+                    end
+                  )
+
+
+  -- Single argument
+  local spawnitemMock = self.mach.mock_function("spawnitemMock")
+  _G.spawnitem = function(...)
+    spawnitemMock(...)
+  end
+
+  spawnitemMock:should_be_called_with(37)
+               :when(
+                 function()
+                   LuaServerApi.spawnitem(37)
+                 end
+               )
+
+
+  -- Multiple arguments
+  local pickupasMock = self.mach.mock_function("pickupasMock")
+  _G.pickupas = function(...)
+    pickupasMock(...)
+  end
+
+  pickupasMock:should_be_called_with(4, 23)
+              :when(
+                function()
+                  LuaServerApi.pickupas(4, 23)
+                end
+              )
+
+end
+
+---
+-- Checks that global API constants can be returned by the LuaServerApi as expected.
+--
+function TestLuaServerApi:testCanReturnGlobalApiConstants()
+
+  local LuaServerApi = self.testClass
 
   _G.SA_MAP = 7
   _G.GM_CTF = 5
   _G.VOTEE_INVALID = 6
-
-  self:assertEquals(_G.clientprint, LuaServerApi.clientprint)
-  self:assertEquals(_G.getip, LuaServerApi.getip)
-  self:assertEquals(_G.flagaction, LuaServerApi.flagaction)
 
   self:assertEquals(7, LuaServerApi.SA_MAP)
   self:assertEquals(5, LuaServerApi.GM_CTF)
@@ -122,7 +273,7 @@ function TestLuaServerApi:testCanSetApiEventListeners()
 
   self:assertNil(_G.onPlayerCallVote)
   LuaServerApi.onPlayerCallVote = eventListenerMock
-  self:assertIs(eventListenerMock, LuaServerApi.onPlayerCallVote)
+  self:assertIs(eventListenerMock, _G.onPlayerCallVote)
 
 end
 
