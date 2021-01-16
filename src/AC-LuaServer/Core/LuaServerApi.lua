@@ -73,11 +73,14 @@ function LuaServerApi:__index(_index)
         if (not luaServerApi or
             (luaServerApi and luaServerApi:emit("before_" .. _index, table.unpack(apiFunctionArguments)) == nil)) then
           -- No event listener wants to cancel the lua API call
-          globalVariableWithName(table.unpack(apiFunctionArguments))
+          local returnValues = { globalVariableWithName(table.unpack(apiFunctionArguments)) }
 
           if (luaServerApi) then
             luaServerApi:emit("after_" .. _index, table.unpack(apiFunctionArguments))
           end
+
+          return table.unpack(returnValues)
+
         end
 
       end

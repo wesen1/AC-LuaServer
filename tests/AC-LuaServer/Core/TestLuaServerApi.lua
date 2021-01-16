@@ -231,6 +231,58 @@ function TestLuaServerApi:testCanCallLuaServerApiFunctionsWithoutEmittingEvents(
 end
 
 ---
+-- Checks that the return values of LuaServer Api functions are returned as expected.
+--
+function TestLuaServerApi:testCanReturnReturnValuesOfApiFunctions()
+
+  local LuaServerApi = self.testClass
+
+  -- No return values
+  local setscoreMock = self.mach.mock_function("setscoreMock")
+  _G.setscore = function(...)
+    return setscoreMock(...)
+  end
+
+  setscoreMock:should_be_called_with(7, 311)
+              :when(
+                function()
+                  self:assertNil(LuaServerApi.setscore(7, 311))
+                end
+              )
+
+
+  -- Single return value
+  local getnameMock = self.mach.mock_function("getnameMock")
+  _G.getname = function(...)
+    return getnameMock(...)
+  end
+
+  getnameMock:should_be_called_with(5)
+             :and_will_return("unarmed")
+             :when(
+               function()
+                 self:assertEquals("unarmed", LuaServerApi.getname(5))
+               end
+             )
+
+
+  -- Multiple return values
+  local getposMock = self.mach.mock_function("getposMock")
+  _G.getpos = function(...)
+    return getposMock(...)
+  end
+
+  getposMock:should_be_called_with(8)
+            :and_will_return(1, 4, 2)
+            :when(
+              function()
+                self:assertEquals({1, 4, 2}, { LuaServerApi.getpos(8) })
+              end
+            )
+
+end
+
+---
 -- Checks that global API constants can be returned by the LuaServerApi as expected.
 --
 function TestLuaServerApi:testCanReturnGlobalApiConstants()
