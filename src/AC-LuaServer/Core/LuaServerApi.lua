@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2019-2020 wesen <wesen-ac@web.de>
+-- @copyright 2019-2021 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -13,8 +13,14 @@ local tablex = require "pl.tablex"
 -- Wrapper for the LuaServer Api.
 -- The LuaServerApi consists of global variables and functions.
 --
--- Functions that are overwritten by this class must be called like this: "LuaServerApi:<method>()".
--- All other functions must be called like this: "LuaServerApi.<function>()"
+-- You can call LuaServer Api functions like this: "LuaServerApi.<function name>()".
+--
+-- You may also call LuaServer Api functions like this: "LuaServerApi:<function name>()".
+-- This way two events will be emitted:
+-- 1. "before_<function name>": Will be emitted before the LuaServer Api function is called.
+--                             If any event listener returns something other than nil the LuaServer Api
+--                             function call will be cancelled
+-- 2. "after_<function name>": Will be emitted after the LuaServer Api function was successfully called
 --
 local LuaServerApi = Object:extend()
 LuaServerApi:implement(EventEmitter)
@@ -25,22 +31,6 @@ LuaServerApi:implement(EventEmitter)
 --
 function LuaServerApi:new()
   self.eventCallbacks = {}
-end
-
-
--- Public Methods
-
----
--- Removes the cgz and cfg files of a given map from the Server.
---
-function LuaServerApi:removemap(...)
-
-  if (self:emit("beforeMapRemove", ...) == nil) then
-    -- The map removal should not be cancelled
-    _G.removemap(...)
-    self:emit("mapRemoved", ...)
-  end
-
 end
 
 
@@ -63,8 +53,39 @@ function LuaServerApi:__index(_index)
     -- The parent class has a definition for the given index
     return Object[_index]
   else
-    -- Return the global variable that has the given index name as a last resort
-    return _G[_index]
+    -- Return the global variable that has the given index name as a last resort and assume
+    -- that it is a function or constant that is provided by AC-Lua
+    local globalVariableWithName = _G[_index]
+
+    if (type(globalVariableWithName) == "function") then
+
+      return function(...)
+
+        local apiFunctionArguments = {...}
+        local luaServerApi
+        if (type(apiFunctionArguments[1]) == "table" and type(apiFunctionArguments[1].is) == "function" and
+            apiFunctionArguments[1]:is(LuaServerApi)) then
+          -- The LuaServerApi itself was provided as parameter, events can be fired
+          luaServerApi = apiFunctionArguments[1]
+          apiFunctionArguments = tablex.sub(apiFunctionArguments, 2)
+        end
+
+        if (not luaServerApi or
+            (luaServerApi and luaServerApi:emit("before_" .. _index, table.unpack(apiFunctionArguments)) == nil)) then
+          -- No event listener wants to cancel the lua API call
+          globalVariableWithName(table.unpack(apiFunctionArguments))
+
+          if (luaServerApi) then
+            luaServerApi:emit("after_" .. _index, table.unpack(apiFunctionArguments))
+          end
+        end
+
+      end
+
+    else
+      return globalVariableWithName
+    end
+
   end
 
 end
