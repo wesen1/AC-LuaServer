@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2019 wesen <wesen-ac@web.de>
+-- @copyright 2019-2021 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -100,11 +100,7 @@ function EventCallback:call(...)
     end
 
     for i = #parameters + 1, highestAdditionalParameterNumber, 1 do
-      if (self.additionalCallbackFunctionParameters[i] ~= nil) then
-        table.insert(callbackFunctionParameters, self.additionalCallbackFunctionParameters[i])
-      else
-        table.insert(callbackFunctionParameters, nil)
-      end
+      table.insert(callbackFunctionParameters, self.additionalCallbackFunctionParameters[i])
     end
 
     return self.callbackFunction(table.unpack(callbackFunctionParameters))
