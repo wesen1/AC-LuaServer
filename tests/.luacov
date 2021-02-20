@@ -64,6 +64,10 @@ return {
   modules = {
   },
 
+  includeuntestedfiles = {
+    "../src"
+  },
+
   reporter = "html",
 
   html = {
