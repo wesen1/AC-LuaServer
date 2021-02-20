@@ -173,11 +173,27 @@ function TestMapRotation:testCanRemoveEntriesForMap()
 end
 
 ---
--- Checks that the MapRotation can be cleared.
+-- Checks that the whole map rotation can be set as expected.
 --
-function TestMapRotation:testCanBeCleared()
+function TestMapRotation:testCanSetAllEntries()
 
   local mapRotation = self:createTestMapRotationInstance()
+
+  local mapRotationEntryMockA = self:getMock(
+    "AC-LuaServer.Core.MapRotation.MapRotationEntry", "MapRotationEntryMock"
+  )
+  local mapRotationEntryMockB = self:getMock(
+    "AC-LuaServer.Core.MapRotation.MapRotationEntry", "MapRotationEntryMock"
+  )
+  local mapRotationEntryMockC = self:getMock(
+    "AC-LuaServer.Core.MapRotation.MapRotationEntry", "MapRotationEntryMock"
+  )
+
+  local newMapRotationEntries = {
+    mapRotationEntryMockA,
+    mapRotationEntryMockB,
+    mapRotationEntryMockC
+  }
 
   self.activeMapRotationMock.clear
                             :should_be_called()
@@ -185,18 +201,44 @@ function TestMapRotation:testCanBeCleared()
                               self.mapRotationFileMock.remove
                                                       :should_be_called()
                             )
+                            :and_then(
+                              self.activeMapRotationMock.setEntries
+                                                        :should_be_called_with(
+                                                          self.mach.match(newMapRotationEntries)
+                                                        )
+                                                        :and_also(
+                                                          self.mapRotationFileMock.setEntries
+                                                                                  :should_be_called_with(
+                                                                                    self.mach.match(
+                                                                                      newMapRotationEntries
+                                                                                    )
+                                                                                  )
+                                                        )
+                            )
                             :when(
                               function()
-                                mapRotation:clear()
+                                mapRotation:setAllEntries(newMapRotationEntries)
                               end
                             )
 
 end
 
+
 ---
 -- Checks that the MapRotationFile of the MapRotation can be changed after creating the instance.
 --
 function TestMapRotation:testCanChangeMapRotationFile()
+  self:canChangeMapRotationFile(true)
+  self:canChangeMapRotationFile(false)
+end
+
+
+---
+-- Checks that the MapRotationFile of the MapRotation can be changed after creating the instance.
+--
+-- @tparam bool _loadMapRotation The loadMapRotation parameter for the changeMapRotationConfigFile method
+--
+function TestMapRotation:canChangeMapRotationFile(_loadMapRotation)
 
   local mapRotation = self:createTestMapRotationInstance()
 
@@ -205,18 +247,22 @@ function TestMapRotation:testCanChangeMapRotationFile()
     "AC-LuaServer.Core.MapRotation.MapRotationFile", "MapRotationFileMockB"
   )
 
-  MapRotationFileMock.__call
+  local expectations = MapRotationFileMock.__call
                      :should_be_called_with("config/tosok_maprot.cfg")
                      :and_will_return(mapRotationFileMock)
-                     :and_also(
-                       self.activeMapRotationMock.loadFromFile
-                                                 :should_be_called_with("config/tosok_maprot.cfg")
-                     )
-                     :when(
-                       function()
-                         mapRotation:changeMapRotationConfigFile("config/tosok_maprot.cfg")
-                       end
-                     )
+
+  if (_loadMapRotation) then
+    expectations:and_also(
+                  self.activeMapRotationMock.loadFromFile
+                                            :should_be_called_with("config/tosok_maprot.cfg")
+                )
+  end
+
+  expectations:when(
+                function()
+                  mapRotation:changeMapRotationConfigFile("config/tosok_maprot.cfg", _loadMapRotation)
+                end
+              )
 
   -- Append a entry
   local mapRotationEntryMock = self:getMock(
