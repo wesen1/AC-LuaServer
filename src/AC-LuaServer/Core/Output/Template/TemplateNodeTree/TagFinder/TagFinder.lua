@@ -24,10 +24,10 @@ local TagFinder = Object:extend()
 TagFinder.tagPatterns = {
   { tagName = "config", pattern = "##+%[ *CONFIG *]#*;" },
   { tagName = "end-config", pattern = "##+%[ *ENDCONFIG *]#*;" },
-  { tagName = "custom-field", pattern = "%-%-+%[ *FIELD *]%-*;" },
-  { tagName = "end-custom-field", pattern = "%-%-+%[ *ENDFIELD *]%-*;" },
-  { tagName = "row", pattern = "__+;" },
-  { tagName = "row-field", pattern = "%-%-+;" }
+  { tagName = "custom-field", pattern = "|?%-%-+%[ *FIELD *]%-*;" },
+  { tagName = "end-custom-field", pattern = "|?%-%-+%[ *ENDFIELD *]%-*;" },
+  { tagName = "row", pattern = "|?__+;" },
+  { tagName = "row-field", pattern = "|?%-%-+;" }
 }
 
 
