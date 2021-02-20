@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2018-2019 wesen <wesen-ac@web.de>
+-- @copyright 2018-2021 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -54,25 +54,23 @@ end
 -- @tparam MapRotationEntry _mapRotationEntry The entry to append
 --
 function MapRotationFile:appendEntry(_mapRotationEntry)
+  self:writeConfigLinesToConfigFile({
+    self:convertMapRotationEntryToConfigLine(_mapRotationEntry)
+  })
+end
 
-  -- Open the map rotation cfg file in "append" mode
-  local cfgFile = io.open(self.filePath , "a");
+---
+-- Replaces all entries in the map rotation config file by a given list of MapRotationEntry's.
+--
+-- @tparam MapRotationEntry[] _mapRotationEntries The MapRotationEntry's to set
+--
+function MapRotationFile:setEntries(_mapRotationEntries)
+  local configLines = {}
+  for _, mapRotationEntry in ipairs(_mapRotationEntries) do
+    table.insert(configLines, self:convertMapRotationEntryToConfigLine(mapRotationEntry))
+  end
 
-  -- Append a new line for the new map rotation entry
-  cfgFile:write(string.format(
-    "%s:%i:%i:%i:%i:%i:%i\n",
-    _mapRotationEntry:getMapName(),
-    _mapRotationEntry:getGameModeId(),
-    _mapRotationEntry:getTimeInMinutes(),
-    _mapRotationEntry:getAreGameChangeVotesAllowed() and 1 or 0,
-    _mapRotationEntry:getMinimumNumberOfPlayers(),
-    _mapRotationEntry:getMaximumNumberOfPlayers(),
-    _mapRotationEntry:getNumberOfSkipLines()
-  ))
-
-  -- Close the file
-  cfgFile:close()
-
+  self:writeConfigLinesToConfigFile(configLines)
 end
 
 ---
@@ -110,6 +108,50 @@ end
 --
 function MapRotationFile:remove()
   os.remove(self.filePath)
+end
+
+
+-- Private Methods
+
+---
+-- Writes a given list of map rotation config lines to the map rotation config file.
+--
+-- @tparam string[] The list of map rotation config lines to write
+--
+function MapRotationFile:writeConfigLinesToConfigFile(_configLines)
+
+  -- Open the map rotation cfg file in "append" mode
+  local cfgFile = io.open(self.filePath , "a");
+
+  -- Append a new line for the new map rotation entry
+  cfgFile:write(table.concat(_configLines, "\n") .. "\n")
+
+  -- Close the file
+  cfgFile:close()
+
+end
+
+---
+-- Converts a given MapRotationEntry to a map rotation entry config line that can be inserted into the
+-- map rotation config file.
+--
+-- @tparam MapRotationEntry _mapRotationEntry The MapRotationEntry to convert
+--
+-- @treturn string The generated map rotation entry config line
+--
+function MapRotationFile:convertMapRotationEntryToConfigLine(_mapRotationEntry)
+
+  return string.format(
+    "%s:%i:%i:%i:%i:%i:%i",
+    _mapRotationEntry:getMapName(),
+    _mapRotationEntry:getGameModeId(),
+    _mapRotationEntry:getTimeInMinutes(),
+    _mapRotationEntry:getAreGameChangeVotesAllowed() and 1 or 0,
+    _mapRotationEntry:getMinimumNumberOfPlayers(),
+    _mapRotationEntry:getMaximumNumberOfPlayers(),
+    _mapRotationEntry:getNumberOfSkipLines()
+  )
+
 end
 
 

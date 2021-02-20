@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2019 wesen <wesen-ac@web.de>
+-- @copyright 2019-2021 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -160,6 +160,166 @@ function TestMapRotationFile:testCanAppendEntry()
                          :when(
                            function()
                              mapRotationFile:appendEntry(mapRotationEntryMock)
+                           end
+                         )
+
+end
+
+---
+-- Checks that all MapRotationEntry's can be set as expected.
+--
+function TestMapRotationFile:testCanSetEntries()
+
+  local MapRotationFile = self.testClass
+
+  local mapRotationEntryMockA = self:getMock(
+    "AC-LuaServer.Core.MapRotation.MapRotationEntry", "MapRotationEntryMock"
+  )
+  local mapRotationEntryMockB = self:getMock(
+    "AC-LuaServer.Core.MapRotation.MapRotationEntry", "MapRotationEntryMock"
+  )
+  local mapRotationEntryMockC = self:getMock(
+    "AC-LuaServer.Core.MapRotation.MapRotationEntry", "MapRotationEntryMock"
+  )
+
+  local newMapRotationEntries = {
+    mapRotationEntryMockA,
+    mapRotationEntryMockB,
+    mapRotationEntryMockC
+  }
+
+
+  local fileMock = {
+    write = self.mach.mock_method("write"),
+    close = self.mach.mock_method("close")
+  }
+
+  local mapRotationFile = MapRotationFile("config/maprot_random.cfg")
+  self:assertEquals("config/maprot_random.cfg", mapRotationFile:getFilePath())
+
+  self.dependencyMocks.io.open
+                         :should_be_called_with("config/maprot_random.cfg", "a")
+                         :and_will_return(fileMock)
+                         :and_also(
+                           mapRotationEntryMockA.getMapName
+                                                :should_be_called()
+                                                :and_will_return("ac_douze")
+                                                :and_also(
+                                                  mapRotationEntryMockA.getGameModeId
+                                                                       :should_be_called()
+                                                                       :and_will_return(3)
+                                                )
+                                                :and_also(
+                                                  mapRotationEntryMockA.getTimeInMinutes
+                                                                       :should_be_called()
+                                                                       :and_will_return(11)
+                                                )
+                                                :and_also(
+                                                  mapRotationEntryMockA.getAreGameChangeVotesAllowed
+                                                                       :should_be_called()
+                                                                       :and_will_return(true)
+                                                )
+                                                :and_also(
+                                                  mapRotationEntryMockA.getMinimumNumberOfPlayers
+                                                                       :should_be_called()
+                                                                       :and_will_return(7)
+                                                )
+                                                :and_also(
+                                                  mapRotationEntryMockA.getMaximumNumberOfPlayers
+                                                                       :should_be_called()
+                                                                       :and_will_return(8)
+                                                )
+                                                :and_also(
+                                                  mapRotationEntryMockA.getNumberOfSkipLines
+                                                                       :should_be_called()
+                                                                       :and_will_return(2)
+                                                )
+                         )
+                         :and_also(
+                           mapRotationEntryMockB.getMapName
+                                                :should_be_called()
+                                                :and_will_return("camper-minecraft-edition-2")
+                                                :and_also(
+                                                  mapRotationEntryMockB.getGameModeId
+                                                                       :should_be_called()
+                                                                       :and_will_return(9)
+                                                )
+                                                :and_also(
+                                                  mapRotationEntryMockB.getTimeInMinutes
+                                                                       :should_be_called()
+                                                                       :and_will_return(13)
+                                                )
+                                                :and_also(
+                                                  mapRotationEntryMockB.getAreGameChangeVotesAllowed
+                                                                       :should_be_called()
+                                                                       :and_will_return(false)
+                                                )
+                                                :and_also(
+                                                  mapRotationEntryMockB.getMinimumNumberOfPlayers
+                                                                       :should_be_called()
+                                                                       :and_will_return(4)
+                                                )
+                                                :and_also(
+                                                  mapRotationEntryMockB.getMaximumNumberOfPlayers
+                                                                       :should_be_called()
+                                                                       :and_will_return(9)
+                                                )
+                                                :and_also(
+                                                  mapRotationEntryMockB.getNumberOfSkipLines
+                                                                       :should_be_called()
+                                                                       :and_will_return(0)
+                                                )
+                         )
+                         :and_also(
+                           mapRotationEntryMockC.getMapName
+                                                :should_be_called()
+                                                :and_will_return("ac_sunset")
+                                                :and_also(
+                                                  mapRotationEntryMockC.getGameModeId
+                                                                       :should_be_called()
+                                                                       :and_will_return(4)
+                                                )
+                                                :and_also(
+                                                  mapRotationEntryMockC.getTimeInMinutes
+                                                                       :should_be_called()
+                                                                       :and_will_return(8)
+                                                )
+                                                :and_also(
+                                                  mapRotationEntryMockC.getAreGameChangeVotesAllowed
+                                                                       :should_be_called()
+                                                                       :and_will_return(true)
+                                                )
+                                                :and_also(
+                                                  mapRotationEntryMockC.getMinimumNumberOfPlayers
+                                                                       :should_be_called()
+                                                                       :and_will_return(8)
+                                                )
+                                                :and_also(
+                                                  mapRotationEntryMockC.getMaximumNumberOfPlayers
+                                                                       :should_be_called()
+                                                                       :and_will_return(16)
+                                                )
+                                                :and_also(
+                                                  mapRotationEntryMockC.getNumberOfSkipLines
+                                                                       :should_be_called()
+                                                                       :and_will_return(7)
+                                                )
+                         )
+                         :and_then(
+                           fileMock.write
+                                   :should_be_called_with(
+                                     "ac_douze:3:11:1:7:8:2\n" ..
+                                     "camper-minecraft-edition-2:9:13:0:4:9:0\n" ..
+                                     "ac_sunset:4:8:1:8:16:7\n"
+                                   )
+                         )
+                         :and_then(
+                           fileMock.close
+                                   :should_be_called()
+                         )
+                         :when(
+                           function()
+                             mapRotationFile:setEntries(newMapRotationEntries)
                            end
                          )
 
