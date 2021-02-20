@@ -56,8 +56,20 @@ end
 --
 function ActiveMapRotation:appendEntry(_mapRotationEntry)
   LuaServerApi.addmaprotentry(self:convertMapRotationEntryToConfigTable(_mapRotationEntry))
+end
 
+---
+-- Replaces all entries in the active map rotation by a given list of MapRotationEntry's.
+--
+-- @tparam MapRotationEntry[] _mapRotationEntries The MapRotationEntry's to set
+--
+function ActiveMapRotation:setEntries(_mapRotationEntries)
+  local mapRotationConfigTables = {}
+  for _, mapRotationEntry in ipairs(_mapRotationEntries) do
+    table.insert(mapRotationConfigTables, self:convertMapRotationEntryToConfigTable(mapRotationEntry))
+  end
 
+  LuaServerApi.setwholemaprot(mapRotationConfigTables)
 end
 
 ---

@@ -254,8 +254,178 @@ function TestActiveMapRotation:testCanAppendEntry()
                         end
                       )
 
+end
+
+---
+-- Checks that all MapRotationEntry's can be set as expected.
+--
+function TestActiveMapRotation:testCanSetEntries()
+
+  local ActiveMapRotation = self.testClass
+  local LuaServerApiMock = self.dependencyMocks.LuaServerApi
+  LuaServerApiMock.setwholemaprot = self.mach.mock_function("setwholemaprot")
+
+  local mapRotationEntryMockA = self:getMock(
+    "AC-LuaServer.Core.MapRotation.MapRotationEntry", "MapRotationEntryMock"
+  )
+  local mapRotationEntryMockB = self:getMock(
+    "AC-LuaServer.Core.MapRotation.MapRotationEntry", "MapRotationEntryMock"
+  )
+  local mapRotationEntryMockC = self:getMock(
+    "AC-LuaServer.Core.MapRotation.MapRotationEntry", "MapRotationEntryMock"
+  )
+
+  local newMapRotationEntries = {
+    mapRotationEntryMockA,
+    mapRotationEntryMockB,
+    mapRotationEntryMockC
+  }
 
 
+  local activeMapRotation = ActiveMapRotation()
+
+  mapRotationEntryMockA.getMapName
+                       :should_be_called()
+                       :and_will_return("GEMA-iCEMAN")
+                       :and_also(
+                         mapRotationEntryMockA.getGameModeId
+                                              :should_be_called()
+                                              :and_will_return(5)
+                       )
+                       :and_also(
+                         mapRotationEntryMockA.getTimeInMinutes
+                                              :should_be_called()
+                                              :and_will_return(8)
+                       )
+                       :and_also(
+                         mapRotationEntryMockA.getAreGameChangeVotesAllowed
+                                              :should_be_called()
+                                              :and_will_return(false)
+                       )
+                       :and_also(
+                         mapRotationEntryMockA.getMinimumNumberOfPlayers
+                                              :should_be_called()
+                                              :and_will_return(5)
+                       )
+                       :and_also(
+                         mapRotationEntryMockA.getMaximumNumberOfPlayers
+                                              :should_be_called()
+                                              :and_will_return(14)
+                       )
+                       :and_also(
+                         mapRotationEntryMockA.getNumberOfSkipLines
+                                              :should_be_called()
+                                              :and_will_return(0)
+                       )
+                       :and_also(
+                         mapRotationEntryMockB.getMapName
+                                              :should_be_called()
+                                              :and_will_return("GemaWinter")
+                                              :and_also(
+                                                mapRotationEntryMockB.getGameModeId
+                                                                     :should_be_called()
+                                                                     :and_will_return(5)
+                                              )
+                                              :and_also(
+                                                mapRotationEntryMockB.getTimeInMinutes
+                                                                     :should_be_called()
+                                                                     :and_will_return(12)
+                                              )
+                                              :and_also(
+                                                mapRotationEntryMockB.getAreGameChangeVotesAllowed
+                                                                     :should_be_called()
+                                                                     :and_will_return(true)
+                                              )
+                                              :and_also(
+                                                mapRotationEntryMockB.getMinimumNumberOfPlayers
+                                                                     :should_be_called()
+                                                                     :and_will_return(3)
+                                              )
+                                              :and_also(
+                                                mapRotationEntryMockB.getMaximumNumberOfPlayers
+                                                                     :should_be_called()
+                                                                     :and_will_return(16)
+                                              )
+                                              :and_also(
+                                                mapRotationEntryMockB.getNumberOfSkipLines
+                                                                     :should_be_called()
+                                                                     :and_will_return(1)
+                                              )
+                       )
+                       :and_also(
+                         mapRotationEntryMockC.getMapName
+                                              :should_be_called()
+                                              :and_will_return("gladi-gema1")
+                                              :and_also(
+                                                mapRotationEntryMockC.getGameModeId
+                                                                     :should_be_called()
+                                                                     :and_will_return(5)
+                                              )
+                                              :and_also(
+                                                mapRotationEntryMockC.getTimeInMinutes
+                                                                     :should_be_called()
+                                                                     :and_will_return(18)
+                                              )
+                                              :and_also(
+                                                mapRotationEntryMockC.getAreGameChangeVotesAllowed
+                                                                     :should_be_called()
+                                                                     :and_will_return(true)
+                                              )
+                                              :and_also(
+                                                mapRotationEntryMockC.getMinimumNumberOfPlayers
+                                                                     :should_be_called()
+                                                                     :and_will_return(8)
+                                              )
+                                              :and_also(
+                                                mapRotationEntryMockC.getMaximumNumberOfPlayers
+                                                                     :should_be_called()
+                                                                     :and_will_return(10)
+                                              )
+                                              :and_also(
+                                                mapRotationEntryMockC.getNumberOfSkipLines
+                                                                     :should_be_called()
+                                                                     :and_will_return(4)
+                                              )
+                       )
+                       :and_then(
+                         LuaServerApiMock.setwholemaprot
+                                         :should_be_called_with(
+                                           self.mach.match({
+                                             {
+                                               map = "GEMA-iCEMAN",
+                                               mode = 5,
+                                               time = 8,
+                                               allowVote = 0,
+                                               minplayer = 5,
+                                               maxplayer = 14,
+                                               skiplines = 0
+                                             },
+                                             {
+                                               map = "GemaWinter",
+                                               mode = 5,
+                                               time = 12,
+                                               allowVote = 1,
+                                               minplayer = 3,
+                                               maxplayer = 16,
+                                               skiplines = 1
+                                             },
+                                             {
+                                               map = "gladi-gema1",
+                                               mode = 5,
+                                               time = 18,
+                                               allowVote = 1,
+                                               minplayer = 8,
+                                               maxplayer = 10,
+                                               skiplines = 4
+                                             }
+                                           })
+                                         )
+                       )
+                       :when(
+                         function()
+                           activeMapRotation:setEntries(newMapRotationEntries)
+                         end
+                       )
 
 end
 
