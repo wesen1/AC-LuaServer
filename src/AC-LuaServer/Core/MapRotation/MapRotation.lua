@@ -59,10 +59,14 @@ end
 -- Changes the map rotation config file.
 --
 -- @tparam string _mapRotationConfigFilePath The path to the map reotation config file to use
+-- @tparam bool _loadMapRotation True to load the entries from the new config file into the active map rotation, false otherwise
 --
-function MapRotation:changeMapRotationConfigFile(_mapRotationConfigFilePath)
+function MapRotation:changeMapRotationConfigFile(_mapRotationConfigFilePath, _loadMapRotation)
   self.mapRotationFile = MapRotationFile(_mapRotationConfigFilePath)
-  self.activeMapRotation:loadFromFile(_mapRotationConfigFilePath)
+
+  if (_loadMapRotation) then
+    self.activeMapRotation:loadFromFile(_mapRotationConfigFilePath)
+  end
 end
 
 ---
