@@ -173,11 +173,27 @@ function TestMapRotation:testCanRemoveEntriesForMap()
 end
 
 ---
--- Checks that the MapRotation can be cleared.
+-- Checks that the whole map rotation can be set as expected.
 --
-function TestMapRotation:testCanBeCleared()
+function TestMapRotation:testCanSetAllEntries()
 
   local mapRotation = self:createTestMapRotationInstance()
+
+  local mapRotationEntryMockA = self:getMock(
+    "AC-LuaServer.Core.MapRotation.MapRotationEntry", "MapRotationEntryMock"
+  )
+  local mapRotationEntryMockB = self:getMock(
+    "AC-LuaServer.Core.MapRotation.MapRotationEntry", "MapRotationEntryMock"
+  )
+  local mapRotationEntryMockC = self:getMock(
+    "AC-LuaServer.Core.MapRotation.MapRotationEntry", "MapRotationEntryMock"
+  )
+
+  local newMapRotationEntries = {
+    mapRotationEntryMockA,
+    mapRotationEntryMockB,
+    mapRotationEntryMockC
+  }
 
   self.activeMapRotationMock.clear
                             :should_be_called()
@@ -185,9 +201,23 @@ function TestMapRotation:testCanBeCleared()
                               self.mapRotationFileMock.remove
                                                       :should_be_called()
                             )
+                            :and_then(
+                              self.activeMapRotationMock.setEntries
+                                                        :should_be_called_with(
+                                                          self.mach.match(newMapRotationEntries)
+                                                        )
+                                                        :and_also(
+                                                          self.mapRotationFileMock.setEntries
+                                                                                  :should_be_called_with(
+                                                                                    self.mach.match(
+                                                                                      newMapRotationEntries
+                                                                                    )
+                                                                                  )
+                                                        )
+                            )
                             :when(
                               function()
-                                mapRotation:clear()
+                                mapRotation:setAllEntries(newMapRotationEntries)
                               end
                             )
 

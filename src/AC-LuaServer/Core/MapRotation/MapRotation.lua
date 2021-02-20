@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2018 wesen <wesen-ac@web.de>
+-- @copyright 2018-2021 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -85,6 +85,18 @@ function MapRotation:appendEntry(_mapRotationEntry)
 end
 
 ---
+-- Replaces all entries in the map rotation by a given list of MapRotationEntry's.
+--
+-- @tparam MapRotationEntry[] _mapRotationEntries The MapRotationEntry's to set
+--
+function MapRotation:setAllEntries(_mapRotationEntries)
+  self:clear()
+
+  self.activeMapRotation:setEntries(_mapRotationEntries)
+  self.mapRotationFile:setEntries(_mapRotationEntries)
+end
+
+---
 -- Removes all map rotation entries for a specific map from the active map rotation and from its config file.
 --
 -- @tparam string _mapName The map name to search for
@@ -93,6 +105,9 @@ function MapRotation:removeEntriesForMap(_mapName)
   self.activeMapRotation:removeEntriesForMap(_mapName)
   self.mapRotationFile:removeEntriesForMap(_mapName)
 end
+
+
+-- Private Methods
 
 ---
 -- Clears the active map rotation and its config file.
