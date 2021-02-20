@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2019 wesen <wesen-ac@web.de>
+-- @copyright 2019-2021 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -193,8 +193,7 @@ function TestActiveMapRotation:testCanAppendEntry()
 
   local ActiveMapRotation = self.testClass
   local LuaServerApiMock = self.dependencyMocks.LuaServerApi
-  LuaServerApiMock.getwholemaprot = self.mach.mock_function("getmaprotnextentry")
-  LuaServerApiMock.setwholemaprot = self.mach.mock_function("setwholemaprot")
+  LuaServerApiMock.addmaprotentry = self.mach.mock_function("addmaprotentry")
 
   local mapRotationEntryMock = self:getMock(
     "AC-LuaServer.Core.MapRotation.MapRotationEntry", "MapRotationEntryMock"
@@ -202,162 +201,61 @@ function TestActiveMapRotation:testCanAppendEntry()
 
   local activeMapRotation = ActiveMapRotation()
 
-
-  LuaServerApiMock.getwholemaprot
-                  :should_be_called()
-                  :and_will_return({
-                    {
-                      map = "GEMA-iCEMAN",
-                      mode = 5,
-                      time = 8,
-                      allowVote = 0,
-                      minplayer = 5,
-                      maxplayer = 14,
-                      skiplines = 0
-                    },
-                    {
-                      map = "GemaWinter",
-                      mode = 5,
-                      time = 12,
-                      allowVote = 1,
-                      minplayer = 3,
-                      maxplayer = 16,
-                      skiplines = 1
-                    }
-                  })
-                  :and_also(
-                    mapRotationEntryMock.getMapName
-                                        :should_be_called()
-                                        :and_will_return("gladi-gema1")
-                  )
-                  :and_also(
-                    mapRotationEntryMock.getGameModeId
-                                        :should_be_called()
-                                        :and_will_return(5)
-                  )
-                  :and_also(
-                    mapRotationEntryMock.getTimeInMinutes
-                                        :should_be_called()
-                                        :and_will_return(18)
-                  )
-                  :and_also(
-                    mapRotationEntryMock.getAreGameChangeVotesAllowed
-                                        :should_be_called()
-                                        :and_will_return(true)
-                  )
-                  :and_also(
-                    mapRotationEntryMock.getMinimumNumberOfPlayers
-                                        :should_be_called()
-                                        :and_will_return(8)
-                  )
-                  :and_also(
-                    mapRotationEntryMock.getMaximumNumberOfPlayers
-                                        :should_be_called()
-                                        :and_will_return(10)
-                  )
-                  :and_also(
-                    mapRotationEntryMock.getNumberOfSkipLines
-                                        :should_be_called()
-                                        :and_will_return(4)
-                  )
-                  :and_then(
-                    LuaServerApiMock.setwholemaprot
-                                    :should_be_called_with(
-                                      self.mach.match({
-                                        {
-                                          map = "GEMA-iCEMAN",
-                                          mode = 5,
-                                          time = 8,
-                                          allowVote = 0,
-                                          minplayer = 5,
-                                          maxplayer = 14,
-                                          skiplines = 0
-                                        },
-                                        {
-                                          map = "GemaWinter",
-                                          mode = 5,
-                                          time = 12,
-                                          allowVote = 1,
-                                          minplayer = 3,
-                                          maxplayer = 16,
-                                          skiplines = 1
-                                        },
-                                        {
-                                          map = "gladi-gema1",
-                                          mode = 5,
-                                          time = 18,
-                                          allowVote = 1,
-                                          minplayer = 8,
-                                          maxplayer = 10,
-                                          skiplines = 4
-                                        }
-                                      })
-                                    )
-                  ):when(
-                    function()
-                      activeMapRotation:appendEntry(mapRotationEntryMock)
-                    end
-                  )
+  mapRotationEntryMock.getMapName
+                      :should_be_called()
+                      :and_will_return("gladi-gema1")
+                      :and_also(
+                        mapRotationEntryMock.getGameModeId
+                                            :should_be_called()
+                                            :and_will_return(5)
+                      )
+                      :and_also(
+                        mapRotationEntryMock.getTimeInMinutes
+                                            :should_be_called()
+                                            :and_will_return(18)
+                      )
+                      :and_also(
+                        mapRotationEntryMock.getAreGameChangeVotesAllowed
+                                            :should_be_called()
+                                            :and_will_return(true)
+                      )
+                      :and_also(
+                        mapRotationEntryMock.getMinimumNumberOfPlayers
+                                            :should_be_called()
+                                            :and_will_return(8)
+                      )
+                      :and_also(
+                        mapRotationEntryMock.getMaximumNumberOfPlayers
+                                            :should_be_called()
+                                            :and_will_return(10)
+                      )
+                      :and_also(
+                        mapRotationEntryMock.getNumberOfSkipLines
+                                            :should_be_called()
+                                            :and_will_return(4)
+                      )
+                      :and_then(
+                        LuaServerApiMock.addmaprotentry
+                                        :should_be_called_with(
+                                          self.mach.match({
+                                            map = "gladi-gema1",
+                                            mode = 5,
+                                            time = 18,
+                                            allowVote = 1,
+                                            minplayer = 8,
+                                            maxplayer = 10,
+                                            skiplines = 4
+                                          })
+                                        )
+                      )
+                      :when(
+                        function()
+                          activeMapRotation:appendEntry(mapRotationEntryMock)
+                        end
+                      )
 
 
-    LuaServerApiMock.getwholemaprot
-                    :should_be_called()
-                    :and_will_return({})
-                    :and_also(
-                      mapRotationEntryMock.getMapName
-                                          :should_be_called()
-                                          :and_will_return("gema_warm_up")
-                    )
-                    :and_also(
-                      mapRotationEntryMock.getGameModeId
-                                          :should_be_called()
-                                          :and_will_return(0)
-                    )
-                    :and_also(
-                      mapRotationEntryMock.getTimeInMinutes
-                                          :should_be_called()
-                                          :and_will_return(7)
-                    )
-                    :and_also(
-                      mapRotationEntryMock.getAreGameChangeVotesAllowed
-                                          :should_be_called()
-                                          :and_will_return(false)
-                    )
-                    :and_also(
-                      mapRotationEntryMock.getMinimumNumberOfPlayers
-                                          :should_be_called()
-                                          :and_will_return(2)
-                    )
-                    :and_also(
-                      mapRotationEntryMock.getMaximumNumberOfPlayers
-                                          :should_be_called()
-                                          :and_will_return(12)
-                    )
-                    :and_also(
-                      mapRotationEntryMock.getNumberOfSkipLines
-                                          :should_be_called()
-                                          :and_will_return(3)
-                    )
-                    :and_then(
-                      LuaServerApiMock.setwholemaprot
-                                      :should_be_called_with(
-                                        self.mach.match({
-                                          {
-                                            map = "gema_warm_up",
-                                            mode = 0,
-                                            time = 7,
-                                            allowVote = 0,
-                                            minplayer = 2,
-                                            maxplayer = 12,
-                                            skiplines = 3
-                                          }
-                                        })
-                                      )
-                    ):when(
-                      function()
-                        activeMapRotation:appendEntry(mapRotationEntryMock)
-                      end
-                    )
+
 
 end
 
