@@ -8,6 +8,7 @@
 local GlobalCallbackFunctionNotFoundException = require "AC-LuaServer.Core.Event.Exception.GlobalCallbackFunctionNotFoundException"
 local InvalidCallbackFunctionException = require "AC-LuaServer.Core.Event.Exception.InvalidCallbackFunctionException"
 local Object = require "classic"
+local tablex = require "pl.tablex"
 
 ---
 -- Represents a callback function with a priority for EventEmitter's.
@@ -29,15 +30,16 @@ EventCallback.callbackFunction = nil
 -- This table is in the format { index = parameter }, the additional parameters will be inserted into the
 -- list of parameters at the specified indexes
 --
--- @tfield mixed[] additionalParameters
+-- @tfield mixed[][] additionalCallbackFunctionParameters
 --
-EventCallback.additionalParameters = nil
+EventCallback.additionalCallbackFunctionParameters = nil
 
 ---
 -- The priority of this EventCallback in the stack of EventCallback's for the target event
 -- The lower the value the higher the priority (Defaults to 128)
 --
 -- @tfield int priority
+--
 EventCallback.priority = nil
 
 
@@ -48,6 +50,7 @@ EventCallback.priority = nil
 -- @tparam int _priority The priority (optional)
 --
 function EventCallback:new(_callbackFunction, _priority)
+  self.additionalCallbackFunctionParameters = {}
   self:initializeCallbackFunction(_callbackFunction)
   self:initializePriority(_priority)
 end
@@ -76,7 +79,7 @@ end
 --
 function EventCallback:call(...)
 
-  if (self.additionalCallbackFunctionParameters == nil) then
+  if (tablex.size(self.additionalCallbackFunctionParameters) == 0) then
     return self.callbackFunction(...)
   else
 
@@ -85,7 +88,7 @@ function EventCallback:call(...)
     local callbackFunctionParameters = {}
     for i, parameter in ipairs(parameters) do
       if (self.additionalCallbackFunctionParameters[i] ~= nil) then
-        table.insert(callbackFunctionParameters, self.additionalCallbackFunctionParameters[i])
+        tablex.insertvalues(callbackFunctionParameters, self.additionalCallbackFunctionParameters[i])
       end
 
       table.insert(callbackFunctionParameters, parameter)
@@ -100,7 +103,10 @@ function EventCallback:call(...)
     end
 
     for i = #parameters + 1, highestAdditionalParameterNumber, 1 do
-      table.insert(callbackFunctionParameters, self.additionalCallbackFunctionParameters[i])
+      local additionalParametersAtPosition = self.additionalCallbackFunctionParameters[i]
+      if (additionalParametersAtPosition ~= nil) then
+        tablex.insertvalues(callbackFunctionParameters, additionalParametersAtPosition)
+      end
     end
 
     return self.callbackFunction(table.unpack(callbackFunctionParameters))
@@ -138,14 +144,30 @@ function EventCallback:initializeCallbackFunction(_callbackFunction)
   elseif (callbackFunctionType == "table") then
     -- Configuration for a object method call
 
+    local object, methodName, additionalParameters
+
     if (type(_callbackFunction["object"]) == "table" and
         type(_callbackFunction["methodName"]) == "string") then
+      object = _callbackFunction["object"]
+      methodName = _callbackFunction["methodName"]
+      additionalParameters = _callbackFunction["additionalParameters"]
 
-      local object = _callbackFunction["object"]
-      local methodName = _callbackFunction["methodName"]
+    elseif (type(_callbackFunction[1]) == "table" and type(_callbackFunction[2]) == "string") then
+      -- Alternative notation for a object method call
+      object = _callbackFunction[1]
+      methodName = _callbackFunction[2]
+      additionalParameters = _callbackFunction[3]
+    end
 
+    if (object and methodName) then
       self.callbackFunction = object[methodName]
-      self.additionalCallbackFunctionParameters = { object }
+      self:addAdditionalParameters(1, { object })
+
+      if (type(additionalParameters) == "table") then
+        for parameterPosition, parameterValues in pairs(additionalParameters) do
+          self:addAdditionalParameters(parameterPosition, parameterValues)
+        end
+      end
     end
 
   end
@@ -156,6 +178,20 @@ function EventCallback:initializeCallbackFunction(_callbackFunction)
     error(InvalidCallbackFunctionException())
   end
 
+end
+
+---
+-- Adds additional parameters to the callback function at a specific position.
+--
+-- @tparam int _position The parameter position to add new values to
+-- @tparam mixed[] _parameters The parameters to insert at the position
+--
+function EventCallback:addAdditionalParameters(_position, _parameters)
+  if (self.additionalCallbackFunctionParameters[_position] == nil) then
+    self.additionalCallbackFunctionParameters[_position] = {}
+  end
+
+  tablex.insertvalues(self.additionalCallbackFunctionParameters[_position], _parameters)
 end
 
 ---
