@@ -6,6 +6,8 @@
 --
 
 local Object = require "classic"
+-- TODO: Rename to client output exception or similar
+
 
 ---
 -- Error exception for the error() and pcall() functions.
@@ -24,6 +26,10 @@ local Exception = Object:extend()
 -- @treturn string The message
 --
 function Exception:getMessage()
+end
+
+function Exception:__tostring()
+  return self:getMessage()
 end
 
 

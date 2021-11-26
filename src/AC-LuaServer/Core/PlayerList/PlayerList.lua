@@ -62,6 +62,22 @@ end
 -- Public Methods
 
 ---
+-- Returns a list of all players in this PlayerList.
+--
+-- @treturn Player[] The list of players
+--
+function PlayerList:getAllPlayers()
+
+  local players = {}
+  for _, player in pairs(self.players) do
+    table.insert(players, player)
+  end
+
+  return players
+
+end
+
+---
 -- Returns a Player by his client number.
 --
 -- @tparam int _cn The client number of the Player
@@ -191,6 +207,8 @@ function PlayerList:onPlayerRoleChange(_cn, _newRole)
   elseif (_newRole == LuaServerApi.CR_DEFAULT) then
     roleChangePlayer:setHasAdminRole(false)
   end
+
+  self:emit("onPlayerRoleChanged", roleChangePlayer, _newRole)
 
 end
 

@@ -24,23 +24,17 @@ local HelpCommand = BaseCommand:extend()
 --
 function HelpCommand:new()
 
-  local commandNameArgument = CommandArgument(
-    StaticString("helpCommandCommandNameArgumentName"):getString(),
-    false,
-    "string",
-    StaticString("helpCommandCommandNameArgumentShortName"):getString(),
-    StaticString("helpCommandCommandNameArgumentDescription"):getString()
-  )
+  BaseCommand.new(self, "help")
 
-  BaseCommand.new(
-    self,
-    StaticString("helpCommandName"):getString(),
-    0,
-    nil,
-    { commandNameArgument },
-    StaticString("helpCommandDescription"):getString(),
-    { StaticString("helpCommandAlias1"):getString() }
-  )
+  local commandNameArgument = CommandArgument("commandName")
+  commandNameArgument:setShortName("cmd")
+  commandNameArgument:setDescription("The command name")
+
+  self:addArgument(commandNameArgument)
+  self:setRequiredLevel(0)
+
+  self:setDescription("Shows a command's description and its arguments.")
+  self:addAlias("man")
 
 end
 
