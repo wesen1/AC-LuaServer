@@ -1,0 +1,11 @@
+version: "3"
+services:
+    ac-lua-server:
+        build: .
+        ports:
+            - "28763:28763/udp"
+            - "28764:28764/udp"
+        volumes:
+            - ./ac-server/config:/ac-server/config:rw
+            - ./ac-server/lua:/ac-server/lua:rw
+            - ./ac-server/packages:/ac-server/packages:rw

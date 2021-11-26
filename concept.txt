@@ -1,0 +1,23 @@
+
+
+        <-- Register Events --
+        <- Unregister Events -
+Server  ------- Events ------> BackgroundService
+        <----- Commands ------
+        -- Command Result --->
+
+
+AC Server -> redis -> BackgroundService
+
+
+Register Events = MessageQueue
+Event = Redis Publish
+Commands = MessageQueue
+
+
+
+=> AMQP ?
+
+=> exchanges:
+  "events" ->
+  "commands" <- RPC
