@@ -1,0 +1,25 @@
+{#
+ # Generates an exception message for the "not enough arguments passed to command" case.
+ #
+ # @tparam string[] colors The list of colors
+ # @tparam int numberOfPassedArguments The number of arguments that were passed to the CommandParser
+ # @tparam BaseCommand command The command for which arguments are missing
+ #}
+
+Not enough arguments (Missing arguments:
+
+{% local requiredCommandArguments = command:getRequiredArguments(); %}
+{% for index = numberOfPassedArguments + 1, #requiredCommandArguments, 1 do %}
+
+  {% if (index > 1) then %}
+    {* colors.error *},
+  {% end %}
+  <whitespace>
+
+  {(lua/config/templates/TextTemplate/CommandHandler/ArgumentShort.template,
+    { colors = colors, argument = requiredCommandArguments[index] }
+  )}
+
+{% end %}
+
+{* colors.error *})

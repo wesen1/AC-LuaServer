@@ -1,0 +1,10 @@
+{#
+ # Prints a command including all of its required arguments.
+ #
+ # @tparam string[] colors The list of colors
+ # @tparam BaseCommand command The command
+ #}
+
+{(lua/config/templates/TextTemplate/CommandHandler/Command.template,
+  { colors = colors, command = command, arguments = command:getRequiredArguments() }
+)}
