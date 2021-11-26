@@ -38,6 +38,7 @@ CommandUser.level = 0
 --
 CommandUser.explicitlyVisibleCommandGroupNames = nil
 
+CommandUser.commandSearcherFilters = nil
 
 ---
 -- CommandUser constructor.
@@ -77,6 +78,15 @@ function CommandUser:setLevel(_level)
 end
 
 ---
+-- Returns the CommandSearcher Filter's for this CommandUser.
+--
+-- @treturn BaseFilter[] The CommandSearcher Filter's
+--
+function CommandUser:getCommandSearcherFilters()
+  return self.commandSearcherFilters
+end
+
+---
 -- Returns the list of CommandGroup names that are explicitly visible to this CommandUser.
 --
 -- @treturn string[] The list of CommandGroup names that are explicitly visible to this CommandUser
@@ -88,13 +98,11 @@ end
 
 -- Public Methods
 
----
--- Returns the CommandSearcher Filter's for this CommandUser.
---
--- @treturn BaseFilter[] The CommandSearcher Filter's
---
-function CommandUser:getCommandSearcherFilters()
-  return self.commandSearcherFilters
+function CommandUser:addExplictlyVisibleCommandGroupName(_commandGroupName)
+  table.insert(self.explicitlyVisibleCommandGroupNames, _commandGroupName)
+end
+
+function CommandUser:removeExplicitlyVisibleCommandGroupName(_commandGroupName)
 end
 
 

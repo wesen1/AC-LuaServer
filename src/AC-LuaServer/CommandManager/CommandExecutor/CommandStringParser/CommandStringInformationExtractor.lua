@@ -14,35 +14,12 @@ local Object = require "classic"
 --
 local CommandStringInformationExtractor = Object:extend()
 
-
 -- Public Methods
 
 ---
--- Returns whether a string is a command string.
--- This is the case if the string starts with "!" and is followed by at least one character other than
--- "!" and " ".
---
--- @tparam string _string The string to check
---
--- @treturn bool True if the string is a command string, false otherwise
---
-function CommandStringInformationExtractor:isCommandSring(_string)
-  return (_string:match("^![^! ]") ~= nil)
-end
-
----
--- Extracts and returns the command name from a command string.
---
--- @tparam string _commandString The string to extract the command name from
---
--- @treturn string|nil The extracted command name
---
-function CommandStringInformationExtractor:extractCommandName(_commandString)
-  return _commandString:match("^!([^! ][^ ]*)")
-end
-
----
 -- Extracts the parameters and explicit options from a command string.
+-- Parameter values may contain multiple words but have to be enclosed in "", '' or [] in that case.
+-- Delimiter strings can be escaped via backslashes.
 --
 -- @tparam string _commandString The string to extract the parameters from
 --
@@ -54,14 +31,76 @@ function CommandStringInformationExtractor:extractParameters(_commandString)
   local parameters = {}
   local explicitOptions = {}
 
-  local currentOptionName
-  for _, parameter in _commandString:gmatch(" ([^ ]+)") do
+  -- TODO: Add support for "multi word parameter" (delimiters = "", '' or [] <- cube style)
+  local currentOptionName, currentOptionNameEndPosition
+  local nextParameterStartDelimiterPosition, nextParameterEndDelimiterPosition
+  local nextParameterStartPosition, nextParameterEndPosition, nextParameterValue
+
+  -- Find the first whitespace after the command name
+  local stringOffset = _commandString:find("[^ ] ")
+  if (stringOffset ~= nil) then
+    -- There is more text after the command name, parse it
+
+    repeat
+
+      -- Find the next explicit option name
+      _, currentOptionNameEndPosition, currentOptionName = _commandString:find("^ *%-%-([^ ]+)", stringOffset)
+      if (currentOptionNameEndPosition ~= nil) then
+        stringOffset = currentOptionNameEndPosition + 1
+      end
+
+      -- Find the next parameter value
+      nextParameterStartDelimiterPosition, nextParameterEndDelimiterPosition = self:findClosestParameterDelimiterPositions(_commandString, stringOffset)
+
+      if (nextParameterStartDelimiterPosition == nil) then
+        nextParameterValue = nil
+      else
+
+        nextParameterStartPosition = nextParameterStartDelimiterPosition + 1
+        if (nextParameterEndDelimiterPosition ~= nil) then
+          nextParameterEndPosition = nextParameterEndDelimiterPosition - 1
+          stringOffset = nextParameterEndDelimiterPosition + 1
+        end
+
+        nextParameterValue = _commandString:sub(nextParameterStartPosition, nextParameterEndPosition)
+      end
+
+      -- Save the next parameter value
+      if (nextParameterValue) then
+
+        if (currentOptionName) then
+          explicitOptions[currentOptionName] = nextParameterValue
+        else
+          table.insert(parameters, nextParameterValue)
+        end
+
+      end
+
+
+    until (nextParameterEndDelimiterPosition == nil)
+
+  end
+
+
+
+  --[[
+  for parameter in _commandString:gmatch(" ([^ ]+)") do
+
+    if (currentParameterEndDelimiter) then
+
+      if (parameter:sub(-1, 1) == currentParameterEndDelimiter) then
+        currentParameterEndDelimiter = nil
+      end
+
+    end
 
     if (currentOptionName == nil) then
 
       -- Check if the parameter matches the format "--<name>"
-      currentOptionName = parameter:match("%-%-(.+)")
+      currentOptionName = parameter:match("%-%-([^ ]+)")
       if (currentOptionName == nil) then
+
+
         table.insert(parameters, parameter)
       end
 
@@ -71,8 +110,38 @@ function CommandStringInformationExtractor:extractParameters(_commandString)
     end
 
   end
+  --]]
 
   return parameters, explicitOptions
+
+end
+
+function CommandStringInformationExtractor:findClosestParameterDelimiterPositions(_commandString, _stringOffset)
+
+  local closestParameterDelimiterType, closestParameterStartDelimiterPosition, closestParameterEndDelimiterPosition
+
+  local parameterStartDelimiterPosition
+  for _, parameterDelimiterType in ipairs(self.parameterDelimiterTypes) do
+
+    _, parameterStartDelimiterPosition = _commandString:find("^[^\\]-" .. parameterDelimiterType["start"], _stringOffset)
+    if (parameterStartDelimiterPosition ~= nil and
+        (closestParameterStartDelimiterPosition == nil or parameterStartDelimiterPosition < closestParameterStartDelimiterPosition)) then
+      closestParameterDelimiterType = parameterDelimiterType
+      closestParameterStartDelimiterPosition = parameterStartDelimiterPosition
+    end
+
+  end
+
+  if (closestParameterStartDelimiterPosition ~= nil) then
+    closestParameterEndDelimiterPosition = _commandString:find("[^\\]" .. closestParameterDelimiterType["end"], closestParameterStartDelimiterPosition + 1)
+
+    if (closestParameterEndDelimiterPosition ~= nil) then
+      closestParameterEndDelimiterPosition = closestParameterEndDelimiterPosition + 1
+    end
+
+  end
+
+  return closestParameterStartDelimiterPosition, closestParameterEndDelimiterPosition
 
 end
 

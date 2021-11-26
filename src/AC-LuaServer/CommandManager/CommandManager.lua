@@ -95,7 +95,7 @@ function CommandManager:onPlayerSayText(_cn, _text)
   local commandUser = self.commandUserList:getPlayerByCn(_cn)
   local commandSearcher = CommandSearcher(self.commandList, commandUser:getCommandSearcherFilters())
   local success, returnValue = pcall(
-    self.commandExecutor.handleCommand, self.commandExecutor, commandUser, commandSearcher, _text
+    self.commandExecutor.handlePotentialCommand, self.commandExecutor, commandUser, commandSearcher, _text
   )
 
   if (success) then

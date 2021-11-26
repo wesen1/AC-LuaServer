@@ -5,6 +5,7 @@
 -- @license MIT
 --
 
+local CommandStringInformationExtractor = require "AC-LuaServer.CommandManager.CommandExecutor.CommandStringParser.CommandStringInformationExtractor"
 local Object = require "classic"
 
 
@@ -16,37 +17,31 @@ function CommandStringParser:new()
 end
 
 
-function CommandStringParser:isCommandSring(_string)
-  return self.infoExtractor:isCommandSring(_string)
+---
+-- Returns whether a string is a command string.
+-- This is the case if the string starts with "!" and is followed by at least one character other than
+-- "!" and " ".
+--
+-- @tparam string _string The string to check
+--
+-- @treturn bool True if the string is a command string, false otherwise
+--
+function CommandStringParser:isCommandString(_string)
+  return (_string:match("^![^! ]") ~= nil)
 end
 
 ---
--- Searches CommandList's for the command name that is contained in a string and returns the result.
+-- Searches a FilteredCommandList for the command name that is contained in a string and returns the result.
 --
 -- @tparam string _commandString The string to extract the command name from
--- @tparam CommandList[] _commandLists The list of CommandList's to fetch the command from
+-- @tparam CommandSearcher _commandSearcher The CommandSearcher to search for the command with
 --
 -- @treturn BaseCommand The fetched command
 --
-function CommandStringParser:parseCommand(_commandString, _commandLists)
+function CommandStringParser:parseCommand(_commandString, _commandSearcher)
 
-  local commandName = self.infoExtractor:extractCommandName(_commandString)
-  commandName = commandName:lower()
-
-  local command
-  for _, commandList in ipairs(_commandLists) do
-    command = commandList:getCommandByNameOrAlias(commandName)
-    if (command) then
-      break
-    end
-  end
-
-
-  if (not command) then
-    error(UnknownCommandException(commandName))
-  end
-
-  return command
+  local commandName = _commandString:match("^!([^! ][^ ]*)")
+  return _commandSearcher:getCommandByNameOrAlias(commandName)
 
 end
 

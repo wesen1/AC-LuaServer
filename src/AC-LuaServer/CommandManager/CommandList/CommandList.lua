@@ -1,164 +1,113 @@
 ---
 -- @author wesen
--- @copyright 2017-2019 wesen <wesen-ac@web.de>
+-- @copyright 2017-2020 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
 
-local CmdsCommand = require("wesenGemaMod/CommandExecutor/DefaultCommands/CmdsCommand")
-local EventEmitter = require("wesenGemaMod/Event/EventEmitter")
-local HelpCommand = require("wesenGemaMod/CommandExecutor/DefaultCommands/HelpCommand")
-local Object = require("classic")
-local SortedCommandList = require("wesenGemaMod/CommandExecutor/CommandList/SortedCommandList")
+local Object = require "classic"
 
 ---
--- Stores a list of all available commands and provides methods to get the commands.
+-- Stores a list of commands and provides methods to get the commands.
 --
 -- @type CommandList
 --
 local CommandList = Object:extend()
-CommandList:implement(EventEmitter)
 
 
 ---
--- The list of commands in the format { commandName => Command }
+-- The list of command groups in the format { groupName => CommandGroup }
 --
--- @tfield BaseCommand[] commands
+-- @tfield CommandGroup[] commandGroups
 --
-CommandList.commands = nil
-
----
--- The parent server
---
--- @tfield Server parentServer
---
-CommandList.parentServer = nil
+CommandList.commandGroups = nil
 
 
 ---
 -- CommandList constructor.
 --
--- @tparam Server _parentServer The parent server
---
-function CommandList:new(_parentServer)
-  self.commands = {}
-  self.parentServer = _parentServer
-  self.eventCallbacks = {}
+function CommandList:new()
+  self.commandGroups = {}
 end
 
 
--- Getters and setters
+-- Getters and Setters
 
 ---
--- Returns the parent server.
+-- Returns the list of commands.
 --
--- @treturn Server The parent server
+-- @treturn CommandGroup[] The list of commands
 --
-function CommandList:getParentServer()
-  return self.parentServer
+function CommandList:getCommandGroups()
+  return self.commandGroups
 end
 
 
 -- Public Methods
 
 ---
--- Initializes this CommandList with the default commands "!commands" and "!help".
---
-function CommandList:initialize()
-  self:addCommand(CmdsCommand())
-  self:addCommand(HelpCommand())
-end
-
----
--- Adds a list of commands to this CommandList.
---
--- @tparam BaseCommand[] _commands The list of commands to add
---
--- @emits The "onCommandsAdded" event after the commands were added
---
-function CommandList:addCommands(_commands)
-  for _, command in ipairs(_commands) do
-    self:addCommand(command)
-  end
-
-  self:emit("onCommandsAdded")
-end
-
----
--- Removes a list of commands from this CommandList.
---
--- @tparam BaseCommand[] _commands The list of commands to remove
---
--- @emits The "onCommandsRemoved" event after the commands were removed
---
-function CommandList:removeCommands(_commands)
-  for _, command in ipairs(_commands) do
-    self:removeCommand(command)
-  end
-
-  self:emit("onCommandsRemoved")
-end
-
----
--- Returns a command that has a specified name or alias.
---
--- @tparam string _commandName The command name without the leading "!"
---
--- @treturn BaseCommand|bool The command or false if no command with that name or alias exists
---
-function CommandList:getCommandByNameOrAlias(_commandName)
-
-  local command = self.commands[_commandName]
-  if (command) then
-    return command
-  else
-
-    -- Check aliases
-    for _, command in pairs(self.commands) do
-      if (command:hasAlias(_commandName)) then
-        return command
-      end
-    end
-
-    return false
-
-  end
-
-end
-
----
--- Generates and returns a SortedCommandList for the commands that are stored inside this CommandList.
---
--- @treturn SortedCommandList The SortedCommandList
---
-function CommandList:generateSortedCommandList()
-  local sortedCommandList = SortedCommandList()
-  sortedCommandList:parse(self.commands)
-
-  return sortedCommandList
-end
-
-
--- Private Methods
-
----
--- Adds a command to this CommandList.
+-- Adds a Command to a already existing CommandGroup.
 --
 -- @tparam BaseCommand _command The command to add
 --
-function CommandList:addCommand(_command)
-  _command:attachToCommandList(self)
-  self.commands[_command:getName():lower()] = _command
+-- @emits The "onCommandAdded" event after the command was added
+--
+function CommandList:addCommand(_command, _groupName)
+
+  if (self.commandGroups[_groupName] == nil) then
+    error("Could not add Command: Command group not exists")
+  else
+    self.commandGroups[_groupName]:addCommand(_command)
+  end
+
 end
 
 ---
--- Removes a command from this CommandList.
+-- Removes a Command from this CommandStore.
 --
 -- @tparam BaseCommand _command The command to remove
 --
-function CommandList:removeCommand(_command)
-  _command:detachFromCommandList(self)
-  self.commands[_command:getName():lower()] = _command
+-- @emits The "onCommandRemoved" event after the command was removed
+--
+function CommandList:removeCommand(_command, _groupName)
+
+  if (self.commandGroups[_groupName] == nil) then
+    error("Could not remove Command: Command group not exists")
+  else
+    self.commandGroups[_groupName]:removeCommand(_command)
+  end
+
+end
+
+function CommandList:addCommandGroup(_commandGroup)
+
+  local groupName = _commandGroup:getName()
+  if (self.commandGroups[groupName] == nil) then
+    self.commandGroups[groupName] = _commandGroup
+  else
+    error("Could not add CommandGroup: There already is a CommandGroup with that name")
+  end
+
+end
+
+function CommandList:removeCommandGroup(_commandGroup)
+
+  local groupName = _commandGroup:getIdentifier()
+  if (self.commandGroups[groupName] == nil) then
+    self.commandGroups[groupName] = _commandGroup
+  else
+    error("Could not add CommandGroup: There already is a CommandGroup with that name")
+  end
+
+end
+
+function CommandList:clear()
+  self.commandGroups = {}
+end
+
+
+function CommandList:getCommandGroupByName(_commandGroupName)
+  return self.commandGroups[_commandGroupName]
 end
 
 
