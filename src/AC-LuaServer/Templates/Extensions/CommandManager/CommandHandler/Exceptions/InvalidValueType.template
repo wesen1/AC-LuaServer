@@ -1,0 +1,29 @@
+{#
+ # Generates an exception message for the "invalid value type" case.
+ #
+ # @tparam string[] colors The list of colors
+ # @tparam CommandArgument argument The argument
+ #}
+
+Value for
+<whitespace>
+{(lua/config/templates/TextTemplate/CommandHandler/ArgumentShort.template,
+  { colors = colors, argument = argument }
+)}
+<whitespace>
+{* colors.error *}must be a
+
+{# The argumentType string needs no output name because every argument that is set is a string #}
+{% if (argument:getType() == "integer") then %}
+  n integer
+{% else %}
+
+  <whitespace>
+  {% if (argument:getType() == "float") then %}
+    floating point number
+  {% elseif (argument:getType() == "bool") then %}
+    boolean ("true" or "false")
+  {% else %}
+    {* argument:getType() *}
+  {% end %}
+{% end %}

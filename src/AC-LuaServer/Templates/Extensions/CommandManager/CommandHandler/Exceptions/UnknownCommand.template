@@ -1,0 +1,7 @@
+{#
+ # Generates a message that informs a player that no command with a specific name exists.
+ #
+ # @tparam string commandName The name of the command
+ #}
+
+Unknown command "{* commandName *}", check your spelling and try again

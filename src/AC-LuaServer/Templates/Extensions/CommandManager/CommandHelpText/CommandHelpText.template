@@ -1,0 +1,47 @@
+{#
+ # Prints a command with all arguments, its description and its arguments descriptions.
+ #
+ # @tparam string[] colors The list of colors
+ # @tparam BaseCommand command The command
+ #}
+
+##########################[CONFIG]##########################;
+columns = {
+  [2] = { newLineIndent = "  " }
+};
+########################[ENDCONFIG]#########################;
+
+
+{* colors.helpTitle *}Usage
+------------------------------------------------------------;
+:
+<whitespace>
+{(lua/config/templates/TextTemplate/CommandHandler/CommandWithAllArguments.template,
+  { colors = colors, command = command }
+)}
+______________________________________________________________________;
+
+{* colors.helpTitle *}Description
+------------------------------------------------------------;
+: {* colors.helpDescription *}{* command:getDescription() *}
+______________________________________________________________________;
+
+{* colors.helpTitle *}Required Level
+------------------------------------------------------------;
+: {* colors.helpLevel *}
+{(lua/config/templates/TextTemplate/Player/PlayerLevelName.template,
+  { playerLevel = command:getRequiredLevel() }
+)}
+______________________________________________________________________;
+
+{% if (command:getNumberOfArguments() > 0) then %}
+
+  {* colors.helpTitle *}Arguments
+
+  --------------------------[FIELD]---------------------------;
+  {(lua/config/templates/TableTemplate/CommandHelpText/Arguments.template,
+    { colors = colors, arguments = command:getArguments() }
+  )}
+  ------------------------[ENDFIELD]--------------------------;
+
+{% end %}

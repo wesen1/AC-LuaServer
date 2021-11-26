@@ -1,0 +1,13 @@
+{#
+ # Generates an exception message for the "invalid argument type" case.
+ #
+ # @tparam string[] colors The list of colors
+ # @tparam CommandArgument argument The argument
+ #}
+
+Invalid argument type "{* argument:getType() *}" for argument
+
+<whitespace>
+{(lua/config/templates/TextTemplate/CommandHandler/ArgumentShort.template,
+  { colors = colors, argument = argument }
+)}

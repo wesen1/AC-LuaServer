@@ -1,0 +1,19 @@
+{#
+ # Prints the command list to a player.
+ #
+ # @tparam string[] colors The list of colors
+ # @tparam CommandList commandList The command list
+ # @tparam int maximumLevel The maximum command level for which commands will be shown
+ #}
+
+{* colors.cmdsTitle *}Available commands:
+_________________________________________;
+
+  ------------[FIELD]------------;
+  {(lua/config/templates/TableTemplate/CommandList/CommandList.template,
+    { colors = colors,
+      commandList = commandList,
+      maximumLevel = maximumLevel
+    }
+  )}
+  ----------[ENDFIELD]-----------;

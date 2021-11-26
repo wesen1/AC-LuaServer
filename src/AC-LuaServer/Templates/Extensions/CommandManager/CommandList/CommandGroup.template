@@ -1,0 +1,27 @@
+{#
+ # Prints a command group with a specific level for a command list.
+ #
+ # @tparam string[] colors The list of colors
+ # @tparam CommandList commandList The command list
+ # @tparam string groupName The group name of the group in the command list
+ # @tparam BaseCommand[] groupedCommands The list of grouped commands for the group and a specific level
+ #}
+
+{* groupName *}
+---------------------------------------------------------------------------;
+:
+<whitespace>
+
+{% for index, commandName in ipairs(groupedCommands) do %}
+
+  {# Add leading whitespace (if necessary) #}
+  {% if (index > 1) then %}
+    <whitespace:3>
+  {% end %}
+
+  {# Print the command with required arguments #}
+  {(lua/config/templates/TextTemplate/CommandHandler/CommandWithRequiredArguments.template,
+    { colors = colors, command = commandList:getCommand(commandName) }
+  )}
+
+{% end %}

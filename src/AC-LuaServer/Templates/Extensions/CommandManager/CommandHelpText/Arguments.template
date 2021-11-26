@@ -1,0 +1,29 @@
+{#
+ # Prints a list of arguments and their descriptions in a table.
+ #
+ # @tparam string[] colors The list of colors
+ # @tparam CommandArgument[] arguments The list of arguments
+ #}
+
+{% for i, argument in ipairs(arguments) do %}
+
+  {% if (i == 1) then %}
+    {# The first argument is in the same row like the title "Arguments", so it must contain the colon #}
+    :
+  {% else %}
+    <whitespace>
+  {% end %}
+
+  <whitespace>
+  {(lua/config/templates/TextTemplate/CommandHandler/ArgumentFull.template,
+    { colors = colors, argument = argument }
+  )}
+  -----------------------------------------------------------;
+
+  {* colors.helpDescription *}{* argument:getDescription() *}
+  {% if (argument:getIsOptional()) then %}
+    <whitespace>(Optional)
+  {% end %}
+  _____________________________________________________________________;
+
+{% end %}

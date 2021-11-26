@@ -1,0 +1,19 @@
+{#
+ # Prints a command including a specified argument list.
+ #
+ # @tparam string[] colors The list of colors
+ # @tparam BaseCommand command The command
+ # @tparam CommandArgument[] arguments The list of arguments
+ #}
+
+{# Command name #}
+{* colors["command" .. command:getRequiredLevel()] *}
+{* command:getName() *}
+
+{# Command arguments #}
+{% for _, argument in ipairs(arguments) do %}
+  <whitespace>
+  {(lua/config/templates/TextTemplate/CommandHandler/ArgumentShort.template,
+    { colors = colors, argument = argument }
+  )}
+{% end %}

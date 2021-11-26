@@ -1,0 +1,29 @@
+{#
+ # Prints a command list.
+ #
+ # @tparam string[] colors The list of colors
+ # @tparam CommandList commandList The command list
+ # @tparam int maximumLevel The maximum command level for which commands will be shown
+ #}
+
+{% for _, level in ipairs(commandList:getSortedCommandLevels()) do %}
+
+ {% if (level > maximumLevel) then
+      break
+    end %}
+
+  {% for _, groupName in ipairs(commandList:getSortedCommandGroupNames()[level]) do %}
+
+    <whitespace>
+    {(lua/config/templates/TableTemplate/CommandList/CommandGroup.template,
+      { colors = colors,
+        commandList = commandList,
+        groupName = groupName,
+        groupedCommands = commandList:getGroupedCommands()[level][groupName]
+      }
+    )}
+    ______________________________________________________________________________;
+
+  {% end %}
+
+{% end %}
