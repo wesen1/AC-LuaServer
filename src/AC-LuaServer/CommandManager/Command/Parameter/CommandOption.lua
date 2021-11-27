@@ -15,4 +15,7 @@ local CommandParameter = require "AC-LuaServer.CommandManager.Command.Parameter.
 local CommandOption = CommandParameter:extend()
 
 
+-- choices
+-- number of invocations
+
 return CommandOption

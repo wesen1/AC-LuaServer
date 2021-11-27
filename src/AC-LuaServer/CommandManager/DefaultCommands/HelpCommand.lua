@@ -24,7 +24,7 @@ local HelpCommand = BaseCommand:extend()
 --
 function HelpCommand:new()
 
-  BaseCommand.new(self, "help")
+  BaseCommand.new(self, "help", "Shows a command's description and its arguments.")
 
   local commandNameArgument = CommandArgument("commandName")
   commandNameArgument:setShortName("cmd")
@@ -33,8 +33,13 @@ function HelpCommand:new()
   self:addArgument(commandNameArgument)
   self:setRequiredLevel(0)
 
-  self:setDescription("Shows a command's description and its arguments.")
   self:addAlias("man")
+
+end
+
+function HelpCommand:setupParser(_parser)
+
+
 
 end
 

@@ -24,31 +24,24 @@ local StringTypeCaster = Object:extend()
 --
 function StringTypeCaster.toInteger(_string)
 
-  local number = StringTypeCaster.toNumber(_string)
+  local number, errorMessage = tonumber(_string)
 
-  local _, fractionalPart = math.modf(number)
-  if (fractionalPart == 0) then
-    return number
-  else
-    error()
+  if (number ~= nil) then
+
+    local _, fractionalPart = math.modf(number)
+    if (fractionalPart ~= 0) then
+      errorMessage = "Malformed integer"
+    end
+
   end
+
+  return number, errorMessage
 
 end
 
 
 function StringTypeCaster.toFloat(_string)
-  return StringTypeCaster.toNumber(_string)
-end
-
-function StringTypeCaster.toNumber(_string)
-
-  local number = tonumber(_string)
-  if (number == nil) then
-    error()
-  else
-    return number
-  end
-
+  return tonumber(_string)
 end
 
 

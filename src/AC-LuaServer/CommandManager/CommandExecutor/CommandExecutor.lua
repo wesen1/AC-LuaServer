@@ -1,6 +1,6 @@
 ---
 -- @author wesen
--- @copyright 2018-2019 wesen <wesen-ac@web.de>
+-- @copyright 2018-2020 wesen <wesen-ac@web.de>
 -- @release 0.1
 -- @license MIT
 --
@@ -51,21 +51,20 @@ end
 function CommandExecutor:handlePotentialCommand(_commandUser, _text)
 
   -- Fetch the command
-  self.commandStringParser = CommandStringParser()
-  if (not self.commandStringParser:isCommandSring()) then
-    return
+  if (not self.commandStringParser:isCommandString(_text)) then
+    return false
   end
 
 
   local commandSearcher = CommandSearcher(_commandList, _commandUser:getCommandSearcherFilters())
   local command = self.commandStringParser:parseCommand(_text, commandSearcher)
-  local arguments, options = self.commandStringParser:parseParameterValues(command)
+  local parameters = self.commandStringParser:parseParameterValues(command)
 
   -- Validate the input arguments
-  command:validateInputParameters(arguments, options)
+  command:validateInputParameters(parameters)
 
   -- Adjust the input arguments (if needed)
-  arguments, options = command:adjustInputParameters(arguments, options)
+  arguments, options = command:adjustInputParameters(parameters)
 
   -- Execute the command
   command:execute(_commandUser, arguments, options)

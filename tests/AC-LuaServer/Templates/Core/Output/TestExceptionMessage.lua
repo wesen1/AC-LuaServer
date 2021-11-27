@@ -35,4 +35,36 @@ function TestExceptionMessage:testCanBeRendered()
 end
 
 
+-- TODO: AC-ClientOutput is broken for this, check if other branches contain fixes
+function TestExceptionMessage:tesstCanBeRenderedWithMultiLineErrorMessage()
+
+  -- The width of "[ERROR] " for the default font config is 312
+  -- The width for the new line indent of the ExceptionMessage template is 310
+  --
+  self.output:configure({
+      TemplateRenderer = {
+        ClientOutputRenderer = {
+          ClientOutputFactory = {
+            maximumLineWidth = 312
+          }
+        }
+      }
+  })
+
+  self.output:printTextTemplate(
+    "Core/Output/ExceptionMessage",
+    {
+      exceptionMessage = "Alongword",
+      colors = {
+        ["error"] = "\f1"
+      }
+    }
+  )
+
+  self:assertEquals("[ERROR]", self.outputRows[1])
+  self:assertEquals("          ", self.outputRows[2])
+
+end
+
+
 return TestExceptionMessage

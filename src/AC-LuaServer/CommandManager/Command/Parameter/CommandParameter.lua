@@ -18,6 +18,8 @@ local StringTypeCaster = require "AC-LuaServer.CommandManager.Command.Parameter.
 local CommandParameter = Object:extend()
 
 
+-- TODO: Flags
+
 ---
 -- The full name of the parameter
 -- This name will be shown in the "!help" output for the command to which this parameter belongs

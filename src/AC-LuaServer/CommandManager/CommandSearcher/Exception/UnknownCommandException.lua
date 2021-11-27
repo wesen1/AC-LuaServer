@@ -7,6 +7,11 @@
 
 local TemplateException = require "AC-LuaServer.Core.Util.Exception.TemplateException"
 
+---
+-- Exception for the case that a.
+--
+-- @type CommandUserAlreadyExistsException
+--
 local UnknownCommandException = TemplateException:extend()
 
 

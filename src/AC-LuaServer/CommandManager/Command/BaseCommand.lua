@@ -69,13 +69,15 @@ BaseCommand.options = nil
 --
 BaseCommand.description = nil
 
+BaseCommand.parser = nil
+
 
 ---
 -- BaseCommand constructor.
 --
 -- @tparam string _name The Command's main name
 --
-function BaseCommand:new(_name)
+function BaseCommand:new(_name, _description)
 
   if (_name:match(":") ~= nil) then
     error(BadNameException(_name, "Contains \":\""))
@@ -85,7 +87,12 @@ function BaseCommand:new(_name)
   self.requiredLevel = 0
   self.arguments = {}
   self.options = {}
-  self.description = "No description"
+
+  if (_description) then
+    self.description = tostring(_description)
+  else
+    self.description = "No description"
+  end
 
 end
 
@@ -238,15 +245,6 @@ end
 --
 function BaseCommand:addOption(_option)
   table.insert(self.options, _option)
-end
-
----
--- Sets the description.
---
--- @tparam string _description The description
---
-function BaseCommand:setDescription(_description)
-  self.description = tostring(_description)
 end
 
 
